@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>West Bengal Sainik Board Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="formHandler.js"></script>
+
+<body>
+
+  <!-- HEADER SECTION WITH BANNER IMAGE -->
+  <div class="header">
+    <img src="logo.jpg" alt="Logo" class="logo" />
+    <h1 class="title">Feedback / Grievances Form</h1>
+  </div>
+
+  <!-- FORM SECTION -->
+  <div class="form-container">
+    <form id="feedbackForm">
+<br>
+      <div class="form-row">
+        <div class="input-group">
+          <label for="rank">Rank *</label>
+          <input type="text" id="rank" name="rank" required title="Enter Rank"/>
+        </div>
+        <div class="input-group">
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" name="name" required title="Enter Full Name"/>
+        </div>
+      </div>
+<br>
+      <div class="form-row">
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" title="Enter Email"/>
+        </div>
+        <div class="input-group">
+          <label for="phone">Phone No. *</label>
+          <input type="tel" id="phone" name="phone" required pattern="\d{10}" maxlength="10" title="Enter 10 digit phone number" />
+        </div>
+      </div>
+<br>
+      <div class="input-group">
+        <label for="branch">Branch *</label>
+        <select id="branch" name="branch" required>
+          <option value="" color="grey">--Select ZSB branch--</option>
+          <option value="0">Rajya Sainik Board</option>
+          <option value="1">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhu )</option>
+          <option value="2">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
+          <option value="3">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
+          <option value="4">ZSB Darjeeling ( Darjeeling )</option>
+          <option value="5">ZSB Howrah ( Howrah & Hooghly )</option>
+          <option value="6">ZSB Jalpaiguri ( Jalpaiguri )</option>
+          <option value="7">ZSB Kalimpong ( Kalimpong )</option>
+          <option value="8">ZSB Kolkata ( Kolkata )</option>
+          <option value="9">ZSB Malda ( Malda )</option>
+          <option value="10">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
+          <option value="11">ZSB Murshidabad ( Murshidabad )</option>
+          <option value="12">ZSB Nadia ( Nadia )</option>
+          <option value="13">ZSB North 24 Parganas ( North 24 Parganas )</option>
+          <option value="14">ZSB South 24 Parganas ( South 24 Parganas )</option>
+        </select>
+      </div>
+<br>
+      <div class="input-group">
+        <label for="id">ZSB ID Card No.</label>
+        <input type="text" id="id" name="id"  />
+      </div>
+<br>
+      <div class="input-group">
+        <label for="sugg">Suggestions/Complaints:</label>
+        <textarea id="sugg" name="sugg" rows="5" placeholder="Click to add text..."></textarea>
+      </div>
+<br>
+      <div class="input-group">
+        <label for="upload">Upload related photos/documents (max 10):</label>
+        <input type="file" id="upload" name="upload" multiple accept="image/*,.pdf,.doc,.docx" />
+        <div id="file-preview"></div>
+      </div>
+<br>
+      <button type="submit">SUBMIT</button>
+
+    </form>
+  </div>
+
+</body>
+</html>
