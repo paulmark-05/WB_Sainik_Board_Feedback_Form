@@ -1,69 +1,50 @@
-let filesArray = [];
-const uploadInput = document.getElementById('upload');
+const fileInput = document.getElementById('upload');
 const previewContainer = document.getElementById('file-preview');
+let filesArray = [];
 
-uploadInput.addEventListener('change', handleFileUpload);
+fileInput.addEventListener('change', () => {
+  filesArray = Array.from(fileInput.files);
+  displayPreviews();
+});
 
-function handleFileUpload(e) {
-  const selectedFiles = Array.from(e.target.files);
-  filesArray.push(...selectedFiles);
-  displayFiles();
-}
-
-function displayFiles() {
+function displayPreviews() {
   previewContainer.innerHTML = '';
-  filesArray.forEach((file, index) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'file-preview';
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '❌';
-    deleteBtn.onclick = () => {
+  filesArray.forEach((file, index) => {
+    const fileDiv = document.createElement('div');
+    fileDiv.classList.add('file-thumbnail');
+
+    const removeBtn = document.createElement('span');
+    removeBtn.innerHTML = '❌';
+    removeBtn.className = 'remove-btn';
+    removeBtn.onclick = () => {
       filesArray.splice(index, 1);
-      displayFiles();
+      displayPreviews();
     };
+
+    const fileName = document.createElement('p');
+    fileName.textContent = file.name;
 
     if (file.type.startsWith('image/')) {
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
-      img.className = 'thumb';
-      wrapper.appendChild(img);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      img.classList.add('thumbnail-img');
+      fileDiv.appendChild(img);
     } else {
       const icon = document.createElement('div');
-      icon.className = 'file-icon';
-      icon.textContent = file.name.split('.').pop().toUpperCase();
-      wrapper.appendChild(icon);
+      icon.classList.add('file-icon');
+      icon.textContent = file.name.split('.').pop().toUpperCase(); // e.g., PDF
+      fileDiv.appendChild(icon);
     }
 
-    wrapper.appendChild(deleteBtn);
-    previewContainer.appendChild(wrapper);
+    fileDiv.appendChild(removeBtn);
+    fileDiv.appendChild(fileName);
+    previewContainer.appendChild(fileDiv);
   });
+
+  // Update file input with filtered files
+  const dataTransfer = new DataTransfer();
+  filesArray.forEach(file => dataTransfer.items.add(file));
+  fileInput.files = dataTransfer.files;
 }
-
-document.querySelector('form').addEventListener('submit', async function (e) {
-  e.preventDefault();
-
-  const formData = new FormData(this);
-  filesArray.forEach(file => formData.append('files', file));
-
-  try {
-    const res = await fetch('/submit', {
-      method: 'POST',
-      body: formData
-    });
-
-    const result = await res.json();
-    if (res.ok) {
-      alert(result.message || 'Form submitted successfully!');
-      this.reset();
-      filesArray = [];
-      displayFiles();
-    } else {
-      alert(result.error || 'Submission failed');
-    }
-  } catch (err) {
-    console.error('Submit error:', err);
-    alert('Submission failed!');
-  }
-});
-
