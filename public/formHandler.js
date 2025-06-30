@@ -1,50 +1,90 @@
-const fileInput = document.getElementById('upload');
-const previewContainer = document.getElementById('file-preview');
-let filesArray = [];
+document.addEventListener("DOMContentLoaded", () => {
+  let selectedFiles = [];
 
-fileInput.addEventListener('change', () => {
-  filesArray = Array.from(fileInput.files);
-  displayPreviews();
-});
+  const uploadInput = document.getElementById("upload");
+  const previewContainer = document.getElementById("file-preview");
+  const form = document.getElementById("feedbackForm");
 
-function displayPreviews() {
-  previewContainer.innerHTML = '';
+  uploadInput.addEventListener("change", function () {
+    const newFiles = Array.from(uploadInput.files);
 
-  filesArray.forEach((file, index) => {
-    const fileDiv = document.createElement('div');
-    fileDiv.classList.add('file-thumbnail');
+    // Avoid duplicates by name
+    const existingNames = selectedFiles.map(file => file.name);
+    const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
 
-    const removeBtn = document.createElement('span');
-    removeBtn.innerHTML = '❌';
-    removeBtn.className = 'remove-btn';
-    removeBtn.onclick = () => {
-      filesArray.splice(index, 1);
-      displayPreviews();
-    };
-
-    const fileName = document.createElement('p');
-    fileName.textContent = file.name;
-
-    if (file.type.startsWith('image/')) {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      img.onload = () => URL.revokeObjectURL(img.src);
-      img.classList.add('thumbnail-img');
-      fileDiv.appendChild(img);
-    } else {
-      const icon = document.createElement('div');
-      icon.classList.add('file-icon');
-      icon.textContent = file.name.split('.').pop().toUpperCase(); // e.g., PDF
-      fileDiv.appendChild(icon);
-    }
-
-    fileDiv.appendChild(removeBtn);
-    fileDiv.appendChild(fileName);
-    previewContainer.appendChild(fileDiv);
+    selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // limit 10
+    uploadInput.value = ""; // Clear native input (doesn't remove selectedFiles)
+    renderPreviews();
   });
 
-  // Update file input with filtered files
-  const dataTransfer = new DataTransfer();
-  filesArray.forEach(file => dataTransfer.items.add(file));
-  fileInput.files = dataTransfer.files;
-}
+  function renderPreviews() {
+    previewContainer.innerHTML = "";
+    const dataTransfer = new DataTransfer();
+
+    selectedFiles.forEach((file, index) => {
+      const fileBox = document.createElement("div");
+      fileBox.className = "file-box";
+
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "×";
+      removeBtn.className = "remove-btn";
+      removeBtn.onclick = () => {
+        selectedFiles.splice(index, 1);
+        renderPreviews();
+      };
+
+      fileBox.appendChild(removeBtn);
+
+      if (file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.className = "file-thumb";
+        fileBox.appendChild(img);
+      } else {
+        const icon = document.createElement("div");
+        icon.className = "file-icon";
+        icon.textContent = file.name.split(".").pop().toUpperCase();
+        fileBox.appendChild(icon);
+      }
+
+      const fileName = document.createElement("div");
+      fileName.className = "file-name";
+      fileName.textContent = file.name;
+      fileBox.appendChild(fileName);
+
+      previewContainer.appendChild(fileBox);
+      dataTransfer.items.add(file);
+    });
+
+    uploadInput.files = dataTransfer.files;
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    selectedFiles.forEach(file => {
+      formData.append("files", file);
+    });
+
+    try {
+      const res = await fetch("/submit", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert(result.message || "Form submitted successfully!");
+        form.reset();
+        selectedFiles = [];
+        renderPreviews();
+      } else {
+        alert(result.error || "Failed to submit form");
+      }
+    } catch (err) {
+      console.error("Submission failed:", err);
+      alert("Form submission failed");
+    }
+  });
+});
