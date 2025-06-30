@@ -1,5 +1,11 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-body { background: #f5f5f5; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f5f5f5;
+}
+
 .header {
   background: linear-gradient(to bottom, rgb(224, 60, 60), rgb(48, 48, 172), rgb(39, 170, 214));
   padding: 30px 20px;
@@ -10,6 +16,7 @@ body { background: #f5f5f5; }
   align-items: center;
   justify-content: center;
 }
+
 .logo {
   width: 200px;
   height: auto;
@@ -22,56 +29,63 @@ body { background: #f5f5f5; }
   margin: 0;
   font-weight: 600;
 }
+
+
 .form-container {
   background-color: white;
+  width: 90%;
   max-width: 1000px;
   margin: 40px auto;
   padding: 30px 40px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
+
 form .form-row {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   margin-bottom: 20px;
 }
+
 .input-group {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-.input-group label {
+
+label {
+  font-weight: 600;
   margin-bottom: 5px;
-  font-weight: 500;
-}
-.input-group input,
-.input-group select,
-.input-group textarea {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-button {
-  background: blue;
-  color: white;
-  padding: 10px 20px;
-  border: 2px dashed black;
-  border-radius: 5px;
-  margin-top: 15px;
-  cursor: pointer;
-}
-button:hover {
-  background: lightblue;
-  color: black;
-  box-shadow: 0 0 12px 4px black;
-}
-button:active {
-  background: yellow;
-  color: black;
 }
 
+input, select, textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 30px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+/* ... existing CSS above ... */
 #file-preview {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -177,4 +191,3 @@ button:active {
   padding: 2px 6px;
   font-size: 12px;
 }
-
