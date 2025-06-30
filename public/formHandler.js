@@ -8,12 +8,12 @@ document.addEventListener("DOMContentLoaded", () => {
   uploadInput.addEventListener("change", function () {
     const newFiles = Array.from(uploadInput.files);
 
-    // Avoid duplicates by name
+    // Avoid duplicates by file.name
     const existingNames = selectedFiles.map(file => file.name);
     const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
 
-    selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // limit 10
-    uploadInput.value = ""; // Clear native input (doesn't remove selectedFiles)
+    selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // Limit to 10 files
+    uploadInput.value = ""; // Clear native file input (doesn't clear selectedFiles)
     renderPreviews();
   });
 
@@ -25,12 +25,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const fileBox = document.createElement("div");
       fileBox.className = "file-box";
 
-      const removeBtn = document.createElement("button");
-      removeBtn.textContent = "×";
+      const removeBtn = document.createElement("span");
+      removeBtn.innerHTML = "&times;";
       removeBtn.className = "remove-btn";
       removeBtn.onclick = () => {
         selectedFiles.splice(index, 1);
         renderPreviews();
+        document.getElementById("upload-count").textContent = `${selectedFiles.length} file(s) selected`;
       };
 
       fileBox.appendChild(removeBtn);
@@ -57,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     uploadInput.files = dataTransfer.files;
+    document.getElementById("upload-count").textContent = `${selectedFiles.length} file(s) selected`;
   }
 
   form.addEventListener("submit", async function (e) {
@@ -64,11 +66,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formData = new FormData(form);
     selectedFiles.forEach(file => {
-      formData.append("files", file);
+      formData.append("upload", file); // 'upload' must match the name used by multer in backend
     });
 
     try {
-      const res = await fetch("/submit", {
+      const res = await fetch("https://wb-sainik-board-feedback-form.onrender.com/submit", {
         method: "POST",
         body: formData
       });
@@ -79,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         form.reset();
         selectedFiles = [];
         renderPreviews();
+        document.getElementById("upload-count").textContent = "";
       } else {
         alert(result.error || "Failed to submit form");
       }
