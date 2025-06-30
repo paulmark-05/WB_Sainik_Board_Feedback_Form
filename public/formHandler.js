@@ -59,32 +59,31 @@ document.addEventListener("DOMContentLoaded", () => {
     uploadInput.files = dataTransfer.files;
   }
 
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
+ form.addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-    const formData = new FormData(form);
-    selectedFiles.forEach(file => {
-      formData.append("files", file);
+  const formData = new FormData(form);
+  selectedFiles.forEach(file => {
+    formData.append("files", file);
+  });
+
+  try {
+    const res = await fetch("/submit", {
+      method: "POST",
+      body: formData
     });
 
-    try {
-      const res = await fetch("/submit", {
-        method: "POST",
-        body: formData
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        alert(result.message || "Form submitted successfully!");
-        form.reset();
-        selectedFiles = [];
-        renderPreviews();
-      } else {
-        alert(result.error || "Failed to submit form");
-      }
-    } catch (err) {
-      console.error("Submission failed:", err);
-      alert("Form submission failed");
+    const result = await res.json();
+    if (res.ok) {
+      alert(result.message || "Form submitted successfully!");
+      form.reset();
+      selectedFiles = [];
+      renderPreviews();
+    } else {
+      alert(result.error || "Failed to submit form");
     }
-  });
+  } catch (err) {
+    console.error("Submission failed:", err);
+    alert("Form submission failed");
+  }
 });
