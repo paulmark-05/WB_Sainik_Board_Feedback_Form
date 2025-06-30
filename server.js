@@ -10,7 +10,7 @@ app.use(express.static("public"));
 
 // AUTH SETUP
 const auth = new google.auth.GoogleAuth({
-  keyFile: "credentials.json",
+  credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON),
   scopes: [
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/spreadsheets",
