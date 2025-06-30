@@ -1,135 +1,166 @@
-const express = require("express");
-const multer = require("multer");
-const { google } = require("googleapis");
-const cors = require("cors");
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
+const { google } = require('googleapis');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
+
+require('dotenv').config();
 
 const app = express();
-const upload = multer({ storage: multer.memoryStorage() });
-app.use(cors());
-app.use(express.static("public"));
+const PORT = process.env.PORT || 3000;
 
-// AUTH SETUP
+app.use(cors());
+app.use(express.static('public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Multer config
+const upload = multer({ dest: 'uploads/' });
+
+// Google Auth
 const auth = new google.auth.GoogleAuth({
   credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON),
   scopes: [
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/gmail.send"
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/gmail.send'
   ]
 });
 
-// HARDCODED VALUES
-const SHEET_ID = "1K-BOrpm64U18GFmvy03U2A-vJWreviVIv8qTd4kB_ac";
-const DRIVE_FOLDER_ID = "1ZgZu36dopu2kwEefJ4uVCEvkgwWF20DG";
-const NOTIFY_EMAIL = "paulamit001@gmail.com";
+// Load APIs
+let drive, sheets, gmail;
+auth.getClient().then(authClient => {
+  drive = google.drive({ version: 'v3', auth: authClient });
+  sheets = google.sheets({ version: 'v4', auth: authClient });
+  gmail = google.gmail({ version: 'v1', auth: authClient });
+});
 
-// CLEAN BRANCH NAME (removes content in brackets)
-function cleanName(name) {
-  return name.replace(/\s*\([^)]*\)/g, "").trim();
-}
-
-// EMAIL SENDER FUNCTION
-async function sendEmail(authClient, form) {
-  const gmail = google.gmail({ version: "v1", auth: authClient });
-
-  const body = `
-To: ${NOTIFY_EMAIL}
-Subject: 📝 New Feedback Submission Received
-
-Rank: ${form.rank}
-Name: ${form.name}
-Email: ${form.email}
-Phone: ${form.phone}
-Branch: ${form.branch}
-ID No: ${form.id}
-Suggestions: ${form.sugg}
-
-📄 View Sheet: https://docs.google.com/spreadsheets/d/${SHEET_ID}
-`;
-
-  const encoded = Buffer.from(body)
-    .toString("base64")
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-
-  await gmail.users.messages.send({
-    userId: "me",
-    requestBody: { raw: encoded }
-  });
-}
-
-// FORM SUBMISSION HANDLER
-app.post("/submit", upload.array("files", 10), async (req, res) => {
+// POST /submit route
+app.post('/submit', upload.array('upload', 10), async (req, res) => {
   try {
-    const authClient = await auth.getClient();
-    const drive = google.drive({ version: "v3", auth: authClient });
-    const sheets = google.sheets({ version: "v4", auth: authClient });
+    const data = req.body;
+    const files = req.files || [];
 
-    const { rank, name, email, phone, branch, id, sugg } = req.body;
-    const files = req.files;
+    // Create Drive folder structure
+    const branchName = cleanFolderName(data.branch || "Uncategorized");
+    const subFolderName = cleanFolderName(`${data.rank} - ${data.name}`);
+    const parentFolderId = await ensureFolder(process.env.DRIVE_FOLDER_ID, branchName);
+    const userFolderId = await ensureFolder(parentFolderId, subFolderName);
 
-    const branchName = cleanName(branch);
-    const userFolderName = `${rank} - ${name}`;
-
-    // Ensure parent folders exist
-    async function ensureFolder(parentId, name) {
-      const query = `'${parentId}' in parents and name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-      const result = await drive.files.list({ q: query, fields: "files(id)" });
-
-      if (result.data.files.length > 0) return result.data.files[0].id;
-
-      const folder = await drive.files.create({
-        requestBody: {
-          name,
-          mimeType: "application/vnd.google-apps.folder",
-          parents: [parentId]
-        },
-        fields: "id"
+    const uploadedFileLinks = [];
+    for (let file of files) {
+      const fileMeta = {
+        name: file.originalname,
+        parents: [userFolderId]
+      };
+      const media = {
+        mimeType: file.mimetype,
+        body: fs.createReadStream(file.path)
+      };
+      const uploadedFile = await drive.files.create({
+        resource: fileMeta,
+        media: media,
+        fields: 'id, webViewLink'
       });
-
-      return folder.data.id;
+      uploadedFileLinks.push(uploadedFile.data.webViewLink);
+      fs.unlinkSync(file.path); // cleanup
     }
 
-    // Create folder structure: Branch → Rank - Name
-    const branchFolderId = await ensureFolder(DRIVE_FOLDER_ID, branchName);
-    const userFolderId = await ensureFolder(branchFolderId, userFolderName);
-
-    // Upload files
-    for (const file of files) {
-      await drive.files.create({
-        requestBody: {
-          name: file.originalname,
-          parents: [userFolderId]
-        },
-        media: {
-          mimeType: file.mimetype,
-          body: Buffer.from(file.buffer)
-        }
-      });
-    }
-
-    // Append to sheet
-    const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-    const folderLink = `https://drive.google.com/drive/folders/${userFolderId}`;
+    // Append data to sheet
+    const sheetValues = [
+      new Date().toLocaleString(),
+      data.rank,
+      data.name,
+      data.email,
+      data.phone,
+      data.branch,
+      data.id,
+      data.sugg,
+      uploadedFileLinks.join(', ')
+    ];
 
     await sheets.spreadsheets.values.append({
-      spreadsheetId: SHEET_ID,
-      range: "Sheet1!A1",
+      spreadsheetId: process.env.SHEET_ID,
+      range: "Sheet1",
       valueInputOption: "USER_ENTERED",
-      resource: {
-        values: [[rank, name, email, phone, branch, id, sugg, timestamp, folderLink]]
+      requestBody: {
+        values: [sheetValues]
       }
     });
 
-    // Send email
-    await sendEmail(authClient, { rank, name, email, phone, branch, id, sugg });
+    // Email notification
+    await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: createEmail({
+          to: process.env.NOTIFY_EMAIL,
+          subject: `📬 New Form Submission from ${data.name}`,
+          message: `
+You have a new form submission.
 
-    res.json({ message: "Submission successful!" });
+Name: ${data.name}
+Rank: ${data.rank}
+Branch: ${data.branch}
+Phone: ${data.phone}
+Email: ${data.email}
+Suggestion: ${data.sugg || 'N/A'}
+
+📎 Files: ${uploadedFileLinks.join('\n')}
+🔗 View all submissions: https://docs.google.com/spreadsheets/d/${process.env.SHEET_ID}/edit
+`
+        })
+      }
+    });
+
+    res.json({ message: "✅ Form submitted successfully!" });
   } catch (err) {
-    console.error("Submission failed:", err);
-    res.status(500).json({ error: "Server error during submission." });
+    console.error("❌ Error in /submit:", err);
+    res.status(500).json({ message: "❌ Failed to submit form" });
   }
 });
 
-// START SERVER
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("✅ Server running on port", PORT));
+// Utility: create Drive folder if not exists
+async function ensureFolder(parentId, folderName) {
+  const search = await drive.files.list({
+    q: `'${parentId}' in parents and name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id, name)'
+  });
+  if (search.data.files.length > 0) {
+    return search.data.files[0].id;
+  }
+
+  const folder = await drive.files.create({
+    resource: {
+      name: folderName,
+      mimeType: 'application/vnd.google-apps.folder',
+      parents: [parentId]
+    },
+    fields: 'id'
+  });
+  return folder.data.id;
+}
+
+// Utility: format folder names
+function cleanFolderName(name) {
+  return name.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// Utility: encode Gmail message
+function createEmail({ to, subject, message }) {
+  const email = [
+    `To: ${to}`,
+    'Content-Type: text/plain; charset=utf-8',
+    'MIME-Version: 1.0',
+    `Subject: ${subject}`,
+    '',
+    message
+  ].join('\n');
+
+  return Buffer.from(email).toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
