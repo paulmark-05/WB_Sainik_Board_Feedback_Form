@@ -51,7 +51,7 @@ body {
 }
 
 .guidelines-btn {
-    background: linear-gradient(135deg, #007bff, #0056b3);
+     background: linear-gradient(to bottom, rgb(224, 60, 60), rgb(48, 48, 172), rgb(39, 170, 214));
     color: white;
     border: none;
     padding: 15px 25px;
