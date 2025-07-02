@@ -1,7 +1,7 @@
 // Prevent multiple submissions
 let isSubmitting = false;
 let selectedFiles = [];
-let pendingOversizedFiles = []; // Store oversized files temporarily
+let pendingOversizedFiles = [];
 
 // Enhanced file size display function
 function formatFileSize(bytes) {
@@ -19,18 +19,54 @@ function formatFileSize(bytes) {
     }
 }
 
-// Terms acceptance validation
-function validateTermsAcceptance() {
-    const termsCheckbox = document.getElementById('termsCheckbox');
+// Simplified consent validation
+function validateConsent() {
+    const consentCheckbox = document.getElementById('consentCheckbox');
     const submitBtn = document.getElementById('submitBtn');
     
-    if (termsCheckbox && termsCheckbox.checked) {
+    if (consentCheckbox && consentCheckbox.checked) {
         submitBtn.disabled = false;
         submitBtn.classList.remove('disabled');
     } else {
         submitBtn.disabled = true;
         submitBtn.classList.add('disabled');
     }
+}
+
+// Phone number validation
+function validatePhoneNumber(phone) {
+    // Remove all non-digit characters
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    // Check if it's exactly 10 digits and starts with 6, 7, 8, or 9
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(cleanPhone);
+}
+
+// Real-time phone validation
+function setupPhoneValidation() {
+    const phoneInput = document.getElementById('phone');
+    const phoneError = document.getElementById('phone-error');
+    
+    if (!phoneInput) return;
+    
+    phoneInput.addEventListener('input', function() {
+        const phone = this.value.trim();
+        
+        if (phone === '') {
+            phoneError.textContent = '';
+            phoneError.style.display = 'none';
+            return;
+        }
+        
+        if (!validatePhoneNumber(phone)) {
+            phoneError.textContent = 'Please enter a valid 10-digit mobile number';
+            phoneError.style.display = 'block';
+        } else {
+            phoneError.textContent = '';
+            phoneError.style.display = 'none';
+        }
+    });
 }
 
 // Custom Modal Functions
@@ -41,22 +77,18 @@ function showModal(message, type = 'info', title = 'Notification') {
     const messageElement = document.getElementById('modalMessage');
     const footerElement = modal.querySelector('.modal-footer');
     
-    // Remove existing type classes
     container.classList.remove('success', 'error', 'warning', 'info', 'file-size');
     
-    // Add appropriate type class
     if (type) {
         container.classList.add(type);
     }
     
-    // Set content
     titleElement.textContent = title;
     messageElement.innerHTML = message;
     
     // Reset footer to default
     footerElement.innerHTML = '<button class="modal-btn-primary" onclick="closeModal()">OK</button>';
     
-    // Show modal
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
@@ -70,7 +102,7 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Show File Size Violation Modal with WORKING Options
+// RESTORED: File Size Modal with ALL THREE OPTIONS
 function showFileSizeModal(oversizedFiles) {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -78,14 +110,12 @@ function showFileSizeModal(oversizedFiles) {
     const messageElement = document.getElementById('modalMessage');
     const footerElement = modal.querySelector('.modal-footer');
     
-    // Store oversized files for later processing
+    // Store oversized files for processing
     pendingOversizedFiles = [...oversizedFiles];
     
-    // Remove existing type classes and add file-size class
     container.classList.remove('success', 'error', 'warning', 'info');
     container.classList.add('file-size');
     
-    // Set content
     titleElement.textContent = 'File Size Limit Exceeded';
     
     const fileList = oversizedFiles.map(f => 
@@ -102,45 +132,33 @@ function showFileSizeModal(oversizedFiles) {
         </div>
     `;
     
-    // Create custom footer with three WORKING options
+    // THREE WORKING OPTIONS
     footerElement.innerHTML = `
         <button class="modal-btn-secondary" onclick="removeOversizedFiles()">Remove Files</button>
         <button class="modal-btn-secondary" onclick="reselectFiles()">Reselect</button>
         <button class="modal-btn-primary" onclick="compressFiles()">Compress Files</button>
     `;
     
-    // Show modal
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
-// FIXED: Handle removing oversized files - Actually works now
+// WORKING: Remove oversized files
 function removeOversizedFiles() {
-    console.log('Before removal:', selectedFiles.length, 'files');
-    console.log('Removing files:', pendingOversizedFiles.map(f => f.name));
+    console.log('Removing oversized files:', pendingOversizedFiles.map(f => f.name));
     
-    // Remove oversized files from selectedFiles array by comparing file names and sizes
+    // Remove oversized files from selection
     selectedFiles = selectedFiles.filter(file => {
         return !pendingOversizedFiles.some(oversizedFile => 
             oversizedFile.name === file.name && oversizedFile.size === file.size
         );
     });
     
-    console.log('After removal:', selectedFiles.length, 'files');
-    
-    // Clear pending oversized files
     pendingOversizedFiles = [];
-    
-    // Update the file input to reflect the changes
     updateFileInput();
-    
-    // Re-render previews
     renderPreviews();
-    
-    // Close modal
     closeModal();
     
-    // Show success message
     showModal(
         'Oversized files have been removed successfully. You can now submit your form or add different files.',
         'success',
@@ -148,25 +166,19 @@ function removeOversizedFiles() {
     );
 }
 
-// FIXED: Handle reselecting files - Actually works now
+// WORKING: Reselect all files
 function reselectFiles() {
-    console.log('Reselecting files - clearing all selections');
+    console.log('Clearing all files for reselection');
     
-    // Clear all files
     selectedFiles = [];
     pendingOversizedFiles = [];
     
-    // Clear the file input completely
     const uploadInput = document.getElementById('upload');
     uploadInput.value = '';
     
-    // Re-render previews (will show empty)
     renderPreviews();
-    
-    // Close modal
     closeModal();
     
-    // Show instruction message
     showModal(
         'All files have been cleared. Please select your files again using the file upload button.',
         'info',
@@ -174,27 +186,20 @@ function reselectFiles() {
     );
 }
 
-// NEW: Function to update file input to match selectedFiles array
+// Update file input to match selectedFiles array
 function updateFileInput() {
     const uploadInput = document.getElementById('upload');
     
     if (selectedFiles.length === 0) {
-        // If no files left, clear the input
         uploadInput.value = '';
     } else {
-        // Use DataTransfer to create new FileList with remaining files
         const dt = new DataTransfer();
-        
-        selectedFiles.forEach(file => {
-            dt.items.add(file);
-        });
-        
-        // Update the input's files
+        selectedFiles.forEach(file => dt.items.add(file));
         uploadInput.files = dt.files;
     }
 }
 
-// Handle file compression - redirect to free services
+// WORKING: Compress files functionality
 function compressFiles() {
     closeModal();
     
@@ -248,24 +253,17 @@ function showCompressionServiceModal() {
 
 // Client-side image compression
 async function compressImageClientSide(imageFile) {
-    showModal(
-        'Compressing image... Please wait.',
-        'info',
-        'Processing Image'
-    );
+    showModal('Compressing image... Please wait.', 'info', 'Processing Image');
     
     try {
         const compressedFile = await compressImageUsingCanvas(imageFile);
         
         if (compressedFile.size <= 10 * 1024 * 1024) {
-            // Remove original oversized file and add compressed version
             selectedFiles = selectedFiles.filter(f => f.name !== imageFile.name);
             selectedFiles.push(compressedFile);
             pendingOversizedFiles = [];
             
-            // Update file input
             updateFileInput();
-            
             renderPreviews();
             closeModal();
             
@@ -315,7 +313,6 @@ function compressImageUsingCanvas(file) {
             
             canvas.width = width;
             canvas.height = height;
-            
             ctx.drawImage(img, 0, 0, width, height);
             
             canvas.toBlob(
@@ -359,7 +356,7 @@ function redirectToSmallPDF() {
     showPostCompressionInstructions();
 }
 
-// Show instructions after redirecting to compression service
+// Show instructions after compression service redirect
 function showPostCompressionInstructions() {
     const fileNames = pendingOversizedFiles.map(f => f.name).join(', ');
     
@@ -382,17 +379,16 @@ function showPostCompressionInstructions() {
     pendingOversizedFiles = [];
 }
 
-// Information Icon Function - Show Form Help
+// UPDATED: Form Help without 25MB limit and terms references
 function showFormHelp() {
     const helpContent = `
         <div class="help-content">
             <h4>📋 Form Submission Guidelines</h4>
             <ul style="text-align: left; margin: 15px 0;">
-                <li><strong>Required Fields:</strong> Rank, Full Name, Phone, and Branch are mandatory</li>
+                <li><strong>Required Fields:</strong> Rank, Full Name, Phone (10 digits), and Branch are mandatory</li>
                 <li><strong>File Upload:</strong> Maximum 10 files, each under 10MB</li>
                 <li><strong>Supported Formats:</strong> Images (JPG, PNG), Documents (PDF, DOC, DOCX)</li>
-                <li><strong>Total Size Limit:</strong> All files combined must be under 25MB</li>
-                <li><strong>Terms Acceptance:</strong> You must accept terms and conditions before submission</li>
+                <li><strong>Phone Number:</strong> Must be a valid 10-digit Indian mobile number</li>
             </ul>
             
             <h4>📁 Data Protection</h4>
@@ -439,18 +435,21 @@ document.addEventListener("DOMContentLoaded", function() {
     const previewContainer = document.getElementById("file-preview");
     const form = document.getElementById("feedbackForm");
     const submitBtn = document.getElementById("submitBtn");
-    const termsCheckbox = document.getElementById("termsCheckbox");
+    const consentCheckbox = document.getElementById("consentCheckbox");
 
     // Initialize submit button as disabled
     submitBtn.disabled = true;
     submitBtn.classList.add('disabled');
 
-    // Terms checkbox validation
-    if (termsCheckbox) {
-        termsCheckbox.addEventListener('change', validateTermsAcceptance);
+    // Setup phone validation
+    setupPhoneValidation();
+
+    // Consent checkbox validation
+    if (consentCheckbox) {
+        consentCheckbox.addEventListener('change', validateConsent);
     }
 
-    // RESTORED: Enhanced file upload handling with WORKING modal options
+    // File upload handling with modal options
     uploadInput.addEventListener("change", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -479,7 +478,7 @@ document.addEventListener("DOMContentLoaded", function() {
         this.value = "";
         renderPreviews();
         
-        // Show file size modal with WORKING options if there are oversized files
+        // Show file size modal with options if there are oversized files
         if (oversizedFiles.length > 0) {
             showFileSizeModal(oversizedFiles);
         }
@@ -492,7 +491,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const fileBox = document.createElement("div");
             fileBox.className = "file-box";
             
-            // Check if file is oversized and mark visually
             const isOversized = file.size > 10 * 1024 * 1024;
             if (isOversized) {
                 fileBox.classList.add('file-oversized');
@@ -505,7 +503,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 e.preventDefault();
                 e.stopPropagation();
                 selectedFiles.splice(index, 1);
-                updateFileInput(); // Update the actual file input
+                updateFileInput();
                 renderPreviews();
                 updateFileCount();
             };
@@ -530,7 +528,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 fileBox.appendChild(fileName);
             }
             
-            // Enhanced size badge with proper KB/MB display
             const sizeBadge = document.createElement("div");
             sizeBadge.className = isOversized ? "file-size-badge oversized" : "file-size-badge";
             sizeBadge.textContent = formatFileSize(file.size);
@@ -558,7 +555,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("upload-count").textContent = countText;
     }
 
-    // Enhanced form submission with terms validation
+    // Enhanced form submission with phone validation
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -567,13 +564,25 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // Check terms acceptance
-        if (!termsCheckbox || !termsCheckbox.checked) {
+        // Check consent
+        if (!consentCheckbox || !consentCheckbox.checked) {
             showModal(
-                'You must accept the terms and conditions before submitting the form.',
+                'You must agree to submit your personal information before submitting the form.',
                 'error',
-                'Terms Acceptance Required'
+                'Consent Required'
             );
+            return;
+        }
+
+        // Validate phone number
+        const phoneInput = document.getElementById('phone');
+        if (!validatePhoneNumber(phoneInput.value)) {
+            showModal(
+                'Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).',
+                'error',
+                'Invalid Phone Number'
+            );
+            phoneInput.focus();
             return;
         }
 
@@ -584,19 +593,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // Only use valid files for submission
         const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024);
-
-        // Total size validation
-        const totalSize = validFiles.reduce((acc, f) => acc + f.size, 0);
-        if (totalSize > 25 * 1024 * 1024) {
-            showModal(
-                `Total file size is ${formatFileSize(totalSize)}, which exceeds the 25MB limit.<br><br>Please remove some files or compress them further.`,
-                'error',
-                'Total File Size Exceeded'
-            );
-            return;
-        }
 
         isSubmitting = true;
         submitBtn.disabled = true;
@@ -639,7 +636,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     selectedFiles = [];
                     pendingOversizedFiles = [];
                     renderPreviews();
-                    validateTermsAcceptance();
+                    validateConsent();
                 }, 2000);
             } else {
                 throw new Error(result.error || "Failed to submit form");
@@ -654,7 +651,7 @@ document.addEventListener("DOMContentLoaded", function() {
             );
         } finally {
             isSubmitting = false;
-            validateTermsAcceptance();
+            validateConsent();
             if (!submitBtn.disabled) {
                 submitBtn.textContent = "SUBMIT";
             }
