@@ -51,7 +51,7 @@ body {
 }
 
 .guidelines-btn {
-     background: linear-gradient(to bottom, rgb(224, 60, 60), rgb(48, 48, 172), rgb(39, 170, 214));
+    background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
     border: none;
     padding: 15px 25px;
@@ -113,6 +113,12 @@ form .form-row {
     min-width: 250px;
 }
 
+/* NEW: Full width input group for checkboxes */
+.input-group.full-width {
+    flex: 1;
+    min-width: 100%;
+}
+
 label {
     font-weight: 600;
     margin-bottom: 5px;
@@ -136,6 +142,72 @@ input:focus, select:focus, textarea:focus {
 textarea {
     resize: vertical;
     min-height: 100px;
+}
+
+/* NEW: Checkbox/Radio Group Styling */
+.checkbox-group {
+    display: flex;
+    gap: 30px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 0;
+    font-weight: 500;
+    color: #495057;
+}
+
+.checkbox-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.radio-checkmark {
+    position: relative;
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    background-color: white;
+    border: 2px solid #007bff;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label:hover .radio-checkmark {
+    background-color: #e3f2fd;
+    border-color: #0056b3;
+}
+
+.checkbox-label input:checked ~ .radio-checkmark {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.radio-checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+    transform: translate(-50%, -50%);
+}
+
+.checkbox-label input:checked ~ .radio-checkmark:after {
+    display: block;
 }
 
 /* Phone Error Message Styling */
@@ -317,7 +389,7 @@ button[type="submit"].disabled::after {
     border: 2px solid #ff9800;
     background: #fff3e0;
     box-shadow: 0 0 10px rgba(255, 152, 0, 0.3);
-    padding-bottom: 40px; /* Extra space for compress button */
+    padding-bottom: 40px;
 }
 
 .file-box.file-oversized .file-icon {
@@ -381,6 +453,14 @@ button[type="submit"].disabled::after {
     height: 100px;
     object-fit: cover;
     border-radius: 4px;
+}
+
+/* NEW: Full image display for PNG, JPG, JPEG */
+.file-thumb.full-image {
+    height: 120px;
+    object-fit: contain;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
 }
 
 .file-icon {
@@ -554,7 +634,7 @@ button[type="submit"].disabled::after {
     background: #545b62;
 }
 
-/* NEW: Confirmation Modal Specific Styles */
+/* Confirmation Modal Specific Styles */
 .modal-container.confirm .modal-header {
     background: linear-gradient(to right, #ff9800, #f57c00);
 }
@@ -605,12 +685,24 @@ button[type="submit"].disabled::after {
     transition: all 0.2s ease;
     text-align: left;
     width: 100%;
+    position: relative;
 }
 
 .service-btn:hover {
     border-color: #007bff;
     background: #f8f9fa;
     transform: translateY(-2px);
+}
+
+/* NEW: Recommended service styling */
+.service-btn.recommended {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.service-btn.recommended:hover {
+    border-color: #28a745;
+    background: #e8f5e8;
 }
 
 .service-info {
@@ -627,6 +719,30 @@ button[type="submit"].disabled::after {
 .service-info span {
     color: #666;
     font-size: 14px;
+}
+
+/* NEW: Recommended badge */
+.recommended-badge {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: recommendedPulse 2s infinite;
+}
+
+@keyframes recommendedPulse {
+    0%, 100% { 
+        box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+    }
+    50% { 
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.6);
+    }
 }
 
 .compression-note {
@@ -728,8 +844,16 @@ button[type="submit"].disabled::after {
         flex-direction: column;
     }
     
+    .checkbox-group {
+        gap: 20px;
+    }
+    
     .file-box {
         width: 120px;
+    }
+    
+    .file-thumb.full-image {
+        height: 100px;
     }
     
     .title {
@@ -769,6 +893,11 @@ button[type="submit"].disabled::after {
     
     .file-info p {
         font-size: 13px;
+    }
+    
+    .recommended-badge {
+        font-size: 10px;
+        padding: 2px 6px;
     }
     
     .modal-overlay.active {
