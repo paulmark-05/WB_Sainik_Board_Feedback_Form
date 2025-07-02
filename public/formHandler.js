@@ -1,117 +1,154 @@
+// Prevent multiple submissions
+let isSubmitting = false;
+let selectedFiles = [];
 
-document.addEventListener("DOMContentLoaded", () => {
-  let selectedFiles = [];
+document.addEventListener("DOMContentLoaded", function() {
+    const uploadInput = document.getElementById("upload");
+    const previewContainer = document.getElementById("file-preview");
+    const form = document.getElementById("feedbackForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const loader = document.getElementById("loader");
+    const timeoutMsg = document.getElementById("timeout-msg");
 
-  const uploadInput = document.getElementById("upload");
-  const previewContainer = document.getElementById("file-preview");
-  const form = document.getElementById("feedbackForm");
-  const submitBtn = form.querySelector("button[type='submit']");
-  const loader = document.getElementById("loader");
-  const timeoutMsg = document.getElementById("timeout-msg");
-
-  uploadInput.addEventListener("change", function () {
-    const newFiles = Array.from(uploadInput.files);
-
-    const existingNames = selectedFiles.map(file => file.name);
-    const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
-
-    selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // Limit to 10
-    uploadInput.value = "";
-    renderPreviews();
-  });
-
-  function renderPreviews() {
-    previewContainer.innerHTML = "";
-    const dataTransfer = new DataTransfer();
-
-    selectedFiles.forEach((file, index) => {
-      const fileBox = document.createElement("div");
-      fileBox.className = "file-box";
-
-      const removeBtn = document.createElement("span");
-      removeBtn.innerHTML = "&times;";
-      removeBtn.className = "remove-btn";
-      removeBtn.onclick = () => {
-        selectedFiles.splice(index, 1);
+    // File upload handling
+    uploadInput.addEventListener("change", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const newFiles = Array.from(this.files);
+        const existingNames = selectedFiles.map(file => file.name);
+        const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
+        
+        selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // Limit to 10
+        this.value = ""; // Clear input
         renderPreviews();
-        document.getElementById("upload-count").textContent = `${selectedFiles.length} file(s) selected`;
-      };
-
-      fileBox.appendChild(removeBtn);
-
-      if (file.type.startsWith("image/")) {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        img.className = "file-thumb";
-        fileBox.appendChild(img);
-      } else {
-        const icon = document.createElement("div");
-        icon.className = "file-icon";
-        icon.textContent = file.name.split(".").pop().toUpperCase();
-        fileBox.appendChild(icon);
-      }
-
-      const fileName = document.createElement("div");
-      fileName.className = "file-name";
-      fileName.textContent = file.name;
-      fileBox.appendChild(fileName);
-
-      previewContainer.appendChild(fileBox);
-      dataTransfer.items.add(file);
     });
 
-    uploadInput.files = dataTransfer.files;
-    document.getElementById("upload-count").textContent = `${selectedFiles.length} file(s) selected`;
-  }
+    function renderPreviews() {
+        previewContainer.innerHTML = "";
+        
+        selectedFiles.forEach((file, index) => {
+            const fileBox = document.createElement("div");
+            fileBox.className = "file-box";
 
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
+            const removeBtn = document.createElement("span");
+            removeBtn.innerHTML = "×";
+            removeBtn.className = "remove-btn";
+            removeBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                selectedFiles.splice(index, 1);
+                renderPreviews();
+                updateFileCount();
+            };
 
-    // File size check
-    const totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
-    if (totalSize > 25 * 1024 * 1024) {
-      alert("Total file size exceeds 25 MB. Please remove some files.");
-      return;
+            fileBox.appendChild(removeBtn);
+
+            if (file.type.startsWith("image/")) {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.className = "file-thumb";
+                img.onload = () => URL.revokeObjectURL(img.src);
+                fileBox.appendChild(img);
+            } else {
+                const icon = document.createElement("div");
+                icon.className = "file-icon";
+                icon.textContent = file.name.split(".").pop().toUpperCase();
+                fileBox.appendChild(icon);
+
+                const fileName = document.createElement("div");
+                fileName.className = "file-name";
+                fileName.textContent = file.name;
+                fileBox.appendChild(fileName);
+            }
+
+            previewContainer.appendChild(fileBox);
+        });
+
+        updateFileCount();
     }
 
-    if (selectedFiles.some(f => f.size > 10 * 1024 * 1024)) {
-      alert("A file exceeds 10 MB limit.");
-      return;
+    function updateFileCount() {
+        document.getElementById("upload-count").textContent = 
+            selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : "";
     }
 
-    const formData = new FormData(form);
-    selectedFiles.forEach(file => {
-      formData.append("upload", file);
+    // Form submission - Single event listener
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Prevent multiple submissions
+        if (isSubmitting) {
+            return;
+        }
+
+        // Validation
+        const totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+        if (totalSize > 25 * 1024 * 1024) {
+            alert("Total file size exceeds 25 MB. Please remove some files.");
+            return;
+        }
+
+        if (selectedFiles.some(f => f.size > 10 * 1024 * 1024)) {
+            alert("A file exceeds 10 MB limit.");
+            return;
+        }
+
+        // Set submitting state
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+        loader.style.display = "block";
+        
+        // Show timeout message after 10 seconds
+        const timeoutTimer = setTimeout(() => {
+            timeoutMsg.style.display = "block";
+        }, 10000);
+
+        try {
+            const formData = new FormData();
+            
+            // Append form fields
+            const formFields = new FormData(form);
+            for (let [key, value] of formFields.entries()) {
+                if (key !== 'upload') {
+                    formData.append(key, value);
+                }
+            }
+            
+            // Append files
+            selectedFiles.forEach(file => {
+                formData.append("upload", file);
+            });
+
+            const response = await fetch("/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(result.message || "Form submitted successfully!");
+                form.reset();
+                selectedFiles = [];
+                renderPreviews();
+            } else {
+                throw new Error(result.error || "Failed to submit form");
+            }
+
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("Form submission failed: " + error.message);
+        } finally {
+            // Reset submission state
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = "SUBMIT";
+            loader.style.display = "none";
+            timeoutMsg.style.display = "none";
+            clearTimeout(timeoutTimer);
+        }
     });
-
-    // Show loader, disable form
-    loader.style.display = "block";
-    timeoutMsg.style.display = "block";
-    submitBtn.disabled = true;
-
-    try {
-      const res = await fetch("https://wb-sainik-board-feedback-form.onrender.com/submit", {
-        method: "POST",
-        body: formData
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        alert(result.message || "Form submitted successfully!");
-        form.reset();
-        selectedFiles = [];
-        renderPreviews();
-        document.getElementById("upload-count").textContent = "";
-      } else {
-        alert(result.error || "Failed to submit form");
-      }
-    } catch (err) {
-      console.error("Submission failed:", err);
-      alert("Form submission failed");
-    } finally {
-      loader.style.display = "none";
-      timeoutMsg.style.display = "none";
-      submitBtn.disabled = false;
-    }
-  });
 });
