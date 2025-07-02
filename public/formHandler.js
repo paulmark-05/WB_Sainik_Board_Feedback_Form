@@ -397,9 +397,9 @@ function showFormHelp() {
         <div class="help-content">
             <h4>📋 Form Guidelines</h4>
             <ul style="text-align:left;margin:15px 0;">
-                <li><strong>Required Fields:</strong> Rank, ESM Name, Relationship, Phone, Branch</li>
-                 <li><strong>File Uploads cannot exceed</strong> 10</li>
-                <li><strong>File Size must not exceed</strong> 10 MB</li>
+                <li><strong>Required Fields :</strong> Rank, ESM Name, Relationship, Phone, Branch</li>
+                 <li><b>File Uploads :</b> 10 files max.</li>
+                <li><strong><b>File Size</b> must not exceed</strong> 10 MB</li>
                 <li><strong>Phone Number must be a </strong> Valid 10-digit Indian mobile number</li>
             </ul>
 
