@@ -1,6 +1,4 @@
-// ============================
-// 📄 formHandler.js (Frontend)
-// ============================
+
 document.addEventListener("DOMContentLoaded", () => {
   let selectedFiles = [];
 
