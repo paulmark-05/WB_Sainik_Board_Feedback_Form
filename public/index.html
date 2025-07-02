@@ -27,7 +27,7 @@
 
         <form id="feedbackForm" method="POST" enctype="multipart/form-data">
             <!-- Row 1: Rank/ESM Name Column + Relationship Column -->
-            <div class="form-row">
+            <div class="form-row main-info-row">
                 <div class="input-group stacked-fields">
                     <div class="field-container">
                         <label for="rank">Rank *</label>
@@ -39,39 +39,28 @@
                     </div>
                 </div>
                 <div class="input-group relationship-column">
-                    <label>Relationship *</label>
-                    <div class="checkbox-group vertical">
-                        <label class="checkbox-label">
+                    <label class="relationship-main-label">Relationship *</label>
+                    <div class="checkbox-group-enhanced">
+                        <label class="checkbox-label-enhanced">
                             <input type="radio" name="relationship" value="Self" required>
-                            <span class="radio-checkmark"></span>
-                            Self
+                            <span class="radio-checkmark-enhanced"></span>
+                            <span class="checkbox-text">Self</span>
                         </label>
-                        <label class="checkbox-label">
+                        <label class="checkbox-label-enhanced">
                             <input type="radio" name="relationship" value="Widow" required>
-                            <span class="radio-checkmark"></span>
-                            Widow
+                            <span class="radio-checkmark-enhanced"></span>
+                            <span class="checkbox-text">Widow</span>
                         </label>
-                        <label class="checkbox-label">
+                        <label class="checkbox-label-enhanced">
                             <input type="radio" name="relationship" value="Dependent" required>
-                            <span class="radio-checkmark"></span>
-                            Dependent
+                            <span class="radio-checkmark-enhanced"></span>
+                            <span class="checkbox-text">Dependent</span>
                         </label>
                     </div>
                 </div>
             </div>
 
-            <!-- Row 2: Full Name -->
-            <div class="form-row">
-                <div class="input-group">
-                    <label for="name">Full Name *</label>
-                    <input type="text" id="name" name="name" required placeholder="Enter Full Name">
-                </div>
-                <div class="input-group">
-                    <!-- Empty for layout balance -->
-                </div>
-            </div>
-
-            <!-- Row 3: Phone and Email -->
+            <!-- Row 2: Phone and Email -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="phone">Phone No. *</label>
@@ -85,7 +74,7 @@
                 </div>
             </div>
 
-            <!-- Row 4: Branch and ZSB ID -->
+            <!-- Row 3: Branch and ZSB ID -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="branch">Branch *</label>
@@ -114,7 +103,7 @@
                 </div>
             </div>
 
-            <!-- Row 5: Feedback Text Area -->
+            <!-- Row 4: Feedback Text Area -->
             <div class="form-row">
                 <div class="input-group" style="flex: 1;">
                     <label for="sugg">Suggestions / Feedback :</label>
@@ -122,7 +111,7 @@
                 </div>
             </div>
 
-            <!-- Row 6: File Upload -->
+            <!-- Row 5: File Upload -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="upload">Upload related photos/documents (max 10):</label>
