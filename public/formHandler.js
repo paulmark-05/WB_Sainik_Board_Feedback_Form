@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("feedbackForm");
     const submitBtn = document.getElementById("submitBtn");
     const loader = document.getElementById("loader");
-    const timeoutMsg = document.getElementById("timeout-msg");
 
     // File upload handling
     uploadInput.addEventListener("change", function(e) {
@@ -19,8 +18,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const existingNames = selectedFiles.map(file => file.name);
         const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
         
-        selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // Limit to 10
-        this.value = ""; // Clear input
+        selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10);
+        this.value = "";
         renderPreviews();
     });
 
@@ -73,12 +72,11 @@ document.addEventListener("DOMContentLoaded", function() {
             selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : "";
     }
 
-    // Form submission - Single event listener
+    // Enhanced form submission with proper error handling
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
         e.stopPropagation();
 
-        // Prevent multiple submissions
         if (isSubmitting) {
             return;
         }
@@ -99,17 +97,12 @@ document.addEventListener("DOMContentLoaded", function() {
         isSubmitting = true;
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";
-        loader.style.display = "block";
-        
-        // Show timeout message after 10 seconds
-        const timeoutTimer = setTimeout(() => {
-            timeoutMsg.style.display = "block";
-        }, 10000);
+        // Remove the separate loader - everything shows in button now
 
         try {
             const formData = new FormData();
             
-            // Append form fields
+            // Append form fields (excluding files)
             const formFields = new FormData(form);
             for (let [key, value] of formFields.entries()) {
                 if (key !== 'upload') {
@@ -117,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
             
-            // Append files
+            // Append files separately
             selectedFiles.forEach(file => {
                 formData.append("upload", file);
             });
@@ -127,9 +120,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: formData
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
-            if (response.ok) {
+            if (result.success || result.message) {
                 alert(result.message || "Form submitted successfully!");
                 form.reset();
                 selectedFiles = [];
@@ -140,15 +137,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
         } catch (error) {
             console.error("Submission error:", error);
-            alert("Form submission failed: " + error.message);
+            alert("Form submission failed: " + error.message + ". Please try again.");
         } finally {
             // Reset submission state
             isSubmitting = false;
             submitBtn.disabled = false;
             submitBtn.textContent = "SUBMIT";
-            loader.style.display = "none";
-            timeoutMsg.style.display = "none";
-            clearTimeout(timeoutTimer);
         }
     });
 });
