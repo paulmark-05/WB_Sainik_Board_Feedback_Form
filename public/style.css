@@ -106,10 +106,10 @@ form .form-row {
     margin-bottom: 20px;
 }
 
-/* Main info row with better proportions */
+/* Main info row with proper height matching */
 .form-row.main-info-row {
+    align-items: flex-start;
     min-height: 140px;
-    align-items: stretch;
 }
 
 .input-group {
@@ -126,6 +126,7 @@ form .form-row {
     gap: 15px;
     justify-content: space-between;
     flex: 1.2;
+    min-height: 140px;
 }
 
 .field-container {
@@ -153,41 +154,33 @@ form .form-row {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-/* Relationship column with better distribution */
-.input-group.relationship-column {
+/* Simple relationship column without box styling */
+.input-group.relationship-column-simple {
     display: flex;
     flex-direction: column;
     min-width: 200px;
     max-width: 280px;
     flex: 1;
-    justify-content: space-between;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 20px;
-    border-left: 4px solid #007bff;
+    justify-content: flex-start;
 }
 
-.relationship-main-label {
+.relationship-label {
     font-weight: 600;
     margin-bottom: 15px;
     color: #333;
-    text-align: center;
     font-size: 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #dee2e6;
 }
 
-/* Evenly distributed checkbox group */
-.checkbox-group-enhanced {
+/* Simple checkbox group with equal spacing */
+.checkbox-group-simple {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
-    height: 100%;
-    gap: 12px;
+    justify-content: space-between;
+    height: 105px;
+    gap: 0;
 }
 
-.checkbox-label-enhanced {
+.checkbox-label-simple {
     display: flex;
     align-items: center;
     font-size: 15px;
@@ -197,16 +190,13 @@ form .form-row {
     color: #495057;
     padding: 8px 0;
     transition: all 0.2s ease;
-    border-radius: 6px;
-    padding-left: 5px;
 }
 
-.checkbox-label-enhanced:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-    transform: translateX(2px);
+.checkbox-label-simple:hover {
+    color: #007bff;
 }
 
-.checkbox-label-enhanced input[type="radio"] {
+.checkbox-label-simple input[type="radio"] {
     position: absolute;
     opacity: 0;
     cursor: pointer;
@@ -214,59 +204,54 @@ form .form-row {
     width: 0;
 }
 
-.radio-checkmark-enhanced {
+/* Simple radio button styling */
+.radio-checkmark-simple {
     position: relative;
     display: inline-block;
-    height: 20px;
-    width: 20px;
+    height: 18px;
+    width: 18px;
     background-color: white;
     border: 2px solid #007bff;
     border-radius: 50%;
-    margin-right: 12px;
+    margin-right: 10px;
     flex-shrink: 0;
     transition: all 0.3s ease;
 }
 
-.checkbox-label-enhanced:hover .radio-checkmark-enhanced {
-    background-color: #e3f2fd;
+.checkbox-label-simple:hover .radio-checkmark-simple {
     border-color: #0056b3;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.3);
 }
 
-.checkbox-label-enhanced input:checked ~ .radio-checkmark-enhanced {
+.checkbox-label-simple input:checked ~ .radio-checkmark-simple {
     background-color: #007bff;
     border-color: #007bff;
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
 }
 
-.radio-checkmark-enhanced:after {
+.radio-checkmark-simple:after {
     content: "";
     position: absolute;
     display: none;
     top: 50%;
     left: 50%;
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: white;
     transform: translate(-50%, -50%);
 }
 
-.checkbox-label-enhanced input:checked ~ .radio-checkmark-enhanced:after {
+.checkbox-label-simple input:checked ~ .radio-checkmark-simple:after {
     display: block;
 }
 
-.checkbox-text {
+.checkbox-text-simple {
     font-weight: 500;
     color: #495057;
     transition: color 0.2s ease;
 }
 
-.checkbox-label-enhanced:hover .checkbox-text {
-    color: #007bff;
-}
-
-.checkbox-label-enhanced input:checked ~ .radio-checkmark-enhanced ~ .checkbox-text {
+.checkbox-label-simple input:checked ~ .radio-checkmark-simple ~ .checkbox-text-simple {
     color: #007bff;
     font-weight: 600;
 }
@@ -455,7 +440,7 @@ button[type="submit"].disabled::after {
     }
 }
 
-/* FIXED: File box with reduced empty space and compact layout */
+/* File box with reduced empty space and compact layout */
 .file-box {
     width: 150px;
     height: auto;
@@ -470,7 +455,6 @@ button[type="submit"].disabled::after {
     background: #f9f9f9;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
-    /* FIXED: Removed min-height to prevent excessive space */
 }
 
 .file-box.file-oversized {
@@ -536,7 +520,7 @@ button[type="submit"].disabled::after {
     50% { opacity: 0.7; }
 }
 
-/* FIXED: Improved image thumbnails with reduced empty space */
+/* Improved image thumbnails with reduced empty space */
 .file-thumb {
     width: 100%;
     height: 100px;
@@ -568,14 +552,14 @@ button[type="submit"].disabled::after {
     margin-bottom: 3px;
 }
 
-/* FIXED: Truncated file names to 2 lines maximum */
+/* Truncated file names to 2 lines maximum */
 .file-name {
     margin-top: 3px;
     font-size: 11px;
     word-wrap: break-word;
     padding: 0 3px;
     line-height: 1.2;
-    max-height: 2.4em; /* Exactly 2 lines */
+    max-height: 2.4em;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -819,7 +803,7 @@ button[type="submit"].disabled::after {
     font-size: 14px;
 }
 
-/* FIXED: Subtle green "Recommended" text instead of badge */
+/* Subtle green "Recommended" text instead of badge */
 .recommended-text {
     color: #28a745;
     font-size: 12px;
@@ -934,22 +918,24 @@ button[type="submit"].disabled::after {
     .input-group.stacked-fields {
         margin-bottom: 15px;
         flex: 1;
+        min-height: auto;
     }
     
-    .input-group.relationship-column {
+    .input-group.relationship-column-simple {
         max-width: none;
         min-width: 100%;
         margin-top: 15px;
     }
     
-    .checkbox-group-enhanced {
+    .checkbox-group-simple {
         flex-direction: row;
         gap: 15px;
         flex-wrap: wrap;
         justify-content: space-around;
+        height: auto;
     }
     
-    .checkbox-label-enhanced {
+    .checkbox-label-simple {
         flex: 1;
         min-width: 80px;
         justify-content: center;
