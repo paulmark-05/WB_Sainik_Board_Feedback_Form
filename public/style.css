@@ -113,19 +113,25 @@ form .form-row {
     min-width: 250px;
 }
 
-/* NEW: Full width input group for checkboxes */
-.input-group.full-width {
-    flex: 1;
-    min-width: 100%;
+/* NEW: Stacked fields for Rank and ESM Name */
+.input-group.stacked-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-label {
+.field-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.field-container label {
     font-weight: 600;
     margin-bottom: 5px;
     color: #333;
 }
 
-input, select, textarea {
+.field-container input {
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -133,23 +139,25 @@ input, select, textarea {
     font-family: 'Poppins', sans-serif;
 }
 
-input:focus, select:focus, textarea:focus {
+.field-container input:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-textarea {
-    resize: vertical;
-    min-height: 100px;
+/* NEW: Relationship column styling */
+.input-group.relationship-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    max-width: 250px;
 }
 
-/* NEW: Checkbox/Radio Group Styling */
-.checkbox-group {
+.checkbox-group.vertical {
     display: flex;
-    gap: 30px;
+    flex-direction: column;
+    gap: 15px;
     margin-top: 10px;
-    flex-wrap: wrap;
 }
 
 .checkbox-label {
@@ -208,6 +216,31 @@ textarea {
 
 .checkbox-label input:checked ~ .radio-checkmark:after {
     display: block;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+input, select, textarea {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
 }
 
 /* Phone Error Message Styling */
@@ -455,7 +488,6 @@ button[type="submit"].disabled::after {
     border-radius: 4px;
 }
 
-/* NEW: Full image display for PNG, JPG, JPEG */
 .file-thumb.full-image {
     height: 120px;
     object-fit: contain;
@@ -694,7 +726,6 @@ button[type="submit"].disabled::after {
     transform: translateY(-2px);
 }
 
-/* NEW: Recommended service styling */
 .service-btn.recommended {
     border-color: #28a745;
     background: #f8fff9;
@@ -721,7 +752,6 @@ button[type="submit"].disabled::after {
     font-size: 14px;
 }
 
-/* NEW: Recommended badge */
 .recommended-badge {
     background: linear-gradient(135deg, #28a745, #20c997);
     color: white;
@@ -844,8 +874,19 @@ button[type="submit"].disabled::after {
         flex-direction: column;
     }
     
-    .checkbox-group {
+    .input-group.stacked-fields {
+        margin-bottom: 15px;
+    }
+    
+    .input-group.relationship-column {
+        max-width: none;
+        min-width: 100%;
+    }
+    
+    .checkbox-group.vertical {
+        flex-direction: row;
         gap: 20px;
+        flex-wrap: wrap;
     }
     
     .file-box {
