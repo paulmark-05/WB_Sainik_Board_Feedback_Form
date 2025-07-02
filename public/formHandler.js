@@ -1,6 +1,7 @@
 // Prevent multiple submissions
 let isSubmitting = false;
 let selectedFiles = [];
+let currentCompressFileIndex = -1; // Track which file is being compressed
 
 // Enhanced file size display function
 function formatFileSize(bytes) {
@@ -65,7 +66,7 @@ function setupPhoneValidation() {
     });
 }
 
-// Custom Modal Functions (Simplified - only for notifications)
+// Custom Modal Functions
 function showModal(message, type = 'info', title = 'Notification') {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -73,7 +74,7 @@ function showModal(message, type = 'info', title = 'Notification') {
     const messageElement = document.getElementById('modalMessage');
     const footerElement = modal.querySelector('.modal-footer');
     
-    container.classList.remove('success', 'error', 'warning', 'info');
+    container.classList.remove('success', 'error', 'warning', 'info', 'confirm');
     
     if (type) {
         container.classList.add(type);
@@ -82,7 +83,7 @@ function showModal(message, type = 'info', title = 'Notification') {
     titleElement.textContent = title;
     messageElement.innerHTML = message;
     
-    // Simple OK button only
+    // Simple OK button only for regular notifications
     footerElement.innerHTML = '<button class="modal-btn-primary" onclick="closeModal()">OK</button>';
     
     modal.classList.add('active');
@@ -96,22 +97,90 @@ function closeModal() {
     const modal = document.getElementById('customModal');
     modal.classList.remove('active');
     document.body.style.overflow = 'auto';
+    
+    // Reset compression tracking
+    currentCompressFileIndex = -1;
 }
 
-// NEW: Compress specific file function
+// NEW: Show compression confirmation dialog
+function showCompressionConfirmation(fileIndex) {
+    const file = selectedFiles[fileIndex];
+    if (!file) return;
+    
+    // Store the file index for later use
+    currentCompressFileIndex = fileIndex;
+    
+    const modal = document.getElementById('customModal');
+    const container = modal.querySelector('.modal-container');
+    const titleElement = modal.querySelector('.modal-title');
+    const messageElement = document.getElementById('modalMessage');
+    const footerElement = modal.querySelector('.modal-footer');
+    
+    // Set confirmation styling
+    container.classList.remove('success', 'error', 'warning', 'info');
+    container.classList.add('confirm');
+    
+    titleElement.textContent = 'Compress File Confirmation';
+    
+    messageElement.innerHTML = `
+        <div class="confirmation-content">
+            <div class="file-info">
+                <p><strong>File:</strong> ${file.name}</p>
+                <p><strong>Current Size:</strong> ${formatFileSize(file.size)}</p>
+                <p><strong>Size Limit:</strong> 10 MB</p>
+            </div>
+            <p class="confirmation-question">What would you like to do with this oversized file?</p>
+        </div>
+    `;
+    
+    // Custom footer with Yes/No options
+    footerElement.innerHTML = `
+        <button class="modal-btn-secondary" onclick="closeModal()">No, close this message</button>
+        <button class="modal-btn-primary" onclick="proceedWithCompression()">Yes, I want to compress</button>
+    `;
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    const modalBody = modal.querySelector('.modal-body');
+    modalBody.scrollTop = 0;
+}
+
+// NEW: Proceed with compression after confirmation
+function proceedWithCompression() {
+    if (currentCompressFileIndex === -1) {
+        closeModal();
+        return;
+    }
+    
+    const file = selectedFiles[currentCompressFileIndex];
+    if (!file) {
+        closeModal();
+        return;
+    }
+    
+    closeModal();
+    
+    console.log('Proceeding with compression for:', file.name);
+    
+    // Check if it's an image for client-side compression
+    if (file.type.startsWith('image/')) {
+        compressImageClientSide(file, currentCompressFileIndex);
+    } else {
+        // Redirect to external compression service
+        showCompressionServiceModal([file], currentCompressFileIndex);
+    }
+}
+
+// UPDATED: Compress file function with confirmation
 function compressFile(fileIndex) {
     const file = selectedFiles[fileIndex];
     if (!file) return;
     
-    console.log('Compressing file:', file.name);
+    console.log('Compress button clicked for:', file.name);
     
-    // Check if it's an image for client-side compression
-    if (file.type.startsWith('image/')) {
-        compressImageClientSide(file, fileIndex);
-    } else {
-        // Redirect to external compression service
-        showCompressionServiceModal([file], fileIndex);
-    }
+    // Show confirmation dialog instead of immediate compression
+    showCompressionConfirmation(fileIndex);
 }
 
 // Client-side image compression
@@ -133,7 +202,8 @@ async function compressImageClientSide(imageFile, fileIndex) {
                 `Image compressed successfully!<br><br>
                 <strong>Original:</strong> ${formatFileSize(imageFile.size)}<br>
                 <strong>Compressed:</strong> ${formatFileSize(compressedFile.size)}<br>
-                <strong>Savings:</strong> ${(((imageFile.size - compressedFile.size) / imageFile.size) * 100).toFixed(1)}%`,
+                <strong>Savings:</strong> ${(((imageFile.size - compressedFile.size) / imageFile.size) * 100).toFixed(1)}%<br><br>
+                The compressed file has replaced the original in your selection.`,
                 'success',
                 'Compression Complete'
             );
@@ -143,7 +213,7 @@ async function compressImageClientSide(imageFile, fileIndex) {
     } catch (error) {
         console.error('Image compression failed:', error);
         showModal(
-            'Image compression failed. Please try using an external service.',
+            'Image compression failed. Please try using an external service or select a different file.',
             'error',
             'Compression Failed'
         );
@@ -309,7 +379,8 @@ function showFormHelp() {
             <h4>🔧 File Management</h4>
             <ul style="text-align: left; margin: 15px 0;">
                 <li><strong>Oversized Files:</strong> Red warning appears above files exceeding 10MB</li>
-                <li><strong>Compress Button:</strong> Click to reduce file size using free online tools</li>
+                <li><strong>Compress Button:</strong> Click to get compression options with confirmation</li>
+                <li><strong>Confirmation Dialog:</strong> Choose to compress or cancel the action</li>
                 <li><strong>Automatic Replacement:</strong> Compressed files automatically replace originals</li>
             </ul>
             
@@ -356,7 +427,7 @@ document.addEventListener("DOMContentLoaded", function() {
         consentCheckbox.addEventListener('change', validateConsent);
     }
 
-    // SIMPLIFIED file upload handling - NO MODAL POPUPS
+    // File upload handling
     uploadInput.addEventListener("change", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -376,7 +447,7 @@ document.addEventListener("DOMContentLoaded", function() {
             uniqueFiles.splice(allowedCount);
         }
         
-        // Add ALL files (including oversized ones) - NO MODAL
+        // Add ALL files (including oversized ones)
         selectedFiles = [...selectedFiles, ...uniqueFiles];
         
         this.value = "";
@@ -451,7 +522,7 @@ document.addEventListener("DOMContentLoaded", function() {
             sizeBadge.textContent = formatFileSize(file.size);
             fileBox.appendChild(sizeBadge);
 
-            // NEW: Add compress button for oversized files
+            // Add compress button for oversized files (with confirmation)
             if (isOversized) {
                 const compressBtn = document.createElement("button");
                 compressBtn.className = "compress-btn";
