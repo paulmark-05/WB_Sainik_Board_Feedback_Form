@@ -64,7 +64,18 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    // Disable submit button
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+
     const formData = new FormData(form);
+
+    // ✅ Send visible branch name, not just option value
+    const branchSelect = form.branch;
+    const branchLabel = branchSelect.options[branchSelect.selectedIndex].text;
+    formData.set("branch", branchLabel);
+
     selectedFiles.forEach(file => {
       formData.append("upload", file); // 'upload' must match the name used by multer in backend
     });
@@ -88,6 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.error("Submission failed:", err);
       alert("Form submission failed");
+    } finally {
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Submit";
     }
   });
 });
