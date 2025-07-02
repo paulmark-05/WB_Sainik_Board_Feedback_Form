@@ -258,7 +258,7 @@ button[type="submit"].disabled::after {
     min-height: 20px;
 }
 
-/* NEW: Oversized Files Warning */
+/* Oversized Files Warning */
 .oversized-warning {
     width: 100%;
     background: #fff5f5;
@@ -343,7 +343,7 @@ button[type="submit"].disabled::after {
     animation: blink 1.5s infinite;
 }
 
-/* NEW: Compress Button Styling */
+/* Compress Button Styling */
 .compress-btn {
     position: absolute;
     bottom: 5px;
@@ -434,7 +434,7 @@ button[type="submit"].disabled::after {
     font-weight: 500;
 }
 
-/* Modal Styles (Simplified) */
+/* Modal Styles */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -536,6 +536,51 @@ button[type="submit"].disabled::after {
 
 .modal-btn-primary:hover {
     background: #0056b3;
+}
+
+.modal-btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.modal-btn-secondary:hover {
+    background: #545b62;
+}
+
+/* NEW: Confirmation Modal Specific Styles */
+.modal-container.confirm .modal-header {
+    background: linear-gradient(to right, #ff9800, #f57c00);
+}
+
+.confirmation-content {
+    text-align: center;
+}
+
+.file-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 4px solid #ff9800;
+}
+
+.file-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.confirmation-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin: 20px 0;
 }
 
 /* Compression Services Styles */
@@ -718,6 +763,14 @@ button[type="submit"].disabled::after {
         padding: 4px 6px;
     }
     
+    .confirmation-question {
+        font-size: 14px;
+    }
+    
+    .file-info p {
+        font-size: 13px;
+    }
+    
     .modal-overlay.active {
         padding: 10px;
     }
@@ -743,7 +796,8 @@ button[type="submit"].disabled::after {
         flex-direction: column;
     }
     
-    .modal-btn-primary {
+    .modal-btn-primary,
+    .modal-btn-secondary {
         width: 100%;
         margin: 5px 0;
     }
