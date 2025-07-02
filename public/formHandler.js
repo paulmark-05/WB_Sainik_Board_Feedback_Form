@@ -25,6 +25,42 @@ function isFullDisplayImage(file) {
     return imageTypes.includes(file.type.toLowerCase());
 }
 
+// NEW: Setup relationship toggle functionality
+function setupRelationshipToggle() {
+    const relationshipRadios = document.querySelectorAll('input[name="relationship"]');
+    
+    relationshipRadios.forEach(radio => {
+        let isSelected = false;
+        
+        radio.addEventListener('click', function() {
+            if (isSelected && this.checked) {
+                // Deselect if already selected
+                this.checked = false;
+                isSelected = false;
+            } else {
+                // Clear all others and select this one
+                relationshipRadios.forEach(r => {
+                    r.parentElement.isSelected = false;
+                });
+                this.checked = true;
+                isSelected = true;
+            }
+        });
+        
+        // Track selection state
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                relationshipRadios.forEach(r => {
+                    if (r !== this) {
+                        r.parentElement.isSelected = false;
+                    }
+                });
+                isSelected = true;
+            }
+        });
+    });
+}
+
 // Simplified consent validation
 function validateConsent() {
     const consentCheckbox = document.getElementById('consentCheckbox');
@@ -363,7 +399,7 @@ function showFormHelp() {
                 <li><strong>File Upload:</strong> Maximum 10 files, each under 10MB</li>
                 <li><strong>Supported Formats:</strong> Images (JPG, PNG), Documents (PDF, DOC, DOCX)</li>
                 <li><strong>Phone Number:</strong> Must be a valid 10-digit Indian mobile number</li>
-                <li><strong>Relationship:</strong> Select one option - Self, Widow, or Dependent</li>
+                <li><strong>Relationship:</strong> Click to select, click again to deselect</li>
             </ul>
             
             <h4>📁 Data Protection</h4>
@@ -419,6 +455,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Setup phone validation
     setupPhoneValidation();
+
+    // NEW: Setup relationship toggle functionality
+    setupRelationshipToggle();
 
     // Consent checkbox validation
     if (consentCheckbox) {
@@ -497,7 +536,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             fileBox.appendChild(removeBtn);
 
-            // ENHANCED: Full image display for PNG, JPG, JPEG
+            // Enhanced: Full image display for PNG, JPG, JPEG
             if (isFullDisplayImage(file)) {
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(file);
