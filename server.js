@@ -211,45 +211,109 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     }
 });
 
-// Enhanced email notification function
+// Enhanced email notification function with detailed debugging
 async function sendEmailNotification(data, uploadedFileLinks) {
-    if (!process.env.NOTIFY_EMAIL || !process.env.APP_PASSWORD) {
-        throw new Error('Email configuration missing - check NOTIFY_EMAIL and APP_PASSWORD');
+    console.log('📧 Starting email notification process...');
+    
+    // Check environment variables
+    if (!process.env.NOTIFY_EMAIL) {
+        throw new Error('NOTIFY_EMAIL environment variable not set');
     }
+    if (!process.env.APP_PASSWORD) {
+        throw new Error('APP_PASSWORD environment variable not set');
+    }
+    
+    console.log(`Email from: ${process.env.NOTIFY_EMAIL}`);
+    console.log(`App password length: ${process.env.APP_PASSWORD ? process.env.APP_PASSWORD.length : 'undefined'}`);
 
     const transporter = nodemailer.createTransporter({
         service: 'gmail',
         auth: {
             user: process.env.NOTIFY_EMAIL,
             pass: process.env.APP_PASSWORD
-        }
+        },
+        debug: true, // Enable debug logs
+        logger: true // Enable logger
     });
 
-    // Verify connection first
-    await transporter.verify();
+    // Test connection first
+    try {
+        console.log('🔍 Verifying SMTP connection...');
+        await transporter.verify();
+        console.log('✅ SMTP connection verified');
+    } catch (verifyError) {
+        console.error('❌ SMTP verification failed:', verifyError.message);
+        throw new Error(`Email configuration error: ${verifyError.message}`);
+    }
 
     const mailOptions = {
-        from: `WB Sainik Board <${process.env.NOTIFY_EMAIL}>`,
+        from: `"WB Sainik Board" <${process.env.NOTIFY_EMAIL}>`,
         to: process.env.NOTIFY_EMAIL,
-        subject: `📬 New Feedback - ${data.name} (${data.branch})`,
+        subject: `📬 New Feedback Submission - ${data.name} (${data.branch})`,
         html: `
-        <h2>New Feedback Form Submission</h2>
-        <table border="1" cellpadding="5" cellspacing="0">
-            <tr><td><strong>Name:</strong></td><td>${data.name}</td></tr>
-            <tr><td><strong>Rank:</strong></td><td>${data.rank}</td></tr>
-            <tr><td><strong>Branch:</strong></td><td>${data.branch}</td></tr>
-            <tr><td><strong>Phone:</strong></td><td>${data.phone}</td></tr>
-            <tr><td><strong>Email:</strong></td><td>${data.email || 'Not provided'}</td></tr>
-            <tr><td><strong>Feedback:</strong></td><td>${data.sugg || 'No feedback provided'}</td></tr>
-        </table>
-        ${uploadedFileLinks.length > 0 ? 
-            '<h3>Files:</h3>' + uploadedFileLinks.map(link => `<a href="${link}">${link}</a>`).join('<br>') : ''
-        }
-        <p><em>Submitted: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</em></p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+                New Feedback Form Submission
+            </h2>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr style="background-color: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Name:</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.name}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Rank:</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.rank}</td>
+                </tr>
+                <tr style="background-color: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Branch:</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.branch}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Phone:</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.phone}</td>
+                </tr>
+                <tr style="background-color: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Email:</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.email || 'Not provided'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">ID Card:</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.id || 'Not provided'}</td>
+                </tr>
+                <tr style="background-color: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; vertical-align: top;">Feedback:</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.sugg || 'No feedback provided'}</td>
+                </tr>
+            </table>
+            
+            ${uploadedFileLinks.length > 0 ? `
+                <h3 style="color: #2c3e50;">Uploaded Files (${uploadedFileLinks.length}):</h3>
+                <ul style="list-style-type: none; padding: 0;">
+                    ${uploadedFileLinks.map((link, index) => 
+                        `<li style="margin: 5px 0;"><a href="${link}" target="_blank" style="color: #3498db; text-decoration: none;">📎 File ${index + 1}</a></li>`
+                    ).join('')}
+                </ul>
+            ` : '<p><em>No files uploaded</em></p>'}
+            
+            <div style="margin-top: 30px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #3498db;">
+                <p style="margin: 0; color: #2c3e50;">
+                    <strong>Submitted:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                </p>
+            </div>
+        </div>
         `
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+        console.log('📤 Sending email...');
+        const info = await transporter.sendMail(mailOptions);
+        console.log('✅ Email sent successfully:', info.messageId);
+        return info;
+    } catch (sendError) {
+        console.error('❌ Email sending failed:', sendError);
+        throw new Error(`Failed to send email: ${sendError.message}`);
+    }
 }
 
 // Helper functions
@@ -278,6 +342,27 @@ async function ensureFolder(parentId, folderName) {
 function cleanFolderName(name) {
     return name.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim();
 }
+
+// Add email test endpoint for debugging
+app.get('/test-email', async (req, res) => {
+    try {
+        const testData = {
+            name: 'Test User',
+            rank: 'Major',
+            branch: 'Test Branch',
+            phone: '1234567890',
+            email: 'test@example.com',
+            id: 'TEST123',
+            sugg: 'This is a test submission'
+        };
+        
+        await sendEmailNotification(testData, []);
+        res.json({ success: true, message: 'Test email sent successfully!' });
+    } catch (error) {
+        console.error('Test email failed:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
