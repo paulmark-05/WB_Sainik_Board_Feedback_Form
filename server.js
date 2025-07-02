@@ -1,5 +1,5 @@
 // =========================
-// 🛠 server.js (Backend)
+// ✅ Final server.js
 // =========================
 const express = require('express');
 const multer = require('multer');
@@ -8,15 +8,10 @@ const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
 
 app.use(cors());
 app.use(express.static('public'));
@@ -87,7 +82,6 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
       requestBody: { values: [sheetValues] }
     });
 
-    // 📧 Send email via Nodemailer
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -123,5 +117,29 @@ ${uploadedFileLinks.join('\n')}
   }
 });
 
+async function ensureFolder(parentId, folderName) {
+  const search = await drive.files.list({
+    q: `'${parentId}' in parents and name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id, name)'
+  });
+  if (search.data.files.length > 0) {
+    return search.data.files[0].id;
+  }
+  const folder = await drive.files.create({
+    resource: {
+      name: folderName,
+      mimeType: 'application/vnd.google-apps.folder',
+      parents: [parentId]
+    },
+    fields: 'id'
+  });
+  return folder.data.id;
+}
+
 function cleanFolderName(name) {
-  return name.replace(/[^
+  return name.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
