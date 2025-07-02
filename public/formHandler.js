@@ -389,43 +389,37 @@ function updateFileInput() {
 }
 
 // Form Help Guidelines
+// ──────────────────────────────────────────────────────────────────────────
+// Help & Guidelines  (clean, concise)
+// ──────────────────────────────────────────────────────────────────────────
 function showFormHelp() {
     const helpContent = `
         <div class="help-content">
-            <h4>📋 Form Submission Guidelines</h4>
-            <ul style="text-align: left; margin: 15px 0;">
-                <li><strong>Required Fields:</strong> Rank, ESM Name, Relationship, Phone (10 digits), and Branch are mandatory</li>
-                <li><strong>File Upload:</strong> Maximum 10 files, each under 10MB</li>
-                <li><strong>Supported Formats:</strong> Images (JPG, PNG), Documents (PDF, DOC, DOCX)</li>
-                <li><strong>Phone Number:</strong> Must be a valid 10-digit Indian mobile number</li>
-                <li><strong>Relationship:</strong> Click to select, click again to deselect</li>
+            <h4>📋 Form Guidelines</h4>
+            <ul style="text-align:left;margin:15px 0;">
+                <li><strong>Required Fields:</strong> Rank, ESM Name, Relationship, Phone, Branch</li>
+                 <li><strong>File Uploads cannot exceed</strong> 10</li>
+                <li><strong>File Size must not exceed</strong> 10 MB</li>
+                <li><strong>Phone Number must be a </strong> Valid 10-digit Indian mobile number</li>
             </ul>
-            
-            <h4>📁 Data Protection</h4>
-            <ul style="text-align: left; margin: 15px 0;">
-                <li>All data is processed according to Government of West Bengal guidelines</li>
-                <li>Personal information is protected under Digital Personal Data Protection Act</li>
-                <li>Files are securely stored in government-approved cloud infrastructure</li>
-                <li>Access is restricted to authorized Sainik Board personnel only</li>
-            </ul>
-            
+
             <h4>🔧 File Management</h4>
-            <ul style="text-align: left; margin: 15px 0;">
-                <li><strong>Oversized Files:</strong> Red warning appears above files exceeding 10MB</li>
-                <li><strong>Compress Button:</strong> Click to get compression options with confirmation</li>
-                <li><strong>Image Preview:</strong> PNG, JPG, JPEG files show full image in thumbnail</li>
-                <li><strong>Recommended Service:</strong> iLovePDF is recommended for PDF compression</li>
+            <ul style="text-align:left;margin:15px 0;">
+                <li>Click the <b>×</b> to remove a file</li>
+                <li>Files over 10 MB show an orange border</li>
+                <li>Click an oversized file → <strong>Compress</strong> or <strong>Remove</strong></li>
             </ul>
-            
-            <h4>📞 Support</h4>
-            <p style="text-align: left; margin: 10px 0;">
-                For technical assistance, contact your ZSB branch office.
+
+            <h4>📞 Need Help?</h4>
+            <p style="text-align:left;margin:10px 0;">
+                Contact your local ZSB branch office.
             </p>
         </div>
     `;
-    
-    showModal(helpContent, 'info', 'Form Help & Guidelines');
+
+    showModal(helpContent, 'info', 'Form Help');
 }
+
 
 // Close modal when clicking overlay
 document.addEventListener('click', function(e) {
