@@ -2,95 +2,97 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>West Bengal Sainik Board Feedback</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WB Sainik Board - Feedback Form</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="formHandler.js"></script>
-
 <body>
+    <div class="header">
+        <img src="logo.jpg" alt="WB Sainik Board Logo" class="logo">
+        <h1 class="title">Feedback / Grievances Form</h1>
+    </div>
 
-  <!-- HEADER SECTION WITH BANNER IMAGE -->
-  <div class="header">
-    <img src="logo.jpg" alt="Logo" class="logo" />
-    <h1 class="title">Feedback / Grievances Form</h1>
-  </div>
+    <div class="form-container">
+        <form id="feedbackForm" method="POST" enctype="multipart/form-data">
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="rank">Rank *</label>
+                    <input type="text" id="rank" name="rank" required>
+                </div>
+                <div class="input-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+            </div>
 
-  <!-- FORM SECTION -->
-  <div class="form-container">
-    <form id="feedbackForm" enctype="multipart/form-data">
-<br>
-      <div class="form-row">
-        <div class="input-group">
-          <label for="rank">Rank *</label>
-          <input type="text" id="rank" name="rank" required title="Enter Rank"/>
-        </div>
-        <div class="input-group">
-          <label for="name">Full Name *</label>
-          <input type="text" id="name" name="name" required title="Enter Full Name"/>
-        </div>
-      </div>
-<br>
-      <div class="form-row">
-        <div class="input-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" title="Enter Email"/>
-        </div>
-        <div class="input-group">
-          <label for="phone">Phone No. *</label>
-          <input type="tel" id="phone" name="phone" required pattern="\d{10}" maxlength="10" title="Enter 10 digit phone number" />
-        </div>
-      </div>
-<br>
-      <div class="input-group">
-        <label for="branch">Branch *</label>
-        <select id="branch" name="branch" required>
-          <option value="" color="grey">--Select ZSB branch--</option>
-          <option value="Rajya Sainik Board">Rajya Sainik Board</option>
-          <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhu )</option>
-          <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
-          <option value="ZSB Dakshin Dinajpur">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
-          <option value="ZSB Darjeeling">ZSB Darjeeling ( Darjeeling )</option>
-          <option value="ZSB Howrah">ZSB Howrah ( Howrah & Hooghly )</option>
-          <option value="ZSB Jalpaiguri">ZSB Jalpaiguri ( Jalpaiguri )</option>
-          <option value="ZSB Kalimpong">ZSB Kalimpong ( Kalimpong )</option>
-          <option value="ZSB Kolkata">ZSB Kolkata ( Kolkata )</option>
-          <option value="ZSB Malda">ZSB Malda ( Malda )</option>
-          <option value="ZSB Midnapore">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
-          <option value="ZSB Murshidabad ">ZSB Murshidabad ( Murshidabad )</option>
-          <option value="ZSB Nadia">ZSB Nadia ( Nadia )</option>
-          <option value="ZSB North 24 Parganas">ZSB North 24 Parganas ( North 24 Parganas )</option>
-          <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
-        </select>
-      </div>
-<br>
-      <div class="input-group">
-        <label for="id">ZSB ID Card No.(if any):</label>
-        <input type="text" id="id" name="id"  />
-      </div>
-<br>
-      <div class="input-group">
-        <label for="sugg">Suggestions / Feedback :</label>
-        <textarea id="sugg" name="sugg" rows="5" placeholder="Click to add text..."></textarea>
-      </div>
-<br>
-      <div class="input-group">
-        <label for="upload">Upload related photos/documents (max 10):</label>
-        <input type="file" id="upload" name="upload" multiple accept="image/*,.pdf,.doc,.docx" />
-        <small id="upload-count" style="margin-left: 10px; font-weight: bold; color: #444;"></small>
-        <div id="file-preview" class="preview-grid"></div>
-      </div>
-<br>
-      <button type="submit" id="submitBtn">SUBMIT</button>
-        <div id="spinner" style="display:none;">Submitting...</div>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email">
+                </div>
+                <div class="input-group">
+                    <label for="phone">Phone No. *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+            </div>
 
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="branch">Branch *</label>
+                    <select id="branch" name="branch" required>
+                        <option value="">--Select ZSB branch--</option>
+                        <option value="Rajya Sainik Board">Rajya Sainik Board</option>
+                        <option value="ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhum )">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhum )</option>
+                        <option value="ZSB Coochbehar ( Coochbehar & Alipurduar )">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
+                        <option value="ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
+                        <option value="ZSB Darjeeling ( Darjeeling )">ZSB Darjeeling ( Darjeeling )</option>
+                        <option value="ZSB Howrah ( Howrah & Hooghly )">ZSB Howrah ( Howrah & Hooghly )</option>
+                        <option value="ZSB Jalpaiguri ( Jalpaiguri )">ZSB Jalpaiguri ( Jalpaiguri )</option>
+                        <option value="ZSB Kalimpong ( Kalimpong )">ZSB Kalimpong ( Kalimpong )</option>
+                        <option value="ZSB Kolkata ( Kolkata )">ZSB Kolkata ( Kolkata )</option>
+                        <option value="ZSB Malda ( Malda )">ZSB Malda ( Malda )</option>
+                        <option value="ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
+                        <option value="ZSB Murshidabad ( Murshidabad )">ZSB Murshidabad ( Murshidabad )</option>
+                        <option value="ZSB Nadia ( Nadia )">ZSB Nadia ( Nadia )</option>
+                        <option value="ZSB North 24 Parganas ( North 24 Parganas )">ZSB North 24 Parganas ( North 24 Parganas )</option>
+                        <option value="ZSB South 24 Parganas ( South 24 Parganas )">ZSB South 24 Parganas ( South 24 Parganas )</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="id">ZSB ID Card No.(if any):</label>
+                    <input type="text" id="id" name="id">
+                </div>
+            </div>
 
-    </form>
-  </div>
+            <div class="form-row">
+                <div class="input-group" style="flex: 1;">
+                    <label for="sugg">Suggestions / Feedback :</label>
+                    <textarea id="sugg" name="sugg" rows="4"></textarea>
+                </div>
+            </div>
 
-  <script src="formHandler.js" defer></script>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="upload">Upload related photos/documents (max 10):</label>
+                    <input type="file" id="upload" name="upload" multiple accept="image/*,.pdf,.doc,.docx">
+                    <div id="upload-count"></div>
+                </div>
+            </div>
+
+            <div id="file-preview"></div>
+
+            <button type="submit" id="submitBtn">SUBMIT</button>
+            
+            <div id="loader" style="display: none;">
+                <p>Submitting...</p>
+                <div id="timeout-msg" style="display: none;">
+                    <p>Please wait, this may take up to 30 seconds...</p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="formHandler.js"></script>
 </body>
 </html>
