@@ -39,7 +39,7 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* NEW: Form Header with Guidelines */
+/* Form Header with Guidelines */
 .form-header {
     margin-bottom: 30px;
     padding-bottom: 20px;
@@ -70,10 +70,6 @@ body {
     background: linear-gradient(135deg, #0056b3, #004085);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-}
-
-.guidelines-btn:active {
-    transform: translateY(0);
 }
 
 .guidelines-icon {
@@ -142,28 +138,35 @@ textarea {
     min-height: 100px;
 }
 
-/* Terms Acceptance Checkbox Styling */
-.terms-container {
+/* Phone Error Message Styling */
+.error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* SIMPLIFIED Consent Checkbox Styling */
+.consent-container {
     margin: 25px 0;
-    padding: 20px;
+    padding: 15px;
     background: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 8px;
     border-left: 4px solid #007bff;
 }
 
-.terms-label {
+.consent-label {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     font-size: 14px;
-    line-height: 1.5;
     cursor: pointer;
     margin: 0;
     font-weight: 500;
     color: #495057;
 }
 
-.terms-label input[type="checkbox"] {
+.consent-label input[type="checkbox"] {
     position: absolute;
     opacity: 0;
     cursor: pointer;
@@ -180,17 +183,16 @@ textarea {
     border: 2px solid #007bff;
     border-radius: 4px;
     margin-right: 12px;
-    margin-top: 2px;
     flex-shrink: 0;
     transition: all 0.3s ease;
 }
 
-.terms-label:hover .checkmark {
+.consent-label:hover .checkmark {
     background-color: #e3f2fd;
     border-color: #0056b3;
 }
 
-.terms-label input:checked ~ .checkmark {
+.consent-label input:checked ~ .checkmark {
     background-color: #007bff;
     border-color: #007bff;
 }
@@ -208,20 +210,8 @@ textarea {
     transform: rotate(45deg);
 }
 
-.terms-label input:checked ~ .checkmark:after {
+.consent-label input:checked ~ .checkmark:after {
     display: block;
-}
-
-.terms-link {
-    color: #007bff;
-    text-decoration: underline;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
-
-.terms-link:hover {
-    color: #0056b3;
-    text-decoration: none;
 }
 
 /* Submit Button Styling */
@@ -255,7 +245,7 @@ button[type="submit"].disabled {
 }
 
 button[type="submit"].disabled::after {
-    content: " (Accept terms to enable)";
+    content: " (Check consent to enable)";
     font-size: 12px;
     opacity: 0.8;
 }
@@ -283,6 +273,18 @@ button[type="submit"].disabled::after {
     transition: all 0.3s ease;
 }
 
+.file-box.file-oversized {
+    border: 2px solid #ff9800;
+    background: #fff3e0;
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.3);
+    animation: pulse-orange 2s infinite;
+}
+
+.file-box.file-oversized .file-icon {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
 .file-size-badge {
     position: absolute;
     top: 5px;
@@ -294,6 +296,21 @@ button[type="submit"].disabled::after {
     border-radius: 4px;
     font-weight: bold;
     z-index: 1;
+}
+
+.file-size-badge.oversized {
+    background: #ff9800;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes pulse-orange {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 .file-thumb {
@@ -354,7 +371,7 @@ button[type="submit"].disabled::after {
     font-weight: 500;
 }
 
-/* SIMPLIFIED Modal Styles (No guidelines icon) */
+/* Modal Styles */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -458,6 +475,122 @@ button[type="submit"].disabled::after {
     background: #0056b3;
 }
 
+.modal-btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.modal-btn-secondary:hover {
+    background: #545b62;
+}
+
+/* File Size Modal Specific Styles */
+.modal-container.file-size .modal-header {
+    background: linear-gradient(to right, #ff9800, #f57c00);
+}
+
+.file-size-content ul.oversized-files-list {
+    background: #fff3e0;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+    border-left: 4px solid #ff9800;
+}
+
+.file-size-content ul.oversized-files-list li {
+    margin: 8px 0;
+    list-style-type: none;
+    padding-left: 20px;
+    position: relative;
+}
+
+.file-size-content ul.oversized-files-list li::before {
+    content: "⚠️";
+    position: absolute;
+    left: 0;
+}
+
+/* Compression Services Styles */
+.compression-services h4 {
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.service-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.service-btn {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.service-btn:hover {
+    border-color: #007bff;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+.service-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.service-info strong {
+    color: #333;
+    font-size: 16px;
+}
+
+.service-info span {
+    color: #666;
+    font-size: 14px;
+}
+
+.compression-note {
+    background: #e3f2fd;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #2196f3;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.compression-instructions {
+    text-align: left;
+}
+
+.compression-instructions h4 {
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.compression-instructions ol {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.compression-instructions li {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
 /* Success Modal Variant */
 .modal-container.success .modal-header {
     background: linear-gradient(to right, #28a745, #20c997);
@@ -549,16 +682,12 @@ button[type="submit"].disabled::after {
         font-size: 14px;
     }
     
-    .guidelines-icon {
-        font-size: 20px;
-    }
-    
-    .terms-container {
+    .consent-container {
         margin: 20px 0;
-        padding: 15px;
+        padding: 12px;
     }
     
-    .terms-label {
+    .consent-label {
         font-size: 13px;
     }
     
@@ -587,7 +716,8 @@ button[type="submit"].disabled::after {
         flex-direction: column;
     }
     
-    .modal-btn-primary {
+    .modal-btn-primary,
+    .modal-btn-secondary {
         width: 100%;
         margin: 5px 0;
     }
