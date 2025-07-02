@@ -25,8 +25,12 @@ function showModal(message, type = 'info', title = 'Notification') {
     // Show modal
     modal.classList.add('active');
     
-    // Prevent body scroll
+    // Prevent body scroll but allow modal scroll
     document.body.style.overflow = 'hidden';
+    
+    // Ensure modal content can scroll
+    const modalBody = modal.querySelector('.modal-body');
+    modalBody.scrollTop = 0; // Reset scroll position
 }
 
 function closeModal() {
@@ -81,7 +85,6 @@ function showFileSizeModal(oversizedFiles) {
 
 // Handle removing oversized files
 function removeOversizedFiles() {
-    // Remove oversized files from selectedFiles array
     selectedFiles = selectedFiles.filter(file => file.size <= 10 * 1024 * 1024);
     pendingOversizedFiles = [];
     
@@ -97,14 +100,12 @@ function removeOversizedFiles() {
 
 // Handle reselecting files
 function reselectFiles() {
-    // Clear all files and let user start over
     selectedFiles = [];
     pendingOversizedFiles = [];
     
     renderPreviews();
     closeModal();
     
-    // Clear the file input to allow reselection
     document.getElementById('upload').value = '';
     
     showModal(
@@ -120,7 +121,6 @@ function compressFiles() {
     
     if (pendingOversizedFiles.length === 0) return;
     
-    // Show compression service selection modal
     showCompressionServiceModal();
 }
 
@@ -133,45 +133,40 @@ function showCompressionServiceModal() {
         type.includes('document') || type.includes('docx') || type.includes('doc')
     );
     
-    let serviceOptions = '';
-    
     if (hasImages && pendingOversizedFiles.length === 1 && pendingOversizedFiles[0].type.startsWith('image/')) {
-        // Single image - use client-side compression
         compressImageClientSide(pendingOversizedFiles[0]);
         return;
     }
     
-    if (hasPDFs || hasDocuments || hasImages) {
-        serviceOptions = `
-            <div class="compression-services">
-                <h4>Choose a free compression service:</h4>
-                <div class="service-options">
-                    <button class="service-btn" onclick="redirectToYouCompress()">
-                        <div class="service-info">
-                            <strong>YouCompress</strong>
-                            <span>Free • No Registration • Multiple Formats</span>
-                        </div>
-                    </button>
-                    <button class="service-btn" onclick="redirectToILovePDF()">
-                        <div class="service-info">
-                            <strong>iLovePDF</strong>
-                            <span>Free • PDF Specialist • High Quality</span>
-                        </div>
-                    </button>
-                    <button class="service-btn" onclick="redirectToSmallPDF()">
-                        <div class="service-info">
-                            <strong>SmallPDF</strong>
-                            <span>Free • Easy to Use • Quick Processing</span>
-                        </div>
-                    </button>
-                </div>
-                <p class="compression-note">
-                    💡 <strong>Instructions:</strong> The service will open in a new tab. After compressing your files, 
-                    download them and return to this form to upload the compressed versions.
-                </p>
+    const serviceOptions = `
+        <div class="compression-services">
+            <h4>Choose a free compression service:</h4>
+            <div class="service-options">
+                <button class="service-btn" onclick="redirectToYouCompress()">
+                    <div class="service-info">
+                        <strong>YouCompress</strong>
+                        <span>Free • No Registration • Multiple Formats</span>
+                    </div>
+                </button>
+                <button class="service-btn" onclick="redirectToILovePDF()">
+                    <div class="service-info">
+                        <strong>iLovePDF</strong>
+                        <span>Free • PDF Specialist • High Quality</span>
+                    </div>
+                </button>
+                <button class="service-btn" onclick="redirectToSmallPDF()">
+                    <div class="service-info">
+                        <strong>SmallPDF</strong>
+                        <span>Free • Easy to Use • Quick Processing</span>
+                    </div>
+                </button>
             </div>
-        `;
-    }
+            <p class="compression-note">
+                💡 <strong>Instructions:</strong> The service will open in a new tab. After compressing your files, 
+                download them and return to this form to upload the compressed versions.
+            </p>
+        </div>
+    `;
     
     showModal(serviceOptions, 'info', 'File Compression Services');
 }
@@ -185,11 +180,9 @@ async function compressImageClientSide(imageFile) {
     );
     
     try {
-        // Use browser's canvas API for image compression
         const compressedFile = await compressImageUsingCanvas(imageFile);
         
         if (compressedFile.size <= 10 * 1024 * 1024) {
-            // Remove original oversized file and add compressed version
             selectedFiles = selectedFiles.filter(f => f.name !== imageFile.name);
             selectedFiles.push(compressedFile);
             pendingOversizedFiles = [];
@@ -226,7 +219,6 @@ function compressImageUsingCanvas(file) {
         const img = new Image();
         
         img.onload = function() {
-            // Calculate new dimensions (max 1920px on longest side)
             const maxSize = 1920;
             let { width, height } = img;
             
@@ -245,13 +237,11 @@ function compressImageUsingCanvas(file) {
             canvas.width = width;
             canvas.height = height;
             
-            // Draw and compress
             ctx.drawImage(img, 0, 0, width, height);
             
             canvas.toBlob(
                 (blob) => {
                     if (blob) {
-                        // Create new File object with same name
                         const compressedFile = new File([blob], file.name, {
                             type: 'image/jpeg',
                             lastModified: Date.now()
@@ -262,7 +252,7 @@ function compressImageUsingCanvas(file) {
                     }
                 },
                 'image/jpeg',
-                0.7 // 70% quality
+                0.7
             );
         };
         
@@ -310,11 +300,10 @@ function showPostCompressionInstructions() {
         'Compression Service Opened'
     );
     
-    // Remove oversized files from pending
     pendingOversizedFiles = [];
 }
 
-// Information Icon Function - Show Form Help
+// Information Icon Function - Show Form Help (SCROLLABLE CONTENT)
 function showFormHelp() {
     const helpContent = `
         <div class="help-content">
@@ -335,10 +324,38 @@ function showFormHelp() {
                 <li>No registration required for compression services</li>
             </ul>
             
-            <h4>📞 Support</h4>
-            <p style="text-align: left; margin: 10px 0;">
-                For technical assistance, contact your ZSB branch office.
-            </p>
+            <h4>📁 Data Storage</h4>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>All submissions are saved to Google Sheets for tracking</li>
+                <li>Files are organized in Google Drive by branch and name</li>
+                <li>Email notifications are sent to administrators</li>
+                <li>All data is securely stored with government-grade security</li>
+            </ul>
+            
+            <h4>🔧 Troubleshooting</h4>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>If file upload fails, try refreshing the page and reselecting files</li>
+                <li>Ensure files are not corrupted or password-protected</li>
+                <li>Use latest version of Chrome, Firefox, or Edge browser</li>
+                <li>Disable browser extensions if experiencing upload issues</li>
+                <li>Clear browser cache if form is not responding properly</li>
+            </ul>
+            
+            <h4>📞 Technical Support</h4>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>For technical assistance, contact your ZSB branch office</li>
+                <li>Include error messages and browser information when reporting issues</li>
+                <li>System is monitored 24/7 for optimal performance</li>
+                <li>Regular backups ensure no data loss</li>
+            </ul>
+            
+            <h4>🏛️ Government Compliance</h4>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>This system complies with West Bengal Government IT policies</li>
+                <li>Data is processed according to Right to Information Act guidelines</li>
+                <li>All submissions are treated as official government records</li>
+                <li>Privacy and confidentiality are maintained as per government standards</li>
+            </ul>
         </div>
     `;
     
