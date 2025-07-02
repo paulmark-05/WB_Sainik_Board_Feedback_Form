@@ -137,10 +137,9 @@ function closeModal() {
     document.body.style.overflow = 'auto';
     
     currentCompressFileIndex = -1;
-    window.currentCompressedFile = null;
 }
 
-// Enhanced compression confirmation dialog
+// NEW: Enhanced compression confirmation dialog
 function showCompressionConfirmation(fileIndex) {
     const file = selectedFiles[fileIndex];
     if (!file) return;
@@ -158,20 +157,18 @@ function showCompressionConfirmation(fileIndex) {
     
     titleElement.textContent = 'File Compression Confirmation';
     
-    const fileTypeInfo = getFileTypeInfo(file);
-    
     messageElement.innerHTML = `
         <div class="confirmation-content">
             <div class="file-info">
                 <p><strong>File:</strong> ${file.name}</p>
                 <p><strong>Current Size:</strong> ${formatFileSize(file.size)}</p>
                 <p><strong>Size Limit:</strong> 10 MB</p>
-                <p><strong>File Type:</strong> ${fileTypeInfo.description}</p>
+                <p><strong>File Type:</strong> ${file.type || 'Unknown'}</p>
             </div>
             <p class="confirmation-question">This file exceeds the size limit. Would you like to compress it now?</p>
             <div class="compression-note">
                 <span class="note-icon">💡</span>
-                <span>${fileTypeInfo.compressionNote}</span>
+                <span>Compression will be performed in this dialog and may take a few moments.</span>
             </div>
         </div>
     `;
@@ -188,35 +185,7 @@ function showCompressionConfirmation(fileIndex) {
     modalBody.scrollTop = 0;
 }
 
-// Get file type information for compression
-function getFileTypeInfo(file) {
-    const type = file.type.toLowerCase();
-    const extension = file.name.split('.').pop().toLowerCase();
-    
-    if (type.startsWith('image/')) {
-        return {
-            description: 'Image File',
-            compressionNote: 'Image will be optimized using advanced compression algorithms.'
-        };
-    } else if (type === 'application/pdf' || extension === 'pdf') {
-        return {
-            description: 'PDF Document',
-            compressionNote: 'PDF will be compressed using ZIP compression to reduce file size.'
-        };
-    } else if (type.includes('document') || ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension)) {
-        return {
-            description: 'Office Document',
-            compressionNote: 'Document will be compressed using ZIP compression.'
-        };
-    } else {
-        return {
-            description: 'Unknown File Type',
-            compressionNote: 'File will be compressed using generic compression methods.'
-        };
-    }
-}
-
-// Start compression process with progress dialog
+// NEW: Start compression process with progress dialog
 async function startCompression() {
     if (currentCompressFileIndex === -1) {
         closeModal();
@@ -237,25 +206,16 @@ async function startCompression() {
         
         if (file.type.startsWith('image/')) {
             compressedFile = await compressImageAdvanced(file);
-        } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-            compressedFile = await compressPDFWithZip(file);
-        } else if (file.type.includes('document') || isOfficeDocument(file)) {
-            compressedFile = await compressDocumentWithZip(file);
+        } else if (file.type === 'application/pdf') {
+            compressedFile = await compressPDFAdvanced(file);
+        } else if (file.type.includes('document') || file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+            compressedFile = await compressDocumentGeneric(file);
         } else {
-            compressedFile = await compressGenericFileWithZip(file);
+            throw new Error('File type not supported for compression');
         }
         
-        // Complete progress bar
-        const progressFill = document.querySelector('.progress-fill');
-        if (progressFill) {
-            progressFill.style.width = '100%';
-        }
-        updateProgressStep(2);
-        
-        // Show compression results after a brief delay
-        setTimeout(() => {
-            showCompressionResults(file, compressedFile);
-        }, 1000);
+        // Show compression results
+        showCompressionResults(file, compressedFile);
         
     } catch (error) {
         console.error('Compression failed:', error);
@@ -263,14 +223,7 @@ async function startCompression() {
     }
 }
 
-// Check if file is an office document
-function isOfficeDocument(file) {
-    const officeExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
-    const extension = file.name.split('.').pop().toLowerCase();
-    return officeExtensions.includes(extension);
-}
-
-// Show compression progress
+// NEW: Show compression progress
 function showCompressionProgress(file) {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -283,14 +236,11 @@ function showCompressionProgress(file) {
     
     titleElement.textContent = 'Compressing File...';
     
-    const fileTypeInfo = getFileTypeInfo(file);
-    
     messageElement.innerHTML = `
         <div class="compression-progress">
             <div class="file-info">
                 <p><strong>Processing:</strong> ${file.name}</p>
                 <p><strong>Original Size:</strong> ${formatFileSize(file.size)}</p>
-                <p><strong>Type:</strong> ${fileTypeInfo.description}</p>
             </div>
             <div class="progress-container">
                 <div class="progress-bar">
@@ -337,7 +287,7 @@ function updateProgressStep(stepIndex) {
     });
 }
 
-// Show compression results with options
+// NEW: Show compression results with options
 function showCompressionResults(originalFile, compressedFile) {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -352,7 +302,6 @@ function showCompressionResults(originalFile, compressedFile) {
     
     const compressionRatio = (((originalFile.size - compressedFile.size) / originalFile.size) * 100).toFixed(1);
     const isUnderLimit = compressedFile.size <= 10 * 1024 * 1024;
-    const spaceSaved = originalFile.size - compressedFile.size;
     
     messageElement.innerHTML = `
         <div class="compression-results">
@@ -372,7 +321,7 @@ function showCompressionResults(originalFile, compressedFile) {
                 </div>
             </div>
             <div class="compression-stats">
-                <p><strong>Space Saved:</strong> ${formatFileSize(spaceSaved)} (${compressionRatio}% reduction)</p>
+                <p><strong>Space Saved:</strong> ${formatFileSize(originalFile.size - compressedFile.size)} (${compressionRatio}% reduction)</p>
                 <p><strong>Status:</strong> 
                     <span class="${isUnderLimit ? 'status-success' : 'status-warning'}">
                         ${isUnderLimit ? '✅ Under 10MB limit' : '⚠️ Still over 10MB limit'}
@@ -402,7 +351,7 @@ function showCompressionResults(originalFile, compressedFile) {
     window.currentCompressedFile = compressedFile;
 }
 
-// Show compression error
+// NEW: Show compression error
 function showCompressionError(file, errorMessage) {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -440,7 +389,7 @@ function showCompressionError(file, errorMessage) {
     `;
 }
 
-// Replace original file with compressed version
+// NEW: Replace original file with compressed version
 function replaceWithCompressed() {
     if (currentCompressFileIndex !== -1 && window.currentCompressedFile) {
         selectedFiles[currentCompressFileIndex] = window.currentCompressedFile;
@@ -456,12 +405,10 @@ function replaceWithCompressed() {
         // Clean up
         window.currentCompressedFile = null;
         currentCompressFileIndex = -1;
-    } else {
-        closeModal();
     }
 }
 
-// Remove oversized file from selection
+// NEW: Remove oversized file from selection
 function removeOversizedFile() {
     if (currentCompressFileIndex !== -1) {
         const fileName = selectedFiles[currentCompressFileIndex].name;
@@ -478,12 +425,10 @@ function removeOversizedFile() {
         // Clean up
         window.currentCompressedFile = null;
         currentCompressFileIndex = -1;
-    } else {
-        closeModal();
     }
 }
 
-// Enhanced image compression with multiple quality levels
+// Enhanced image compression
 async function compressImageAdvanced(imageFile) {
     return new Promise((resolve, reject) => {
         const canvas = document.createElement('canvas');
@@ -491,8 +436,8 @@ async function compressImageAdvanced(imageFile) {
         const img = new Image();
         
         img.onload = function() {
-            // Try different compression levels
-            const attemptCompression = async (quality, maxSize) => {
+            // Multiple compression attempts with different quality levels
+            const attemptCompression = (quality, maxSize) => {
                 let { width, height } = img;
                 
                 // Scale down dimensions if needed
@@ -530,7 +475,7 @@ async function compressImageAdvanced(imageFile) {
                 });
             };
             
-            // Try multiple compression levels
+            // Try different compression levels
             const tryCompressionLevels = async () => {
                 const levels = [
                     { quality: 0.8, maxSize: 1920 },
@@ -561,82 +506,17 @@ async function compressImageAdvanced(imageFile) {
     });
 }
 
-// PDF compression using ZIP
-async function compressPDFWithZip(pdfFile) {
-    if (typeof JSZip === 'undefined') {
-        throw new Error('JSZip library not loaded. PDF compression unavailable.');
-    }
-    
-    const zip = new JSZip();
-    zip.file(pdfFile.name, pdfFile);
-    
-    const compressedBlob = await zip.generateAsync({
-        type: 'blob',
-        compression: 'DEFLATE',
-        compressionOptions: {
-            level: 9
-        }
-    });
-    
-    const compressedName = pdfFile.name.replace(/\.pdf$/i, '-compressed.pdf');
-    return new File([compressedBlob], compressedName, {
-        type: 'application/pdf',
-        lastModified: Date.now()
-    });
+// Basic PDF compression (placeholder - requires PDF-lib library)
+async function compressPDFAdvanced(pdfFile) {
+    // Note: This is a placeholder. For full PDF compression, you'd need to include PDF-lib
+    // For now, we'll return the original file with a message
+    throw new Error('PDF compression requires additional libraries. Please use external compression services.');
 }
 
-// Document compression using ZIP
-async function compressDocumentWithZip(docFile) {
-    if (typeof JSZip === 'undefined') {
-        throw new Error('JSZip library not loaded. Document compression unavailable.');
-    }
-    
-    const zip = new JSZip();
-    zip.file(docFile.name, docFile);
-    
-    const compressedBlob = await zip.generateAsync({
-        type: 'blob',
-        compression: 'DEFLATE',
-        compressionOptions: {
-            level: 9
-        }
-    });
-    
-    const extension = docFile.name.split('.').pop();
-    const baseName = docFile.name.replace(new RegExp(`\.${extension}$`, 'i'), '');
-    const compressedName = `${baseName}-compressed.${extension}`;
-    
-    return new File([compressedBlob], compressedName, {
-        type: docFile.type,
-        lastModified: Date.now()
-    });
-}
-
-// Generic file compression using ZIP
-async function compressGenericFileWithZip(file) {
-    if (typeof JSZip === 'undefined') {
-        throw new Error('JSZip library not loaded. File compression unavailable.');
-    }
-    
-    const zip = new JSZip();
-    zip.file(file.name, file);
-    
-    const compressedBlob = await zip.generateAsync({
-        type: 'blob',
-        compression: 'DEFLATE',
-        compressionOptions: {
-            level: 9
-        }
-    });
-    
-    const extension = file.name.split('.').pop();
-    const baseName = file.name.replace(new RegExp(`\.${extension}$`, 'i'), '');
-    const compressedName = `${baseName}-compressed.${extension}`;
-    
-    return new File([compressedBlob], compressedName, {
-        type: file.type || 'application/octet-stream',
-        lastModified: Date.now()
-    });
+// Generic document compression
+async function compressDocumentGeneric(docFile) {
+    // For document files, we can't do much compression client-side
+    throw new Error('Document compression is not supported client-side. Please use external compression services.');
 }
 
 // Compress file function with confirmation
@@ -646,6 +526,22 @@ function compressFile(fileIndex) {
     
     console.log('Compress button clicked for:', file.name);
     showCompressionConfirmation(fileIndex);
+}
+
+// Redirect to compression services (fallback)
+function redirectToYouCompress() {
+    window.open('https://www.youcompress.com/', '_blank');
+    closeModal();
+}
+
+function redirectToILovePDF() {
+    window.open('https://www.ilovepdf.com/compress_pdf', '_blank');
+    closeModal();
+}
+
+function redirectToSmallPDF() {
+    window.open('https://smallpdf.com/compress-pdf', '_blank');
+    closeModal();
 }
 
 // Update file input to match selectedFiles array
@@ -685,7 +581,7 @@ function showFormHelp() {
             <h4>🔧 Enhanced File Compression</h4>
             <ul style="text-align: left; margin: 15px 0;">
                 <li><strong>Real-time Compression:</strong> Files are compressed directly in your browser</li>
-                <li><strong>Multiple File Types:</strong> Images, PDFs, and Office documents supported</li>
+                <li><strong>Progress Tracking:</strong> Watch compression progress in real-time</li>
                 <li><strong>Smart Compression:</strong> Multiple quality levels attempted automatically</li>
                 <li><strong>User Choice:</strong> Decide whether to replace or remove files after compression</li>
             </ul>
