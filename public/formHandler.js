@@ -25,7 +25,7 @@ function isFullDisplayImage(file) {
     return imageTypes.includes(file.type.toLowerCase());
 }
 
-// NEW: Setup relationship toggle functionality
+// Setup relationship toggle functionality
 function setupRelationshipToggle() {
     const relationshipRadios = document.querySelectorAll('input[name="relationship"]');
     
@@ -301,7 +301,7 @@ function compressImageUsingCanvas(file) {
     });
 }
 
-// Show compression service selection with RECOMMENDED mark for iLovePDF
+// Show compression service selection with subtle green "Recommended" text
 function showCompressionServiceModal(files, fileIndex) {
     const file = files[0];
     const serviceOptions = `
@@ -316,8 +316,7 @@ function showCompressionServiceModal(files, fileIndex) {
                 </button>
                 <button class="service-btn recommended" onclick="redirectToILovePDF()">
                     <div class="service-info">
-                        <strong>iLovePDF</strong>
-                        <span class="recommended-badge">Recommended</span>
+                        <strong>iLovePDF<span class="recommended-text">Recommended</span></strong>
                         <span>Free • PDF Specialist • High Quality</span>
                     </div>
                 </button>
@@ -395,7 +394,7 @@ function showFormHelp() {
         <div class="help-content">
             <h4>📋 Form Submission Guidelines</h4>
             <ul style="text-align: left; margin: 15px 0;">
-                <li><strong>Required Fields:</strong> Rank, ESM Name, Relationship, Full Name, Phone (10 digits), and Branch are mandatory</li>
+                <li><strong>Required Fields:</strong> Rank, ESM Name, Relationship, Phone (10 digits), and Branch are mandatory</li>
                 <li><strong>File Upload:</strong> Maximum 10 files, each under 10MB</li>
                 <li><strong>Supported Formats:</strong> Images (JPG, PNG), Documents (PDF, DOC, DOCX)</li>
                 <li><strong>Phone Number:</strong> Must be a valid 10-digit Indian mobile number</li>
@@ -456,7 +455,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Setup phone validation
     setupPhoneValidation();
 
-    // NEW: Setup relationship toggle functionality
+    // Setup relationship toggle functionality
     setupRelationshipToggle();
 
     // Consent checkbox validation
@@ -676,7 +675,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             if (result.success || result.message) {
                 showModal(
-                    `Your feedback has been successfully submitted!<br><br><strong>Name:</strong> ${form.name.value}<br><strong>Branch:</strong> ${form.branch.value}<br><br>Thank you for your valuable feedback.`,
+                    `Your feedback has been successfully submitted!<br><br><strong>ESM Name:</strong> ${form.esmName.value}<br><strong>Branch:</strong> ${form.branch.value}<br><br>Thank you for your valuable feedback.`,
                     'success',
                     'Form Submitted Successfully'
                 );
