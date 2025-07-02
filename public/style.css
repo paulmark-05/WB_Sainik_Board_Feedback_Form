@@ -106,7 +106,7 @@ form .form-row {
     margin-bottom: 20px;
 }
 
-/* ENHANCED: Main info row with better proportions */
+/* Main info row with better proportions */
 .form-row.main-info-row {
     min-height: 140px;
     align-items: stretch;
@@ -153,7 +153,7 @@ form .form-row {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-/* ENHANCED: Relationship column with better distribution */
+/* Relationship column with better distribution */
 .input-group.relationship-column {
     display: flex;
     flex-direction: column;
@@ -178,7 +178,7 @@ form .form-row {
     border-bottom: 1px solid #dee2e6;
 }
 
-/* ENHANCED: Evenly distributed checkbox group */
+/* Evenly distributed checkbox group */
 .checkbox-group-enhanced {
     display: flex;
     flex-direction: column;
@@ -455,6 +455,7 @@ button[type="submit"].disabled::after {
     }
 }
 
+/* FIXED: File box with reduced empty space and compact layout */
 .file-box {
     width: 150px;
     height: auto;
@@ -469,6 +470,7 @@ button[type="submit"].disabled::after {
     background: #f9f9f9;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
+    /* FIXED: Removed min-height to prevent excessive space */
 }
 
 .file-box.file-oversized {
@@ -534,18 +536,21 @@ button[type="submit"].disabled::after {
     50% { opacity: 0.7; }
 }
 
+/* FIXED: Improved image thumbnails with reduced empty space */
 .file-thumb {
     width: 100%;
     height: 100px;
     object-fit: cover;
     border-radius: 4px;
+    margin-bottom: 3px;
 }
 
 .file-thumb.full-image {
-    height: 120px;
+    height: 110px;
     object-fit: contain;
     background: #f8f9fa;
     border: 1px solid #dee2e6;
+    margin-bottom: 3px;
 }
 
 .file-icon {
@@ -560,13 +565,22 @@ button[type="submit"].disabled::after {
     font-size: 16px;
     border-radius: 4px;
     transition: all 0.3s ease;
+    margin-bottom: 3px;
 }
 
+/* FIXED: Truncated file names to 2 lines maximum */
 .file-name {
-    margin-top: 5px;
-    font-size: 12px;
+    margin-top: 3px;
+    font-size: 11px;
     word-wrap: break-word;
-    padding: 0 5px;
+    padding: 0 3px;
+    line-height: 1.2;
+    max-height: 2.4em; /* Exactly 2 lines */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
 }
 
 .remove-btn {
@@ -805,27 +819,13 @@ button[type="submit"].disabled::after {
     font-size: 14px;
 }
 
-.recommended-badge {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    color: white;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 3px 8px;
-    border-radius: 12px;
-    display: inline-block;
-    margin-bottom: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    animation: recommendedPulse 2s infinite;
-}
-
-@keyframes recommendedPulse {
-    0%, 100% { 
-        box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
-    }
-    50% { 
-        box-shadow: 0 0 15px rgba(40, 167, 69, 0.6);
-    }
+/* FIXED: Subtle green "Recommended" text instead of badge */
+.recommended-text {
+    color: #28a745;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+    display: inline;
 }
 
 .compression-note {
@@ -962,7 +962,12 @@ button[type="submit"].disabled::after {
     }
     
     .file-thumb.full-image {
-        height: 100px;
+        height: 90px;
+    }
+    
+    .file-name {
+        font-size: 10px;
+        max-height: 2.2em;
     }
     
     .title {
@@ -1004,9 +1009,8 @@ button[type="submit"].disabled::after {
         font-size: 13px;
     }
     
-    .recommended-badge {
-        font-size: 10px;
-        padding: 2px 6px;
+    .recommended-text {
+        font-size: 11px;
     }
     
     .modal-overlay.active {
