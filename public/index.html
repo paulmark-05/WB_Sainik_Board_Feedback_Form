@@ -14,7 +14,7 @@
     </div>
 
     <div class="form-container">
-        <!-- MOVED: Guidelines Icon at Form Beginning -->
+        <!-- Guidelines Section -->
         <div class="form-header">
             <div class="guidelines-section">
                 <button type="button" class="guidelines-btn" onclick="showFormHelp()" title="Click for form guidelines and help">
@@ -44,7 +44,9 @@
                 </div>
                 <div class="input-group">
                     <label for="phone">Phone No. *</label>
-                    <input type="tel" id="phone" name="phone" required>
+                    <input type="tel" id="phone" name="phone" required pattern="[6-9][0-9]{9}" 
+                           placeholder="Enter 10-digit mobile number">
+                    <div id="phone-error" class="error-message" style="display: none;"></div>
                 </div>
             </div>
 
@@ -52,7 +54,6 @@
                 <div class="input-group">
                     <label for="branch">Branch *</label>
                     <select id="branch" name="branch" required>
-                        <option value="">--Select ZSB branch--</option>
                         <option value="Rajya Sainik Board">Rajya Sainik Board</option>
                           <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhu )</option>
                           <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
@@ -93,13 +94,12 @@
 
             <div id="file-preview"></div>
 
-            <!-- Terms Acceptance Checkbox -->
-            <div class="terms-container">
-                <label class="terms-label">
-                    <input type="checkbox" id="termsCheckbox" name="termsAcceptance" required>
+            <!-- SIMPLIFIED Consent Checkbox -->
+            <div class="consent-container">
+                <label class="consent-label">
+                    <input type="checkbox" id="consentCheckbox" name="consent" required>
                     <span class="checkmark"></span>
-                    I agree to submit my personal information entered above and adhere to the 
-                    <a href="terms.html" target="_blank" class="terms-link">terms and conditions</a>.
+                    I agree to submit my personal information entered above.
                 </label>
             </div>
 
@@ -107,7 +107,7 @@
         </form>
     </div>
 
-    <!-- SIMPLIFIED Modal Popup (No guidelines icon in header) -->
+    <!-- Modal Popup -->
     <div id="customModal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
