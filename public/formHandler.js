@@ -196,27 +196,27 @@ function getFileTypeInfo(file) {
     if (type.startsWith('image/')) {
         return {
             description: 'Image File',
-            compressionNote: 'Image will be aggressively compressed to fit under 10MB limit.'
+            compressionNote: 'Image will be optimized using advanced compression algorithms.'
         };
     } else if (type === 'application/pdf' || extension === 'pdf') {
         return {
             description: 'PDF Document',
-            compressionNote: 'PDF will be compressed using maximum ZIP compression to reduce file size.'
+            compressionNote: 'PDF will be compressed using ZIP compression to reduce file size.'
         };
     } else if (type.includes('document') || ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension)) {
         return {
             description: 'Office Document',
-            compressionNote: 'Document will be compressed using maximum ZIP compression.'
+            compressionNote: 'Document will be compressed using ZIP compression.'
         };
     } else {
         return {
-            description: 'Generic File',
-            compressionNote: 'File will be compressed using maximum compression algorithms.'
+            description: 'Unknown File Type',
+            compressionNote: 'File will be compressed using generic compression methods.'
         };
     }
 }
 
-// ENHANCED: Start compression process with guaranteed size reduction
+// Start compression process with progress dialog
 async function startCompression() {
     if (currentCompressFileIndex === -1) {
         closeModal();
@@ -234,16 +234,15 @@ async function startCompression() {
     
     try {
         let compressedFile;
-        const targetSize = 10 * 1024 * 1024; // 10MB
         
         if (file.type.startsWith('image/')) {
-            compressedFile = await compressImageUntilUnderLimit(file, targetSize);
+            compressedFile = await compressImageAdvanced(file);
         } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-            compressedFile = await compressPDFUntilUnderLimit(file, targetSize);
+            compressedFile = await compressPDFWithZip(file);
         } else if (file.type.includes('document') || isOfficeDocument(file)) {
-            compressedFile = await compressDocumentUntilUnderLimit(file, targetSize);
+            compressedFile = await compressDocumentWithZip(file);
         } else {
-            compressedFile = await compressGenericFileUntilUnderLimit(file, targetSize);
+            compressedFile = await compressGenericFileWithZip(file);
         }
         
         // Complete progress bar
@@ -292,18 +291,17 @@ function showCompressionProgress(file) {
                 <p><strong>Processing:</strong> ${file.name}</p>
                 <p><strong>Original Size:</strong> ${formatFileSize(file.size)}</p>
                 <p><strong>Type:</strong> ${fileTypeInfo.description}</p>
-                <p><strong>Target:</strong> Under 10MB</p>
             </div>
             <div class="progress-container">
                 <div class="progress-bar">
                     <div class="progress-fill"></div>
                 </div>
-                <p class="progress-text">Compressing file aggressively... Please wait.</p>
+                <p class="progress-text">Compressing file... Please wait.</p>
             </div>
             <div class="compression-steps">
                 <div class="step active">📁 Reading file...</div>
-                <div class="step">🗜️ Applying maximum compression...</div>
-                <div class="step">💾 Finalizing under 10MB...</div>
+                <div class="step">🗜️ Applying compression...</div>
+                <div class="step">💾 Finalizing...</div>
             </div>
         </div>
     `;
@@ -387,10 +385,18 @@ function showCompressionResults(originalFile, compressedFile) {
         </div>
     `;
     
-    footerElement.innerHTML = `
-        <button class="modal-btn-danger" onclick="removeOversizedFile()">Remove Original File</button>
-        <button class="modal-btn-primary" onclick="replaceWithCompressed()">Replace with Compressed File</button>
-    `;
+    if (isUnderLimit) {
+        footerElement.innerHTML = `
+            <button class="modal-btn-danger" onclick="removeOversizedFile()">Remove Original File</button>
+            <button class="modal-btn-primary" onclick="replaceWithCompressed()">Replace with Compressed File</button>
+        `;
+    } else {
+        footerElement.innerHTML = `
+            <button class="modal-btn-secondary" onclick="closeModal()">Keep Original</button>
+            <button class="modal-btn-danger" onclick="removeOversizedFile()">Remove Original File</button>
+            <button class="modal-btn-primary" onclick="replaceWithCompressed()">Use Compressed Version</button>
+        `;
+    }
     
     // Store compressed file for later use
     window.currentCompressedFile = compressedFile;
@@ -412,7 +418,7 @@ function showCompressionError(file, errorMessage) {
     messageElement.innerHTML = `
         <div class="compression-error">
             <div class="error-icon">❌</div>
-            <h4>Unable to compress this file under 10MB</h4>
+            <h4>Unable to compress this file</h4>
             <div class="error-details">
                 <p><strong>File:</strong> ${file.name}</p>
                 <p><strong>Error:</strong> ${errorMessage}</p>
@@ -423,7 +429,6 @@ function showCompressionError(file, errorMessage) {
                     <li>Try using an external compression service</li>
                     <li>Reduce the file size manually before uploading</li>
                     <li>Convert to a different format if possible</li>
-                    <li>Remove the file from your selection</li>
                 </ul>
             </div>
         </div>
@@ -435,21 +440,15 @@ function showCompressionError(file, errorMessage) {
     `;
 }
 
-// ENHANCED: Replace original file with compressed version
+// Replace original file with compressed version
 function replaceWithCompressed() {
     if (currentCompressFileIndex !== -1 && window.currentCompressedFile) {
-        // Replace the file in the array
         selectedFiles[currentCompressFileIndex] = window.currentCompressedFile;
-        
-        // Update the file input
         updateFileInput();
-        
-        // Re-render the previews
         renderPreviews();
         
-        // Show success message
         showModal(
-            'File has been successfully replaced with the compressed version that is under 10MB!',
+            'File has been successfully replaced with the compressed version!',
             'success',
             'File Replaced'
         );
@@ -462,26 +461,16 @@ function replaceWithCompressed() {
     }
 }
 
-// ENHANCED: Properly remove oversized file from selection and uploads
+// Remove oversized file from selection
 function removeOversizedFile() {
     if (currentCompressFileIndex !== -1) {
         const fileName = selectedFiles[currentCompressFileIndex].name;
-        
-        // Remove the file from the selectedFiles array
         selectedFiles.splice(currentCompressFileIndex, 1);
-        
-        // Update the file input to reflect the removal
         updateFileInput();
-        
-        // Re-render the file previews
         renderPreviews();
         
-        // Update the file count display
-        updateFileCount();
-        
-        // Show confirmation message
         showModal(
-            `File "${fileName}" has been completely removed from your upload selection.`,
+            `File "${fileName}" has been removed from your selection.`,
             'info',
             'File Removed'
         );
@@ -494,40 +483,77 @@ function removeOversizedFile() {
     }
 }
 
-// ENHANCED: Aggressive image compression until under size limit
-async function compressImageUntilUnderLimit(imageFile, targetSize) {
+// Enhanced image compression with multiple quality levels
+async function compressImageAdvanced(imageFile) {
     return new Promise((resolve, reject) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const img = new Image();
         
-        img.onload = async function() {
-            // Define compression levels from mild to extreme
-            const compressionLevels = [
-                { quality: 0.9, maxSize: 1920 },
-                { quality: 0.8, maxSize: 1600 },
-                { quality: 0.7, maxSize: 1400 },
-                { quality: 0.6, maxSize: 1200 },
-                { quality: 0.5, maxSize: 1000 },
-                { quality: 0.4, maxSize: 800 },
-                { quality: 0.3, maxSize: 600 },
-                { quality: 0.2, maxSize: 400 },
-                { quality: 0.1, maxSize: 300 },
-                { quality: 0.05, maxSize: 200 }
-            ];
-            
-            for (const level of compressionLevels) {
-                const compressed = await attemptImageCompression(img, canvas, ctx, imageFile, level.quality, level.maxSize);
+        img.onload = function() {
+            // Try different compression levels
+            const attemptCompression = async (quality, maxSize) => {
+                let { width, height } = img;
                 
-                if (compressed && compressed.size <= targetSize) {
-                    resolve(compressed);
-                    return;
+                // Scale down dimensions if needed
+                if (width > maxSize || height > maxSize) {
+                    if (width > height) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    } else {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
                 }
-            }
+                
+                canvas.width = width;
+                canvas.height = height;
+                ctx.clearRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                return new Promise((resolve) => {
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                const compressedFile = new File([blob], imageFile.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+                                resolve(compressedFile);
+                            } else {
+                                resolve(null);
+                            }
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+                });
+            };
             
-            // If still not small enough, try extreme compression
-            const extremeCompressed = await attemptImageCompression(img, canvas, ctx, imageFile, 0.01, 150);
-            resolve(extremeCompressed || imageFile);
+            // Try multiple compression levels
+            const tryCompressionLevels = async () => {
+                const levels = [
+                    { quality: 0.8, maxSize: 1920 },
+                    { quality: 0.6, maxSize: 1600 },
+                    { quality: 0.4, maxSize: 1200 },
+                    { quality: 0.3, maxSize: 800 },
+                    { quality: 0.2, maxSize: 600 }
+                ];
+                
+                for (const level of levels) {
+                    const compressed = await attemptCompression(level.quality, level.maxSize);
+                    if (compressed && compressed.size < imageFile.size) {
+                        resolve(compressed);
+                        return;
+                    }
+                }
+                
+                // If no compression worked, return the best attempt
+                const finalAttempt = await attemptCompression(0.1, 400);
+                resolve(finalAttempt || imageFile);
+            };
+            
+            tryCompressionLevels();
         };
         
         img.onerror = () => reject(new Error('Failed to load image for compression'));
@@ -535,47 +561,8 @@ async function compressImageUntilUnderLimit(imageFile, targetSize) {
     });
 }
 
-// Helper function for image compression attempts
-function attemptImageCompression(img, canvas, ctx, originalFile, quality, maxSize) {
-    return new Promise((resolve) => {
-        let { width, height } = img;
-        
-        // Scale down dimensions aggressively
-        if (width > maxSize || height > maxSize) {
-            if (width > height) {
-                height = (height * maxSize) / width;
-                width = maxSize;
-            } else {
-                width = (width * maxSize) / height;
-                height = maxSize;
-            }
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        ctx.clearRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        canvas.toBlob(
-            (blob) => {
-                if (blob) {
-                    const compressedFile = new File([blob], originalFile.name, {
-                        type: 'image/jpeg',
-                        lastModified: Date.now()
-                    });
-                    resolve(compressedFile);
-                } else {
-                    resolve(null);
-                }
-            },
-            'image/jpeg',
-            quality
-        );
-    });
-}
-
-// ENHANCED: PDF compression with maximum ZIP compression
-async function compressPDFUntilUnderLimit(pdfFile, targetSize) {
+// PDF compression using ZIP
+async function compressPDFWithZip(pdfFile) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip library not loaded. PDF compression unavailable.');
     }
@@ -583,23 +570,13 @@ async function compressPDFUntilUnderLimit(pdfFile, targetSize) {
     const zip = new JSZip();
     zip.file(pdfFile.name, pdfFile);
     
-    // Try maximum compression first
-    let compressedBlob = await zip.generateAsync({
+    const compressedBlob = await zip.generateAsync({
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
-            level: 9 // Maximum compression
+            level: 9
         }
     });
-    
-    // If still too large, try alternative compression
-    if (compressedBlob.size > targetSize) {
-        // Try with different compression algorithm
-        compressedBlob = await zip.generateAsync({
-            type: 'blob',
-            compression: 'STORE' // No compression, just ZIP container
-        });
-    }
     
     const compressedName = pdfFile.name.replace(/\.pdf$/i, '-compressed.pdf');
     return new File([compressedBlob], compressedName, {
@@ -608,8 +585,8 @@ async function compressPDFUntilUnderLimit(pdfFile, targetSize) {
     });
 }
 
-// ENHANCED: Document compression with maximum ZIP compression
-async function compressDocumentUntilUnderLimit(docFile, targetSize) {
+// Document compression using ZIP
+async function compressDocumentWithZip(docFile) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip library not loaded. Document compression unavailable.');
     }
@@ -621,7 +598,7 @@ async function compressDocumentUntilUnderLimit(docFile, targetSize) {
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
-            level: 9 // Maximum compression
+            level: 9
         }
     });
     
@@ -635,8 +612,8 @@ async function compressDocumentUntilUnderLimit(docFile, targetSize) {
     });
 }
 
-// ENHANCED: Generic file compression with maximum ZIP compression
-async function compressGenericFileUntilUnderLimit(file, targetSize) {
+// Generic file compression using ZIP
+async function compressGenericFileWithZip(file) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip library not loaded. File compression unavailable.');
     }
@@ -648,7 +625,7 @@ async function compressGenericFileUntilUnderLimit(file, targetSize) {
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
-            level: 9 // Maximum compression
+            level: 9
         }
     });
     
@@ -671,18 +648,15 @@ function compressFile(fileIndex) {
     showCompressionConfirmation(fileIndex);
 }
 
-// ENHANCED: Update file input to properly reflect selectedFiles array
+// Update file input to match selectedFiles array
 function updateFileInput() {
     const uploadInput = document.getElementById('upload');
     
     if (selectedFiles.length === 0) {
         uploadInput.value = '';
-        uploadInput.files = new DataTransfer().files;
     } else {
         const dt = new DataTransfer();
-        selectedFiles.forEach(file => {
-            dt.items.add(file);
-        });
+        selectedFiles.forEach(file => dt.items.add(file));
         uploadInput.files = dt.files;
     }
 }
@@ -710,10 +684,10 @@ function showFormHelp() {
             
             <h4>🔧 Enhanced File Compression</h4>
             <ul style="text-align: left; margin: 15px 0;">
-                <li><strong>Guaranteed Compression:</strong> Files are compressed until they are under 10MB</li>
-                <li><strong>Aggressive Algorithms:</strong> Multiple compression levels attempted automatically</li>
-                <li><strong>Complete Removal:</strong> Remove button completely removes files from uploads</li>
-                <li><strong>Smart Processing:</strong> Different algorithms for images, PDFs, and documents</li>
+                <li><strong>Real-time Compression:</strong> Files are compressed directly in your browser</li>
+                <li><strong>Multiple File Types:</strong> Images, PDFs, and Office documents supported</li>
+                <li><strong>Smart Compression:</strong> Multiple quality levels attempted automatically</li>
+                <li><strong>User Choice:</strong> Decide whether to replace or remove files after compression</li>
             </ul>
             
             <h4>📞 Support</h4>
@@ -883,7 +857,6 @@ document.addEventListener("DOMContentLoaded", function() {
         updateFileCount();
     }
 
-    // ENHANCED: Update file count function
     function updateFileCount() {
         const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024).length;
         const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024).length;
@@ -895,14 +868,9 @@ document.addEventListener("DOMContentLoaded", function() {
             countText = `${validFiles} file(s) selected`;
         } else if (oversizedFiles > 0) {
             countText = `${oversizedFiles} oversized file(s) - use compress buttons`;
-        } else {
-            countText = "No files selected";
         }
         
-        const uploadCountElement = document.getElementById("upload-count");
-        if (uploadCountElement) {
-            uploadCountElement.textContent = countText;
-        }
+        document.getElementById("upload-count").textContent = countText;
     }
 
     // Form submission with validation
