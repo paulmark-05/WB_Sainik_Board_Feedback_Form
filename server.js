@@ -211,7 +211,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     }
 });
 
-// Enhanced email notification function with detailed debugging
+// CORRECTED email notification function with proper nodemailer usage
 async function sendEmailNotification(data, uploadedFileLinks) {
     console.log('📧 Starting email notification process...');
     
@@ -224,9 +224,10 @@ async function sendEmailNotification(data, uploadedFileLinks) {
     }
     
     console.log(`Email from: ${process.env.NOTIFY_EMAIL}`);
-    console.log(`App password length: ${process.env.APP_PASSWORD ? process.env.APP_PASSWORD.length : 'undefined'}`);
+    console.log(`App password configured: ${process.env.APP_PASSWORD ? 'Yes' : 'No'}`);
 
-    const transporter = nodemailer.createTransporter({
+    // FIXED: Changed createTransporter to createTransport
+    const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
             user: process.env.NOTIFY_EMAIL,
@@ -252,53 +253,63 @@ async function sendEmailNotification(data, uploadedFileLinks) {
         subject: `📬 New Feedback Submission - ${data.name} (${data.branch})`,
         html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-                New Feedback Form Submission
-            </h2>
+            <div style="background: linear-gradient(to right, #e03c3c, #303030ac, #27aad6); padding: 20px; text-align: center; color: white;">
+                <h2 style="margin: 0;">West Bengal Sainik Board</h2>
+                <p style="margin: 5px 0 0 0;">New Feedback Form Submission</p>
+            </div>
             
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                 <tr style="background-color: #f8f9fa;">
-                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Name:</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.name}</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; width: 30%;">Name:</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">${data.name}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Rank:</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.rank}</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Rank:</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">${data.rank}</td>
                 </tr>
                 <tr style="background-color: #f8f9fa;">
-                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Branch:</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.branch}</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Branch:</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">${data.branch}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Phone:</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.phone}</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Phone:</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">${data.phone}</td>
                 </tr>
                 <tr style="background-color: #f8f9fa;">
-                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">Email:</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.email || 'Not provided'}</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Email:</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">${data.email || 'Not provided'}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">ID Card:</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.id || 'Not provided'}</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">ID Card:</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">${data.id || 'Not provided'}</td>
                 </tr>
                 <tr style="background-color: #f8f9fa;">
-                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; vertical-align: top;">Feedback:</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${data.sugg || 'No feedback provided'}</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; vertical-align: top;">Feedback:</td>
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">${data.sugg || 'No feedback provided'}</td>
                 </tr>
             </table>
             
             ${uploadedFileLinks.length > 0 ? `
-                <h3 style="color: #2c3e50;">Uploaded Files (${uploadedFileLinks.length}):</h3>
-                <ul style="list-style-type: none; padding: 0;">
-                    ${uploadedFileLinks.map((link, index) => 
-                        `<li style="margin: 5px 0;"><a href="${link}" target="_blank" style="color: #3498db; text-decoration: none;">📎 File ${index + 1}</a></li>`
-                    ).join('')}
-                </ul>
-            ` : '<p><em>No files uploaded</em></p>'}
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #2c3e50; margin: 0 0 10px 0;">📎 Uploaded Files (${uploadedFileLinks.length}):</h3>
+                    <ul style="list-style-type: none; padding: 0; margin: 0;">
+                        ${uploadedFileLinks.map((link, index) => 
+                            `<li style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px;">
+                                <a href="${link}" target="_blank" style="color: #3498db; text-decoration: none; font-weight: 500;">
+                                    📄 Document ${index + 1} - View File
+                                </a>
+                            </li>`
+                        ).join('')}
+                    </ul>
+                </div>
+            ` : '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;"><em>No files uploaded</em></div>'}
             
             <div style="margin-top: 30px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #3498db;">
                 <p style="margin: 0; color: #2c3e50;">
                     <strong>Submitted:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                </p>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                    This is an automated notification from the WB Sainik Board Feedback System.
                 </p>
             </div>
         </div>
@@ -343,24 +354,34 @@ function cleanFolderName(name) {
     return name.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim();
 }
 
-// Add email test endpoint for debugging
+// Enhanced email test endpoint for debugging
 app.get('/test-email', async (req, res) => {
     try {
+        console.log('🧪 Testing email configuration...');
+        
         const testData = {
             name: 'Test User',
             rank: 'Major',
-            branch: 'Test Branch',
+            branch: 'Test Branch - Email Function Check',
             phone: '1234567890',
             email: 'test@example.com',
             id: 'TEST123',
-            sugg: 'This is a test submission'
+            sugg: 'This is a test submission to verify email functionality is working correctly.'
         };
         
-        await sendEmailNotification(testData, []);
-        res.json({ success: true, message: 'Test email sent successfully!' });
+        await sendEmailNotification(testData, ['https://example.com/test-file.pdf']);
+        res.json({ 
+            success: true, 
+            message: 'Test email sent successfully! Check your inbox.',
+            timestamp: new Date().toISOString()
+        });
     } catch (error) {
-        console.error('Test email failed:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('🚨 Test email failed:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message,
+            details: 'Check server logs for more information'
+        });
     }
 });
 
@@ -370,10 +391,13 @@ app.get('/health', (req, res) => {
         status: 'OK', 
         timestamp: new Date().toISOString(),
         googleAPIs: !!(drive && sheets),
-        emailConfig: !!(process.env.NOTIFY_EMAIL && process.env.APP_PASSWORD)
+        emailConfig: !!(process.env.NOTIFY_EMAIL && process.env.APP_PASSWORD),
+        nodemailerVersion: '6.x+'
     });
 });
 
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📧 Email: ${process.env.NOTIFY_EMAIL ? 'Configured' : 'Not configured'}`);
+    console.log(`🔑 App Password: ${process.env.APP_PASSWORD ? 'Set' : 'Missing'}`);
 });
