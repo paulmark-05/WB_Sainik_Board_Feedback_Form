@@ -7,9 +7,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const previewContainer = document.getElementById("file-preview");
     const form = document.getElementById("feedbackForm");
     const submitBtn = document.getElementById("submitBtn");
-    const loader = document.getElementById("loader");
 
-    // File upload handling
+    // File upload handling with enhanced validation feedback
     uploadInput.addEventListener("change", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -20,8 +19,34 @@ document.addEventListener("DOMContentLoaded", function() {
         
         selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10);
         this.value = "";
-        renderPreviews();
+        
+        // Validate files immediately after selection
+        validateFilesAndRender();
     });
+
+    // Enhanced file validation with specific file identification
+    function validateFilesAndRender() {
+        selectedFiles.forEach((file, index) => {
+            file.isValid = true;
+            file.errorMessages = [];
+            
+            // Check file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                file.isValid = false;
+                file.errorMessages.push(`File exceeds 10MB limit (${Math.round(file.size / (1024 * 1024))}MB)`);
+            }
+            
+            // Optional: Check file type restrictions
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!allowedTypes.includes(file.type) && file.type !== '') {
+                // Uncomment these lines if you want to restrict file types:
+                // file.isValid = false;
+                // file.errorMessages.push('File type not supported');
+            }
+        });
+        
+        renderPreviews();
+    }
 
     function renderPreviews() {
         previewContainer.innerHTML = "";
@@ -29,6 +54,11 @@ document.addEventListener("DOMContentLoaded", function() {
         selectedFiles.forEach((file, index) => {
             const fileBox = document.createElement("div");
             fileBox.className = "file-box";
+            
+            // Add error styling if file is invalid
+            if (!file.isValid) {
+                fileBox.classList.add("file-error");
+            }
 
             const removeBtn = document.createElement("span");
             removeBtn.innerHTML = "×";
@@ -37,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 e.preventDefault();
                 e.stopPropagation();
                 selectedFiles.splice(index, 1);
-                renderPreviews();
+                validateFilesAndRender();
                 updateFileCount();
             };
 
@@ -54,11 +84,20 @@ document.addEventListener("DOMContentLoaded", function() {
                 icon.className = "file-icon";
                 icon.textContent = file.name.split(".").pop().toUpperCase();
                 fileBox.appendChild(icon);
+            }
 
-                const fileName = document.createElement("div");
-                fileName.className = "file-name";
-                fileName.textContent = file.name;
-                fileBox.appendChild(fileName);
+            // Add file name
+            const fileName = document.createElement("div");
+            fileName.className = "file-name";
+            fileName.textContent = file.name;
+            fileBox.appendChild(fileName);
+            
+            // Add error messages if file is invalid
+            if (!file.isValid && file.errorMessages.length > 0) {
+                const errorDiv = document.createElement("div");
+                errorDiv.className = "file-error-message";
+                errorDiv.innerHTML = file.errorMessages.join('<br>');
+                fileBox.appendChild(errorDiv);
             }
 
             previewContainer.appendChild(fileBox);
@@ -68,11 +107,22 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateFileCount() {
-        document.getElementById("upload-count").textContent = 
-            selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : "";
+        const validFiles = selectedFiles.filter(file => file.isValid).length;
+        const invalidFiles = selectedFiles.filter(file => !file.isValid).length;
+        
+        let countText = '';
+        if (validFiles > 0) {
+            countText += `${validFiles} valid file(s)`;
+        }
+        if (invalidFiles > 0) {
+            countText += (countText ? ', ' : '') + `${invalidFiles} invalid file(s)`;
+        }
+        
+        document.getElementById("upload-count").textContent = countText;
+        document.getElementById("upload-count").style.color = invalidFiles > 0 ? '#dc3545' : '#666';
     }
 
-    // Enhanced form submission with proper error handling
+    // Enhanced form submission with specific file validation
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -81,15 +131,17 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // Validation
-        const totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
-        if (totalSize > 25 * 1024 * 1024) {
-            alert("Total file size exceeds 25 MB. Please remove some files.");
+        // Enhanced validation with specific file details
+        const invalidFiles = selectedFiles.filter(file => !file.isValid);
+        if (invalidFiles.length > 0) {
+            const fileNames = invalidFiles.map(file => `"${file.name}"`).join('\n- ');
+            alert(`Please fix the following files before submitting:\n\n- ${fileNames}\n\nLook for files highlighted in red in the preview area.`);
             return;
         }
 
-        if (selectedFiles.some(f => f.size > 10 * 1024 * 1024)) {
-            alert("A file exceeds 10 MB limit.");
+        const totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+        if (totalSize > 25 * 1024 * 1024) {
+            alert("Total file size exceeds 25 MB. Please remove some files.");
             return;
         }
 
@@ -97,7 +149,6 @@ document.addEventListener("DOMContentLoaded", function() {
         isSubmitting = true;
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";
-        // Remove the separate loader - everything shows in button now
 
         try {
             const formData = new FormData();
@@ -110,8 +161,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
             
-            // Append files separately
-            selectedFiles.forEach(file => {
+            // Append only valid files
+            const validFiles = selectedFiles.filter(file => file.isValid);
+            validFiles.forEach(file => {
                 formData.append("upload", file);
             });
 
