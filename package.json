@@ -1,34 +1,20 @@
 {
-  "name": "feedback-form",
+  "name": "wb-sainik-board-feedback",
   "version": "1.0.0",
-  "main": "formHandler.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --openssl-legacy-provider server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
-  "engines": {
-  "node": "18.x"
-},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "google-auth-library": "^10.1.0",
-    "googleapis": "118.0.0",
-    "multer": "^2.0.1",
-    "nodemailer": "^7.0.3",
-    "xlsx": "^0.18.5",
-    "dotenv": "^16.3.1"
+    "express": "^4.18.2",
+    "google-auth-library": "^9.4.0",
+    "googleapis": "^129.0.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.8"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/paulmark-05/WB-Sainik-Board-Feedback.git"
-  },
-  "bugs": {
-    "url": "https://github.com/paulmark-05/WB-Sainik-Board-Feedback/issues"
-  },
-  "homepage": "https://github.com/paulmark-05/WB-Sainik-Board-Feedback#readme",
-  "description": ""
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
