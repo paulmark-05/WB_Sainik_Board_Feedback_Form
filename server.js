@@ -173,7 +173,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
             }
         }
 
-        // Send email notification with Drive/Sheet links
+        // Send email notification with NEW HEADER FORMAT
         try {
             await sendEmailNotification(data, uploadedFileLinks, userFolderId);
             console.log('📧 Email notification sent');
@@ -212,7 +212,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     }
 });
 
-// UPDATED email notification function with Drive/Sheet links (NO FILE ATTACHMENTS)
+// UPDATED email notification function with NEW HEADER FORMAT
 async function sendEmailNotification(data, uploadedFileLinks, userFolderId) {
     console.log('📧 Starting email notification process...');
     
@@ -257,16 +257,19 @@ async function sendEmailNotification(data, uploadedFileLinks, userFolderId) {
         `https://docs.google.com/spreadsheets/d/${process.env.SHEET_ID}/edit` : 
         'Not available';
 
+    // NEW EMAIL SUBJECT FORMAT: "New Feedback/Grievance Submission: rank-name(branch name)"
+    const emailSubject = `New Feedback/Grievance Submission: ${data.rank}-${data.name}(${data.branch})`;
+
     const mailOptions = {
         from: `"WB Sainik Board" <${process.env.NOTIFY_EMAIL}>`,
         to: process.env.NOTIFY_EMAIL,
-        subject: `📬 New Feedback Submission - ${data.name} (${data.branch})`,
+        subject: emailSubject,
         html: `
         <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; border: 1px solid #ddd;">
             <!-- Header -->
             <div style="background: linear-gradient(to right, #e03c3c, #303030ac, #27aad6); padding: 20px; text-align: center; color: white;">
                 <h2 style="margin: 0; font-size: 24px;">West Bengal Sainik Board</h2>
-                <p style="margin: 5px 0 0 0; font-size: 16px;">New Feedback Form Submission</p>
+                <p style="margin: 5px 0 0 0; font-size: 16px;">New Feedback/Grievance Submission</p>
             </div>
             
             <!-- Submission Details -->
@@ -360,7 +363,7 @@ async function sendEmailNotification(data, uploadedFileLinks, userFolderId) {
     };
 
     try {
-        console.log('📤 Sending email...');
+        console.log('📤 Sending email with subject:', emailSubject);
         const info = await transporter.sendMail(mailOptions);
         console.log('✅ Email sent successfully:', info.messageId);
         return info;
@@ -405,7 +408,7 @@ app.get('/test-email', async (req, res) => {
         const testData = {
             name: 'Test User',
             rank: 'Major',
-            branch: 'Test Branch - Email Function Check',
+            branch: 'ZSB Kolkata',
             phone: '1234567890',
             email: 'test@example.com',
             id: 'TEST123',
