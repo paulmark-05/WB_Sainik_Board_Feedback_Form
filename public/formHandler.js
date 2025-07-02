@@ -1,7 +1,6 @@
 // Prevent multiple submissions
 let isSubmitting = false;
 let selectedFiles = [];
-let pendingOversizedFiles = [];
 
 // Enhanced file size display function
 function formatFileSize(bytes) {
@@ -35,10 +34,7 @@ function validateConsent() {
 
 // Phone number validation
 function validatePhoneNumber(phone) {
-    // Remove all non-digit characters
     const cleanPhone = phone.replace(/\D/g, '');
-    
-    // Check if it's exactly 10 digits and starts with 6, 7, 8, or 9
     const phoneRegex = /^[6-9]\d{9}$/;
     return phoneRegex.test(cleanPhone);
 }
@@ -69,7 +65,7 @@ function setupPhoneValidation() {
     });
 }
 
-// Custom Modal Functions
+// Custom Modal Functions (Simplified - only for notifications)
 function showModal(message, type = 'info', title = 'Notification') {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -77,7 +73,7 @@ function showModal(message, type = 'info', title = 'Notification') {
     const messageElement = document.getElementById('modalMessage');
     const footerElement = modal.querySelector('.modal-footer');
     
-    container.classList.remove('success', 'error', 'warning', 'info', 'file-size');
+    container.classList.remove('success', 'error', 'warning', 'info');
     
     if (type) {
         container.classList.add(type);
@@ -86,7 +82,7 @@ function showModal(message, type = 'info', title = 'Notification') {
     titleElement.textContent = title;
     messageElement.innerHTML = message;
     
-    // Reset footer to default
+    // Simple OK button only
     footerElement.innerHTML = '<button class="modal-btn-primary" onclick="closeModal()">OK</button>';
     
     modal.classList.add('active');
@@ -102,166 +98,32 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-// RESTORED: File Size Modal with ALL THREE OPTIONS
-function showFileSizeModal(oversizedFiles) {
-    const modal = document.getElementById('customModal');
-    const container = modal.querySelector('.modal-container');
-    const titleElement = modal.querySelector('.modal-title');
-    const messageElement = document.getElementById('modalMessage');
-    const footerElement = modal.querySelector('.modal-footer');
+// NEW: Compress specific file function
+function compressFile(fileIndex) {
+    const file = selectedFiles[fileIndex];
+    if (!file) return;
     
-    // Store oversized files for processing
-    pendingOversizedFiles = [...oversizedFiles];
+    console.log('Compressing file:', file.name);
     
-    container.classList.remove('success', 'error', 'warning', 'info');
-    container.classList.add('file-size');
-    
-    titleElement.textContent = 'File Size Limit Exceeded';
-    
-    const fileList = oversizedFiles.map(f => 
-        `<li><strong>${f.name}</strong> (${formatFileSize(f.size)})</li>`
-    ).join('');
-    
-    messageElement.innerHTML = `
-        <div class="file-size-content">
-            <p>The following files exceed the 10MB limit:</p>
-            <ul class="oversized-files-list">
-                ${fileList}
-            </ul>
-            <p>What would you like to do?</p>
-        </div>
-    `;
-    
-    // THREE WORKING OPTIONS
-    footerElement.innerHTML = `
-        <button class="modal-btn-secondary" onclick="removeOversizedFiles()">Remove Files</button>
-        <button class="modal-btn-secondary" onclick="reselectFiles()">Reselect</button>
-        <button class="modal-btn-primary" onclick="compressFiles()">Compress Files</button>
-    `;
-    
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-// WORKING: Remove oversized files
-function removeOversizedFiles() {
-    console.log('Removing oversized files:', pendingOversizedFiles.map(f => f.name));
-    
-    // Remove oversized files from selection
-    selectedFiles = selectedFiles.filter(file => {
-        return !pendingOversizedFiles.some(oversizedFile => 
-            oversizedFile.name === file.name && oversizedFile.size === file.size
-        );
-    });
-    
-    pendingOversizedFiles = [];
-    updateFileInput();
-    renderPreviews();
-    closeModal();
-    
-    showModal(
-        'Oversized files have been removed successfully. You can now submit your form or add different files.',
-        'success',
-        'Files Removed'
-    );
-}
-
-// WORKING: Reselect all files
-function reselectFiles() {
-    console.log('Clearing all files for reselection');
-    
-    selectedFiles = [];
-    pendingOversizedFiles = [];
-    
-    const uploadInput = document.getElementById('upload');
-    uploadInput.value = '';
-    
-    renderPreviews();
-    closeModal();
-    
-    showModal(
-        'All files have been cleared. Please select your files again using the file upload button.',
-        'info',
-        'Please Reselect Files'
-    );
-}
-
-// Update file input to match selectedFiles array
-function updateFileInput() {
-    const uploadInput = document.getElementById('upload');
-    
-    if (selectedFiles.length === 0) {
-        uploadInput.value = '';
+    // Check if it's an image for client-side compression
+    if (file.type.startsWith('image/')) {
+        compressImageClientSide(file, fileIndex);
     } else {
-        const dt = new DataTransfer();
-        selectedFiles.forEach(file => dt.items.add(file));
-        uploadInput.files = dt.files;
+        // Redirect to external compression service
+        showCompressionServiceModal([file], fileIndex);
     }
-}
-
-// WORKING: Compress files functionality
-function compressFiles() {
-    closeModal();
-    
-    if (pendingOversizedFiles.length === 0) return;
-    
-    showCompressionServiceModal();
-}
-
-// Show compression service selection
-function showCompressionServiceModal() {
-    const fileTypes = pendingOversizedFiles.map(f => f.type);
-    const hasImages = fileTypes.some(type => type.startsWith('image/'));
-    
-    if (hasImages && pendingOversizedFiles.length === 1 && pendingOversizedFiles[0].type.startsWith('image/')) {
-        compressImageClientSide(pendingOversizedFiles[0]);
-        return;
-    }
-    
-    const serviceOptions = `
-        <div class="compression-services">
-            <h4>Choose a free compression service:</h4>
-            <div class="service-options">
-                <button class="service-btn" onclick="redirectToYouCompress()">
-                    <div class="service-info">
-                        <strong>YouCompress</strong>
-                        <span>Free • No Registration • Multiple Formats</span>
-                    </div>
-                </button>
-                <button class="service-btn" onclick="redirectToILovePDF()">
-                    <div class="service-info">
-                        <strong>iLovePDF</strong>
-                        <span>Free • PDF Specialist • High Quality</span>
-                    </div>
-                </button>
-                <button class="service-btn" onclick="redirectToSmallPDF()">
-                    <div class="service-info">
-                        <strong>SmallPDF</strong>
-                        <span>Free • Easy to Use • Quick Processing</span>
-                    </div>
-                </button>
-            </div>
-            <p class="compression-note">
-                💡 <strong>Instructions:</strong> The service will open in a new tab. After compressing your files, 
-                download them and return to this form to upload the compressed versions.
-            </p>
-        </div>
-    `;
-    
-    showModal(serviceOptions, 'info', 'File Compression Services');
 }
 
 // Client-side image compression
-async function compressImageClientSide(imageFile) {
+async function compressImageClientSide(imageFile, fileIndex) {
     showModal('Compressing image... Please wait.', 'info', 'Processing Image');
     
     try {
         const compressedFile = await compressImageUsingCanvas(imageFile);
         
         if (compressedFile.size <= 10 * 1024 * 1024) {
-            selectedFiles = selectedFiles.filter(f => f.name !== imageFile.name);
-            selectedFiles.push(compressedFile);
-            pendingOversizedFiles = [];
+            // Replace the original file with compressed version
+            selectedFiles[fileIndex] = compressedFile;
             
             updateFileInput();
             renderPreviews();
@@ -337,6 +199,42 @@ function compressImageUsingCanvas(file) {
     });
 }
 
+// Show compression service selection for non-images
+function showCompressionServiceModal(files, fileIndex) {
+    const file = files[0];
+    const serviceOptions = `
+        <div class="compression-services">
+            <h4>Choose a free compression service for: <strong>${file.name}</strong></h4>
+            <div class="service-options">
+                <button class="service-btn" onclick="redirectToYouCompress()">
+                    <div class="service-info">
+                        <strong>YouCompress</strong>
+                        <span>Free • No Registration • Multiple Formats</span>
+                    </div>
+                </button>
+                <button class="service-btn" onclick="redirectToILovePDF()">
+                    <div class="service-info">
+                        <strong>iLovePDF</strong>
+                        <span>Free • PDF Specialist • High Quality</span>
+                    </div>
+                </button>
+                <button class="service-btn" onclick="redirectToSmallPDF()">
+                    <div class="service-info">
+                        <strong>SmallPDF</strong>
+                        <span>Free • Easy to Use • Quick Processing</span>
+                    </div>
+                </button>
+            </div>
+            <p class="compression-note">
+                💡 <strong>Instructions:</strong> The service will open in a new tab. After compressing your file, 
+                download it and then upload it again to replace the original.
+            </p>
+        </div>
+    `;
+    
+    showModal(serviceOptions, 'info', 'File Compression Services');
+}
+
 // Redirect to compression services
 function redirectToYouCompress() {
     window.open('https://www.youcompress.com/', '_blank');
@@ -358,28 +256,37 @@ function redirectToSmallPDF() {
 
 // Show instructions after compression service redirect
 function showPostCompressionInstructions() {
-    const fileNames = pendingOversizedFiles.map(f => f.name).join(', ');
-    
     showModal(
         `<div class="compression-instructions">
             <h4>📋 Next Steps:</h4>
             <ol>
-                <li>Upload your files (<strong>${fileNames}</strong>) to the compression service</li>
-                <li>Download the compressed files to your device</li>
-                <li>Return to this form and upload the compressed files</li>
-                <li>Submit your feedback form</li>
+                <li>Upload your file to the compression service</li>
+                <li>Download the compressed file to your device</li>
+                <li>Return to this form and upload the compressed file</li>
+                <li>The new file will automatically replace the oversized one</li>
             </ol>
-            <p>💡 <strong>Tip:</strong> The compression service will automatically optimize your files 
+            <p>💡 <strong>Tip:</strong> The compression service will automatically optimize your file 
             while maintaining good quality.</p>
         </div>`,
         'info',
         'Compression Service Opened'
     );
-    
-    pendingOversizedFiles = [];
 }
 
-// UPDATED: Form Help without 25MB limit and terms references
+// Update file input to match selectedFiles array
+function updateFileInput() {
+    const uploadInput = document.getElementById('upload');
+    
+    if (selectedFiles.length === 0) {
+        uploadInput.value = '';
+    } else {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        uploadInput.files = dt.files;
+    }
+}
+
+// Form Help Guidelines
 function showFormHelp() {
     const helpContent = `
         <div class="help-content">
@@ -399,11 +306,11 @@ function showFormHelp() {
                 <li>Access is restricted to authorized Sainik Board personnel only</li>
             </ul>
             
-            <h4>🔧 File Management Options</h4>
+            <h4>🔧 File Management</h4>
             <ul style="text-align: left; margin: 15px 0;">
-                <li><strong>Remove:</strong> Delete oversized files from your selection</li>
-                <li><strong>Reselect:</strong> Clear all files and start fresh</li>
-                <li><strong>Compress:</strong> Use free online tools to reduce file sizes</li>
+                <li><strong>Oversized Files:</strong> Red warning appears above files exceeding 10MB</li>
+                <li><strong>Compress Button:</strong> Click to reduce file size using free online tools</li>
+                <li><strong>Automatic Replacement:</strong> Compressed files automatically replace originals</li>
             </ul>
             
             <h4>📞 Support</h4>
@@ -449,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function() {
         consentCheckbox.addEventListener('change', validateConsent);
     }
 
-    // File upload handling with modal options
+    // SIMPLIFIED file upload handling - NO MODAL POPUPS
     uploadInput.addEventListener("change", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -469,23 +376,34 @@ document.addEventListener("DOMContentLoaded", function() {
             uniqueFiles.splice(allowedCount);
         }
         
-        // Add ALL files first (including oversized ones)
+        // Add ALL files (including oversized ones) - NO MODAL
         selectedFiles = [...selectedFiles, ...uniqueFiles];
-        
-        // Check for oversized files AFTER adding them
-        const oversizedFiles = uniqueFiles.filter(file => file.size > 10 * 1024 * 1024);
         
         this.value = "";
         renderPreviews();
-        
-        // Show file size modal with options if there are oversized files
-        if (oversizedFiles.length > 0) {
-            showFileSizeModal(oversizedFiles);
-        }
     });
 
     function renderPreviews() {
         previewContainer.innerHTML = "";
+        
+        // Check if there are any oversized files
+        const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024);
+        
+        // Show warning if there are oversized files
+        if (oversizedFiles.length > 0) {
+            const warningDiv = document.createElement("div");
+            warningDiv.className = "oversized-warning";
+            warningDiv.innerHTML = `
+                <div class="warning-content">
+                    <span class="warning-icon">⚠️</span>
+                    <span class="warning-text">
+                        ${oversizedFiles.length} file(s) exceed the 10MB limit. 
+                        Use the compress buttons below to reduce file sizes.
+                    </span>
+                </div>
+            `;
+            previewContainer.appendChild(warningDiv);
+        }
         
         selectedFiles.forEach((file, index) => {
             const fileBox = document.createElement("div");
@@ -533,6 +451,19 @@ document.addEventListener("DOMContentLoaded", function() {
             sizeBadge.textContent = formatFileSize(file.size);
             fileBox.appendChild(sizeBadge);
 
+            // NEW: Add compress button for oversized files
+            if (isOversized) {
+                const compressBtn = document.createElement("button");
+                compressBtn.className = "compress-btn";
+                compressBtn.innerHTML = "🗜️ Compress";
+                compressBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    compressFile(index);
+                };
+                fileBox.appendChild(compressBtn);
+            }
+
             previewContainer.appendChild(fileBox);
         });
 
@@ -549,13 +480,13 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if (validFiles > 0) {
             countText = `${validFiles} file(s) selected`;
         } else if (oversizedFiles > 0) {
-            countText = `${oversizedFiles} oversized file(s) - need action`;
+            countText = `${oversizedFiles} oversized file(s) - use compress buttons`;
         }
         
         document.getElementById("upload-count").textContent = countText;
     }
 
-    // Enhanced form submission with phone validation
+    // Form submission with validation
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -589,7 +520,11 @@ document.addEventListener("DOMContentLoaded", function() {
         // Check for oversized files before submission
         const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024);
         if (oversizedFiles.length > 0) {
-            showFileSizeModal(oversizedFiles);
+            showModal(
+                `Cannot submit form with oversized files. Please compress the following files first:<br><br>${oversizedFiles.map(f => `<strong>${f.name}</strong> (${formatFileSize(f.size)})`).join('<br>')}`,
+                'error',
+                'Oversized Files Detected'
+            );
             return;
         }
 
@@ -634,7 +569,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 setTimeout(() => {
                     form.reset();
                     selectedFiles = [];
-                    pendingOversizedFiles = [];
                     renderPreviews();
                     validateConsent();
                 }, 2000);
