@@ -10,7 +10,7 @@ function showModal(message, type = 'info', title = 'Notification') {
     const messageElement = document.getElementById('modalMessage');
     
     // Remove existing type classes
-    container.classList.remove('success', 'error', 'warning');
+    container.classList.remove('success', 'error', 'warning', 'info');
     
     // Add appropriate type class
     if (type) {
@@ -34,6 +34,36 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
+// Information Icon Function - Show Form Help
+function showFormHelp() {
+    const helpContent = `
+        <div class="help-content">
+            <h4>📋 Form Submission Guidelines</h4>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li><strong>Required Fields:</strong> Rank, Full Name, Phone, and Branch are mandatory</li>
+                <li><strong>File Upload:</strong> Maximum 10 files, each under 10MB</li>
+                <li><strong>Supported Formats:</strong> Images (JPG, PNG), Documents (PDF, DOC, DOCX)</li>
+                <li><strong>Total Size Limit:</strong> All files combined must be under 25MB</li>
+            </ul>
+            
+            <h4>🔧 Troubleshooting</h4>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>If file upload fails, try refreshing the page</li>
+                <li>Ensure files are not corrupted before uploading</li>
+                <li>Use latest version of Chrome or Firefox</li>
+                <li>Disable browser extensions if having issues</li>
+            </ul>
+            
+            <h4>📞 Support</h4>
+            <p style="text-align: left; margin: 10px 0;">
+                For technical assistance, contact your ZSB branch office.
+            </p>
+        </div>
+    `;
+    
+    showModal(helpContent, 'info', 'Form Help & Guidelines');
+}
+
 // Close modal when clicking overlay
 document.addEventListener('click', function(e) {
     if (e.target.id === 'customModal') {
@@ -54,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("feedbackForm");
     const submitBtn = document.getElementById("submitBtn");
 
-    // File upload handling with validation and highlighting
+    // File upload handling - FIXED to not modify File objects
     uploadInput.addEventListener("change", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -63,18 +93,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const existingNames = selectedFiles.map(file => file.name);
         const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
         
-        // Validate each file and mark invalid ones
-        const validatedFiles = uniqueFiles.map(file => {
-            const isValid = file.size <= 10 * 1024 * 1024; // 10MB limit
-            return {
-                ...file,
-                isValid: isValid,
-                errorMessage: !isValid ? `File exceeds 10MB limit (${(file.size / 1024 / 1024).toFixed(1)}MB)` : null
-            };
-        });
+        // Pre-validate files without modifying them
+        const oversizedFiles = uniqueFiles.filter(file => file.size > 10 * 1024 * 1024);
         
-        // Check for oversized files and show specific error
-        const oversizedFiles = validatedFiles.filter(f => !f.isValid);
         if (oversizedFiles.length > 0) {
             const fileList = oversizedFiles.map(f => `<strong>${f.name}</strong> (${(f.size / 1024 / 1024).toFixed(1)}MB)`).join('<br>');
             showModal(
@@ -82,11 +103,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 'error',
                 'File Size Limit Exceeded'
             );
+            this.value = "";
+            return;
         }
         
-        selectedFiles = [...selectedFiles, ...validatedFiles].slice(0, 10);
+        // Add valid files to array WITHOUT modifying the File objects
+        selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10);
         
-        if (selectedFiles.length === 10 && validatedFiles.length > 0) {
+        if (selectedFiles.length === 10 && uniqueFiles.length > 0) {
             showModal(
                 'Maximum 10 files allowed. Additional files were not added.',
                 'warning',
@@ -105,8 +129,9 @@ document.addEventListener("DOMContentLoaded", function() {
             const fileBox = document.createElement("div");
             fileBox.className = "file-box";
             
-            // Add invalid class if file is invalid
-            if (!file.isValid) {
+            // Check if file is invalid WITHOUT modifying the file object
+            const isInvalid = file.size > 10 * 1024 * 1024;
+            if (isInvalid) {
                 fileBox.classList.add('file-invalid');
             }
 
@@ -142,10 +167,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             
             // Add error message for invalid files
-            if (!file.isValid && file.errorMessage) {
+            if (isInvalid) {
                 const errorBadge = document.createElement("div");
                 errorBadge.className = "file-error-badge";
-                errorBadge.textContent = file.errorMessage;
+                errorBadge.textContent = `File exceeds 10MB limit (${(file.size / 1024 / 1024).toFixed(1)}MB)`;
                 fileBox.appendChild(errorBadge);
             }
 
@@ -156,8 +181,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateFileCount() {
-        const validFiles = selectedFiles.filter(f => f.isValid).length;
-        const invalidFiles = selectedFiles.filter(f => !f.isValid).length;
+        const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024).length;
+        const invalidFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024).length;
         
         let countText = "";
         if (validFiles > 0 && invalidFiles > 0) {
@@ -171,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("upload-count").textContent = countText;
     }
 
-    // Enhanced form submission with custom modals
+    // Enhanced form submission with proper file handling
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -180,8 +205,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // Check for invalid files
-        const invalidFiles = selectedFiles.filter(f => !f.isValid);
+        // Check for invalid files (without modifying file objects)
+        const invalidFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024);
         if (invalidFiles.length > 0) {
             const fileList = invalidFiles.map(f => `<strong>${f.name}</strong>`).join(', ');
             showModal(
@@ -192,8 +217,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // Only use valid files for submission
-        const validFiles = selectedFiles.filter(f => f.isValid);
+        // Only use valid files for submission (original File objects, unmodified)
+        const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024);
 
         // Validation with custom popups
         const totalSize = validFiles.reduce((acc, f) => acc + f.size, 0);
@@ -222,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
             
-            // Append only valid files
+            // Append only valid files (original, unmodified File objects)
             validFiles.forEach(file => {
                 formData.append("upload", file);
             });
