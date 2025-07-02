@@ -10,7 +10,7 @@
 <body>
     <div class="header">
         <img src="logo.jpg" alt="WB Sainik Board Logo" class="logo">
-        <h1 class="title">Feedback / Grievance Form</h1>
+        <h1 class="title">Feedback / Grievances Form</h1>
     </div>
 
     <div class="form-container">
@@ -26,65 +26,105 @@
         </div>
 
         <form id="feedbackForm" method="POST" enctype="multipart/form-data">
+            <!-- Row 1: Rank and ESM Name -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="rank">Rank *</label>
-                    <input type="text" id="rank" name="rank" required>
+                    <input type="text" id="rank" name="rank" required placeholder="Enter Rank">
                 </div>
                 <div class="input-group">
-                    <label for="name">Full Name *</label>
-                    <input type="text" id="name" name="name" required>
+                    <label for="esmName">ESM Name *</label>
+                    <input type="text" id="esmName" name="esmName" required placeholder="Enter ESM Name">
                 </div>
             </div>
 
+            <!-- Row 2: Relationship Radio Buttons -->
+            <div class="form-row">
+                <div class="input-group full-width">
+                    <label>Relationship *</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="radio" name="relationship" value="Self" required>
+                            <span class="radio-checkmark"></span>
+                            Self
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="radio" name="relationship" value="Widow" required>
+                            <span class="radio-checkmark"></span>
+                            Widow
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="radio" name="relationship" value="Dependent" required>
+                            <span class="radio-checkmark"></span>
+                            Dependent
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Full Name and Email -->
             <div class="form-row">
                 <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter Full Name">
                 </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter Email-id">
+                </div>
+            </div>
+
+            <!-- Row 4: Phone and Branch -->
+            <div class="form-row">
                 <div class="input-group">
                     <label for="phone">Phone No. *</label>
                     <input type="tel" id="phone" name="phone" required pattern="[6-9][0-9]{9}" 
                            placeholder="Enter 10-digit mobile number">
                     <div id="phone-error" class="error-message" style="display: none;"></div>
                 </div>
-            </div>
-
-            <div class="form-row">
                 <div class="input-group">
                     <label for="branch">Branch *</label>
                     <select id="branch" name="branch" required>
-                            <option value="" color="grey">--Select ZSB branch--</option>
+                        <option value="">--Select ZSB branch--</option>
                         <option value="Rajya Sainik Board">Rajya Sainik Board</option>
-                          <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhu )</option>
-                          <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
-                          <option value="ZSB Dakshin Dinajpur">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
-                          <option value="ZSB Darjeeling">ZSB Darjeeling ( Darjeeling )</option>
-                          <option value="ZSB Howrah">ZSB Howrah ( Howrah & Hooghly )</option>
-                          <option value="ZSB Jalpaiguri">ZSB Jalpaiguri ( Jalpaiguri )</option>
-                          <option value="ZSB Kalimpong">ZSB Kalimpong ( Kalimpong )</option>
-                          <option value="ZSB Kolkata">ZSB Kolkata ( Kolkata )</option>
-                          <option value="ZSB Malda">ZSB Malda ( Malda )</option>
-                          <option value="ZSB Midnapore">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
-                          <option value="ZSB Murshidabad ">ZSB Murshidabad ( Murshidabad )</option>
-                          <option value="ZSB Nadia">ZSB Nadia ( Nadia )</option>
-                          <option value="ZSB North 24 Parganas">ZSB North 24 Parganas ( North 24 Parganas )</option>
-                          <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
+                        <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhum )</option>
+                        <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
+                        <option value="ZSB Dakshin Dinajpur">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
+                        <option value="ZSB Darjeeling">ZSB Darjeeling ( Darjeeling )</option>
+                        <option value="ZSB Howrah">ZSB Howrah ( Howrah & Hooghly )</option>
+                        <option value="ZSB Jalpaiguri">ZSB Jalpaiguri ( Jalpaiguri )</option>
+                        <option value="ZSB Kalimpong">ZSB Kalimpong ( Kalimpong )</option>
+                        <option value="ZSB Kolkata">ZSB Kolkata ( Kolkata )</option>
+                        <option value="ZSB Malda">ZSB Malda ( Malda )</option>
+                        <option value="ZSB Midnapore">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
+                        <option value="ZSB Murshidabad">ZSB Murshidabad ( Murshidabad )</option>
+                        <option value="ZSB Nadia">ZSB Nadia ( Nadia )</option>
+                        <option value="ZSB North 24 Parganas">ZSB North 24 Parganas ( North 24 Parganas )</option>
+                        <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
                     </select>
-                </div>
-                <div class="input-group">
-                    <label for="id">ZSB ID Card No.(if any):</label>
-                    <input type="text" id="id" name="id">
                 </div>
             </div>
 
+            <!-- Row 5: ZSB ID -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="id">ZSB ID Card No.(if any):</label>
+                    <input type="text" id="id" name="id" placeholder="Enter ZSB ID Card Number">
+                </div>
+                <div class="input-group">
+                    <!-- Empty for layout balance -->
+                </div>
+            </div>
+
+            <!-- Row 6: Feedback Text Area -->
             <div class="form-row">
                 <div class="input-group" style="flex: 1;">
                     <label for="sugg">Suggestions / Feedback :</label>
-                    <textarea id="sugg" name="sugg" rows="4"></textarea>
+                    <textarea id="sugg" name="sugg" rows="4" placeholder="Enter your suggestions or feedback here"></textarea>
                 </div>
             </div>
 
+            <!-- Row 7: File Upload -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="upload">Upload related photos/documents (max 10):</label>
@@ -95,7 +135,7 @@
 
             <div id="file-preview"></div>
 
-            <!-- SIMPLIFIED Consent Checkbox -->
+            <!-- Consent Checkbox -->
             <div class="consent-container">
                 <label class="consent-label">
                     <input type="checkbox" id="consentCheckbox" name="consent" required>
