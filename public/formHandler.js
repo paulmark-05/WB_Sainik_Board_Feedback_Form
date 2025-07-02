@@ -1,24 +1,7 @@
-// Prevent multiple submissions
 let selectedFiles = [];
 let isSubmitting = false;
 
-// File size formatting
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 KB';
-    const k = 1024;
-    if (bytes < k) return bytes + ' bytes';
-    if (bytes < k * k) return (bytes / k).toFixed(2) + ' KB';
-    if (bytes < k * k * k) return (bytes / (k * k)).toFixed(2) + ' MB';
-    return (bytes / (k * k * k)).toFixed(2) + ' GB';
-}
-
-// File type detection
-function isFullDisplayImage(file) {
-    const imageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-    return imageTypes.includes(file.type.toLowerCase());
-}
-
-// Modal system
+// Show modal
 function showModal(message, type = 'info', title = 'Notification') {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -45,52 +28,65 @@ function removeFile(fileIndex) {
         updateFileInput();
         renderPreviews();
         updateFileCount();
-        showModal('File removed.', 'info', 'File Removed');
+        closeModal();
     }
 }
 
-// Show compress/remove dialog for oversized file
-function showOversizeOptions(fileIndex) {
+// Show compress confirmation dialog (like your screenshot)
+function showCompressConfirmation(fileIndex) {
     const file = selectedFiles[fileIndex];
     if (!file) return;
-    showModal(`
-        <div>
-            <h4>Oversized File</h4>
-            <p><strong>${file.name}</strong> (${formatFileSize(file.size)}) exceeds the 10MB limit.</p>
-            <div style="margin: 20px 0;">
-                <button class="modal-btn-danger" onclick="removeFile(${fileIndex}); closeModal();">Remove File</button>
-                <button class="modal-btn-primary" onclick="showCompressionOptions(${fileIndex});">Compress File</button>
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    const html = `
+        <div style="padding:16px 0;">
+            <div style="background:#fff;border-radius:8px;padding:16px 0 10px 0;margin-bottom:18px;">
+                <div style="font-weight:600;font-size:15px;margin-bottom:6px;">
+                    <span style="color:#222;">File:</span> ${file.name}
+                </div>
+                <div style="font-size:14px;color:#444;">
+                    <b>Current Size:</b> ${sizeMB} MB<br>
+                    <b>Size Limit:</b> 10 MB
+                </div>
+            </div>
+            <div style="font-weight:500;font-size:16px;text-align:center;margin:10px 0 18px 0;">
+                What would you like to do with this oversized file?
             </div>
         </div>
-    `, 'warning', 'Oversized File');
-    // Remove default footer
+    `;
+    showModal(html, 'warning', 'Compress File Confirmation');
     setTimeout(() => {
-        document.querySelector('.modal-footer').innerHTML = '';
+        const footer = document.querySelector('.modal-footer');
+        footer.innerHTML = `
+            <button class="modal-btn-secondary" onclick="closeModal()">No, close this message</button>
+            <button class="modal-btn-primary" onclick="showCompressionServices(${fileIndex})">Yes, I want to compress</button>
+        `;
     }, 10);
 }
 
-// Show compression service choices
-function showCompressionOptions(fileIndex) {
+// Show online compression services
+function showCompressionServices(fileIndex) {
     const file = selectedFiles[fileIndex];
     if (!file) return;
     showModal(`
-        <div>
-            <h4>Compress Your File Online</h4>
-            <p>Choose a compression service, upload your file, download the compressed version, and re-upload here.</p>
-            <div style="margin: 18px 0;">
-                <button class="modal-btn-primary" onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank');">iLovePDF (PDFs)</button>
-                <button class="modal-btn-primary" onclick="window.open('https://compressjpeg.com/','_blank');">CompressJPEG (Images)</button>
-                <button class="modal-btn-primary" onclick="window.open('https://smallpdf.com/compress-pdf','_blank');">SmallPDF (PDFs/Docs)</button>
+        <div style="padding:10px 0 0 0;">
+            <div style="font-weight:600;font-size:15px;margin-bottom:8px;">Choose a compression service</div>
+            <div style="margin-bottom:16px;">
+                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank')">iLovePDF (PDFs, <span style='color:green;font-size:12px;'>Recommended</span>)</button><br>
+                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://compressjpeg.com/','_blank')">CompressJPEG (Images)</button><br>
+                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://smallpdf.com/compress-pdf','_blank')">SmallPDF (PDFs/Docs)</button>
             </div>
-            <div style="color:#888;font-size:13px;">After compressing, upload the new file here.</div>
+            <div style="color:#555;font-size:14px;">
+                After compressing, download the file and upload the new version here.
+            </div>
         </div>
     `, 'info', 'Online Compression');
     setTimeout(() => {
-        document.querySelector('.modal-footer').innerHTML = `<button class="modal-btn-secondary" onclick="closeModal()">Close</button>`;
+        const footer = document.querySelector('.modal-footer');
+        footer.innerHTML = `<button class="modal-btn-secondary" onclick="closeModal()">Close</button>`;
     }, 10);
 }
 
-// Update file input to match selectedFiles array
+// File input update
 function updateFileInput() {
     const uploadInput = document.getElementById('upload');
     if (!uploadInput) return;
@@ -120,13 +116,7 @@ function renderPreviews() {
         };
         fileBox.appendChild(removeBtn);
         // Preview
-        if (isFullDisplayImage(file)) {
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
-            img.className = "file-thumb full-image";
-            img.onload = () => URL.revokeObjectURL(img.src);
-            fileBox.appendChild(img);
-        } else if (file.type.startsWith("image/")) {
+        if (file.type.startsWith("image/")) {
             const img = document.createElement("img");
             img.src = URL.createObjectURL(file);
             img.className = "file-thumb";
@@ -147,11 +137,12 @@ function renderPreviews() {
         sizeBadge.className = isOversized ? "file-size-badge oversized" : "file-size-badge";
         sizeBadge.textContent = formatFileSize(file.size);
         fileBox.appendChild(sizeBadge);
-        // Oversized: click anywhere to get options
+        // Oversized: click anywhere to get compress/remove options
         if (isOversized) {
             fileBox.style.cursor = "pointer";
-            fileBox.onclick = function() {
-                showOversizeOptions(index);
+            fileBox.onclick = function(e) {
+                e.preventDefault();
+                showCompressConfirmation(index);
             };
         }
         previewContainer.appendChild(fileBox);
@@ -159,6 +150,7 @@ function renderPreviews() {
     updateFileCount();
 }
 
+// File count
 function updateFileCount() {
     const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024).length;
     const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024).length;
@@ -200,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function() {
 // Block form submission if oversized files remain
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("feedbackForm");
-    const submitBtn = document.getElementById("submitBtn");
+    if (!form) return;
     form.addEventListener("submit", function(e) {
         const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024);
         if (oversizedFiles.length > 0) {
@@ -213,3 +205,19 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
+// Help/guidelines working
+function showFormHelp() {
+    showModal(`
+        <div>
+            <h4>Form Submission Guidelines</h4>
+            <ul style="text-align:left;">
+                <li>Required fields: Rank, ESM Name, Relationship, Phone (10 digits), Branch</li>
+                <li>File upload: Max 10 files, each under 10MB</li>
+                <li>Supported: Images (JPG, PNG), PDFs, DOC/DOCX</li>
+                <li>Remove files: Click the red cross or oversized file to remove</li>
+                <li>Compress files: Click oversized file, then "Compress"</li>
+            </ul>
+        </div>
+    `, 'info', 'Form Help & Guidelines');
+}
