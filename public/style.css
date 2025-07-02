@@ -106,6 +106,12 @@ form .form-row {
     margin-bottom: 20px;
 }
 
+/* ENHANCED: Main info row with better proportions */
+.form-row.main-info-row {
+    min-height: 140px;
+    align-items: stretch;
+}
+
 .input-group {
     flex: 1;
     display: flex;
@@ -113,11 +119,13 @@ form .form-row {
     min-width: 250px;
 }
 
-/* NEW: Stacked fields for Rank and ESM Name */
+/* Stacked fields for Rank and ESM Name */
 .input-group.stacked-fields {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    justify-content: space-between;
+    flex: 1.2;
 }
 
 .field-container {
@@ -145,32 +153,60 @@ form .form-row {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-/* NEW: Relationship column styling */
+/* ENHANCED: Relationship column with better distribution */
 .input-group.relationship-column {
     display: flex;
     flex-direction: column;
     min-width: 200px;
-    max-width: 250px;
+    max-width: 280px;
+    flex: 1;
+    justify-content: space-between;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid #007bff;
 }
 
-.checkbox-group.vertical {
+.relationship-main-label {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+    font-size: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* ENHANCED: Evenly distributed checkbox group */
+.checkbox-group-enhanced {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-top: 10px;
+    justify-content: space-evenly;
+    height: 100%;
+    gap: 12px;
 }
 
-.checkbox-label {
+.checkbox-label-enhanced {
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 15px;
     cursor: pointer;
     margin: 0;
     font-weight: 500;
     color: #495057;
+    padding: 8px 0;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    padding-left: 5px;
 }
 
-.checkbox-label input[type="radio"] {
+.checkbox-label-enhanced:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+    transform: translateX(2px);
+}
+
+.checkbox-label-enhanced input[type="radio"] {
     position: absolute;
     opacity: 0;
     cursor: pointer;
@@ -178,44 +214,61 @@ form .form-row {
     width: 0;
 }
 
-.radio-checkmark {
+.radio-checkmark-enhanced {
     position: relative;
     display: inline-block;
-    height: 18px;
-    width: 18px;
+    height: 20px;
+    width: 20px;
     background-color: white;
     border: 2px solid #007bff;
     border-radius: 50%;
-    margin-right: 10px;
+    margin-right: 12px;
     flex-shrink: 0;
     transition: all 0.3s ease;
 }
 
-.checkbox-label:hover .radio-checkmark {
+.checkbox-label-enhanced:hover .radio-checkmark-enhanced {
     background-color: #e3f2fd;
     border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-.checkbox-label input:checked ~ .radio-checkmark {
+.checkbox-label-enhanced input:checked ~ .radio-checkmark-enhanced {
     background-color: #007bff;
     border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
 }
 
-.radio-checkmark:after {
+.radio-checkmark-enhanced:after {
     content: "";
     position: absolute;
     display: none;
     top: 50%;
     left: 50%;
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: white;
     transform: translate(-50%, -50%);
 }
 
-.checkbox-label input:checked ~ .radio-checkmark:after {
+.checkbox-label-enhanced input:checked ~ .radio-checkmark-enhanced:after {
     display: block;
+}
+
+.checkbox-text {
+    font-weight: 500;
+    color: #495057;
+    transition: color 0.2s ease;
+}
+
+.checkbox-label-enhanced:hover .checkbox-text {
+    color: #007bff;
+}
+
+.checkbox-label-enhanced input:checked ~ .radio-checkmark-enhanced ~ .checkbox-text {
+    color: #007bff;
+    font-weight: 600;
 }
 
 label {
@@ -874,19 +927,34 @@ button[type="submit"].disabled::after {
         flex-direction: column;
     }
     
+    .form-row.main-info-row {
+        min-height: auto;
+    }
+    
     .input-group.stacked-fields {
         margin-bottom: 15px;
+        flex: 1;
     }
     
     .input-group.relationship-column {
         max-width: none;
         min-width: 100%;
+        margin-top: 15px;
     }
     
-    .checkbox-group.vertical {
+    .checkbox-group-enhanced {
         flex-direction: row;
-        gap: 20px;
+        gap: 15px;
         flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    
+    .checkbox-label-enhanced {
+        flex: 1;
+        min-width: 80px;
+        justify-content: center;
+        text-align: center;
+        padding: 10px 5px;
     }
     
     .file-box {
