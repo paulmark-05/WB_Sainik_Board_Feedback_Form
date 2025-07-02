@@ -2,13 +2,59 @@
 let isSubmitting = false;
 let selectedFiles = [];
 
+// Custom Modal Functions
+function showModal(message, type = 'info', title = 'Notification') {
+    const modal = document.getElementById('customModal');
+    const container = modal.querySelector('.modal-container');
+    const titleElement = modal.querySelector('.modal-title');
+    const messageElement = document.getElementById('modalMessage');
+    
+    // Remove existing type classes
+    container.classList.remove('success', 'error', 'warning');
+    
+    // Add appropriate type class
+    if (type) {
+        container.classList.add(type);
+    }
+    
+    // Set content
+    titleElement.textContent = title;
+    messageElement.innerHTML = message;
+    
+    // Show modal
+    modal.classList.add('active');
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const modal = document.getElementById('customModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking overlay
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'customModal') {
+        closeModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
 document.addEventListener("DOMContentLoaded", function() {
     const uploadInput = document.getElementById("upload");
     const previewContainer = document.getElementById("file-preview");
     const form = document.getElementById("feedbackForm");
     const submitBtn = document.getElementById("submitBtn");
 
-    // File upload handling with enhanced validation feedback
+    // File upload handling with validation and highlighting
     uploadInput.addEventListener("change", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -17,36 +63,40 @@ document.addEventListener("DOMContentLoaded", function() {
         const existingNames = selectedFiles.map(file => file.name);
         const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
         
-        selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10);
-        this.value = "";
-        
-        // Validate files immediately after selection
-        validateFilesAndRender();
-    });
-
-    // Enhanced file validation with specific file identification
-    function validateFilesAndRender() {
-        selectedFiles.forEach((file, index) => {
-            file.isValid = true;
-            file.errorMessages = [];
-            
-            // Check file size (10MB limit)
-            if (file.size > 10 * 1024 * 1024) {
-                file.isValid = false;
-                file.errorMessages.push(`File exceeds 10MB limit (${Math.round(file.size / (1024 * 1024))}MB)`);
-            }
-            
-            // Optional: Check file type restrictions
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            if (!allowedTypes.includes(file.type) && file.type !== '') {
-                // Uncomment these lines if you want to restrict file types:
-                // file.isValid = false;
-                // file.errorMessages.push('File type not supported');
-            }
+        // Validate each file and mark invalid ones
+        const validatedFiles = uniqueFiles.map(file => {
+            const isValid = file.size <= 10 * 1024 * 1024; // 10MB limit
+            return {
+                ...file,
+                isValid: isValid,
+                errorMessage: !isValid ? `File exceeds 10MB limit (${(file.size / 1024 / 1024).toFixed(1)}MB)` : null
+            };
         });
         
+        // Check for oversized files and show specific error
+        const oversizedFiles = validatedFiles.filter(f => !f.isValid);
+        if (oversizedFiles.length > 0) {
+            const fileList = oversizedFiles.map(f => `<strong>${f.name}</strong> (${(f.size / 1024 / 1024).toFixed(1)}MB)`).join('<br>');
+            showModal(
+                `The following files exceed the 10MB limit:<br><br>${fileList}<br><br>Please select smaller files.`,
+                'error',
+                'File Size Limit Exceeded'
+            );
+        }
+        
+        selectedFiles = [...selectedFiles, ...validatedFiles].slice(0, 10);
+        
+        if (selectedFiles.length === 10 && validatedFiles.length > 0) {
+            showModal(
+                'Maximum 10 files allowed. Additional files were not added.',
+                'warning',
+                'File Limit Reached'
+            );
+        }
+        
+        this.value = "";
         renderPreviews();
-    }
+    });
 
     function renderPreviews() {
         previewContainer.innerHTML = "";
@@ -55,9 +105,9 @@ document.addEventListener("DOMContentLoaded", function() {
             const fileBox = document.createElement("div");
             fileBox.className = "file-box";
             
-            // Add error styling if file is invalid
+            // Add invalid class if file is invalid
             if (!file.isValid) {
-                fileBox.classList.add("file-error");
+                fileBox.classList.add('file-invalid');
             }
 
             const removeBtn = document.createElement("span");
@@ -67,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 e.preventDefault();
                 e.stopPropagation();
                 selectedFiles.splice(index, 1);
-                validateFilesAndRender();
+                renderPreviews();
                 updateFileCount();
             };
 
@@ -84,20 +134,19 @@ document.addEventListener("DOMContentLoaded", function() {
                 icon.className = "file-icon";
                 icon.textContent = file.name.split(".").pop().toUpperCase();
                 fileBox.appendChild(icon);
-            }
 
-            // Add file name
-            const fileName = document.createElement("div");
-            fileName.className = "file-name";
-            fileName.textContent = file.name;
-            fileBox.appendChild(fileName);
+                const fileName = document.createElement("div");
+                fileName.className = "file-name";
+                fileName.textContent = file.name;
+                fileBox.appendChild(fileName);
+            }
             
-            // Add error messages if file is invalid
-            if (!file.isValid && file.errorMessages.length > 0) {
-                const errorDiv = document.createElement("div");
-                errorDiv.className = "file-error-message";
-                errorDiv.innerHTML = file.errorMessages.join('<br>');
-                fileBox.appendChild(errorDiv);
+            // Add error message for invalid files
+            if (!file.isValid && file.errorMessage) {
+                const errorBadge = document.createElement("div");
+                errorBadge.className = "file-error-badge";
+                errorBadge.textContent = file.errorMessage;
+                fileBox.appendChild(errorBadge);
             }
 
             previewContainer.appendChild(fileBox);
@@ -107,22 +156,22 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateFileCount() {
-        const validFiles = selectedFiles.filter(file => file.isValid).length;
-        const invalidFiles = selectedFiles.filter(file => !file.isValid).length;
+        const validFiles = selectedFiles.filter(f => f.isValid).length;
+        const invalidFiles = selectedFiles.filter(f => !f.isValid).length;
         
-        let countText = '';
-        if (validFiles > 0) {
-            countText += `${validFiles} valid file(s)`;
-        }
-        if (invalidFiles > 0) {
-            countText += (countText ? ', ' : '') + `${invalidFiles} invalid file(s)`;
+        let countText = "";
+        if (validFiles > 0 && invalidFiles > 0) {
+            countText = `${validFiles} valid file(s), ${invalidFiles} invalid file(s)`;
+        } else if (validFiles > 0) {
+            countText = `${validFiles} file(s) selected`;
+        } else if (invalidFiles > 0) {
+            countText = `${invalidFiles} invalid file(s)`;
         }
         
         document.getElementById("upload-count").textContent = countText;
-        document.getElementById("upload-count").style.color = invalidFiles > 0 ? '#dc3545' : '#666';
     }
 
-    // Enhanced form submission with specific file validation
+    // Enhanced form submission with custom modals
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -131,17 +180,29 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // Enhanced validation with specific file details
-        const invalidFiles = selectedFiles.filter(file => !file.isValid);
+        // Check for invalid files
+        const invalidFiles = selectedFiles.filter(f => !f.isValid);
         if (invalidFiles.length > 0) {
-            const fileNames = invalidFiles.map(file => `"${file.name}"`).join('\n- ');
-            alert(`Please fix the following files before submitting:\n\n- ${fileNames}\n\nLook for files highlighted in red in the preview area.`);
+            const fileList = invalidFiles.map(f => `<strong>${f.name}</strong>`).join(', ');
+            showModal(
+                `Please fix the following files: ${fileList}<br><br>Remove these files or replace them with smaller versions.`,
+                'error',
+                'Invalid Files Detected'
+            );
             return;
         }
 
-        const totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+        // Only use valid files for submission
+        const validFiles = selectedFiles.filter(f => f.isValid);
+
+        // Validation with custom popups
+        const totalSize = validFiles.reduce((acc, f) => acc + f.size, 0);
         if (totalSize > 25 * 1024 * 1024) {
-            alert("Total file size exceeds 25 MB. Please remove some files.");
+            showModal(
+                `Total file size is ${(totalSize / 1024 / 1024).toFixed(1)}MB, which exceeds the 25MB limit.<br><br>Please remove some files to continue.`,
+                'error',
+                'Total File Size Exceeded'
+            );
             return;
         }
 
@@ -153,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             const formData = new FormData();
             
-            // Append form fields (excluding files)
+            // Append form fields
             const formFields = new FormData(form);
             for (let [key, value] of formFields.entries()) {
                 if (key !== 'upload') {
@@ -162,7 +223,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             
             // Append only valid files
-            const validFiles = selectedFiles.filter(file => file.isValid);
             validFiles.forEach(file => {
                 formData.append("upload", file);
             });
@@ -179,17 +239,29 @@ document.addEventListener("DOMContentLoaded", function() {
             const result = await response.json();
 
             if (result.success || result.message) {
-                alert(result.message || "Form submitted successfully!");
-                form.reset();
-                selectedFiles = [];
-                renderPreviews();
+                showModal(
+                    `Your feedback has been successfully submitted!<br><br><strong>Name:</strong> ${form.name.value}<br><strong>Branch:</strong> ${form.branch.value}<br><br>Thank you for your valuable feedback.`,
+                    'success',
+                    'Form Submitted Successfully'
+                );
+                
+                // Reset form after successful submission
+                setTimeout(() => {
+                    form.reset();
+                    selectedFiles = [];
+                    renderPreviews();
+                }, 2000);
             } else {
                 throw new Error(result.error || "Failed to submit form");
             }
 
         } catch (error) {
             console.error("Submission error:", error);
-            alert("Form submission failed: " + error.message + ". Please try again.");
+            showModal(
+                `Form submission failed: <strong>${error.message}</strong><br><br>Please check your internet connection and try again. If the problem persists, contact technical support.`,
+                'error',
+                'Submission Failed'
+            );
         } finally {
             // Reset submission state
             isSubmitting = false;
