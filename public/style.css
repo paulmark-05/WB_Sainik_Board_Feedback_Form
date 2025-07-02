@@ -260,6 +260,47 @@ button[type="submit"]:disabled {
     margin-right: 10px;
 }
 
+/* Clickable Information Icon Styles */
+.modal-icon.clickable-icon {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.modal-icon.clickable-icon:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.modal-icon.clickable-icon:active {
+    transform: scale(0.95);
+}
+
+/* Tooltip for info icon */
+.modal-icon.clickable-icon::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+
+.modal-icon.clickable-icon:hover::after {
+    opacity: 1;
+}
+
 .modal-title {
     margin: 0;
     font-size: 18px;
@@ -339,6 +380,36 @@ button[type="submit"]:disabled {
 
 .modal-container.warning .modal-icon::before {
     content: '⚠️';
+}
+
+/* Info Modal Variant for Help */
+.modal-container.info .modal-header {
+    background: linear-gradient(to right, #17a2b8, #138496);
+}
+
+.modal-container.info .modal-icon::before {
+    content: 'ℹ️';
+}
+
+/* Help Content Styling */
+.help-content {
+    text-align: center;
+}
+
+.help-content h4 {
+    color: #007bff;
+    margin: 15px 0 10px 0;
+    font-size: 16px;
+}
+
+.help-content ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.help-content li {
+    margin: 8px 0;
+    line-height: 1.4;
 }
 
 /* Animations */
