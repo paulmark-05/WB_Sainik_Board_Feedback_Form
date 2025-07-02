@@ -26,23 +26,21 @@
         </div>
 
         <form id="feedbackForm" method="POST" enctype="multipart/form-data">
-            <!-- Row 1: Rank and ESM Name -->
+            <!-- Row 1: Rank/ESM Name Column + Relationship Column -->
             <div class="form-row">
-                <div class="input-group">
-                    <label for="rank">Rank *</label>
-                    <input type="text" id="rank" name="rank" required placeholder="Enter Rank">
+                <div class="input-group stacked-fields">
+                    <div class="field-container">
+                        <label for="rank">Rank *</label>
+                        <input type="text" id="rank" name="rank" required placeholder="Enter Rank">
+                    </div>
+                    <div class="field-container">
+                        <label for="esmName">ESM Name *</label>
+                        <input type="text" id="esmName" name="esmName" required placeholder="Enter ESM Name">
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label for="esmName">ESM Name *</label>
-                    <input type="text" id="esmName" name="esmName" required placeholder="Enter ESM Name">
-                </div>
-            </div>
-
-            <!-- Row 2: Relationship Radio Buttons -->
-            <div class="form-row">
-                <div class="input-group full-width">
+                <div class="input-group relationship-column">
                     <label>Relationship *</label>
-                    <div class="checkbox-group">
+                    <div class="checkbox-group vertical">
                         <label class="checkbox-label">
                             <input type="radio" name="relationship" value="Self" required>
                             <span class="radio-checkmark"></span>
@@ -62,19 +60,18 @@
                 </div>
             </div>
 
-            <!-- Row 3: Full Name and Email -->
+            <!-- Row 2: Full Name -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="name">Full Name *</label>
                     <input type="text" id="name" name="name" required placeholder="Enter Full Name">
                 </div>
                 <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter Email-id">
+                    <!-- Empty for layout balance -->
                 </div>
             </div>
 
-            <!-- Row 4: Phone and Branch -->
+            <!-- Row 3: Phone and Email -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="phone">Phone No. *</label>
@@ -82,6 +79,14 @@
                            placeholder="Enter 10-digit mobile number">
                     <div id="phone-error" class="error-message" style="display: none;"></div>
                 </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter Email-id">
+                </div>
+            </div>
+
+            <!-- Row 4: Branch and ZSB ID -->
+            <div class="form-row">
                 <div class="input-group">
                     <label for="branch">Branch *</label>
                     <select id="branch" name="branch" required>
@@ -103,20 +108,13 @@
                         <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
                     </select>
                 </div>
-            </div>
-
-            <!-- Row 5: ZSB ID -->
-            <div class="form-row">
                 <div class="input-group">
                     <label for="id">ZSB ID Card No.(if any):</label>
                     <input type="text" id="id" name="id" placeholder="Enter ZSB ID Card Number">
                 </div>
-                <div class="input-group">
-                    <!-- Empty for layout balance -->
-                </div>
             </div>
 
-            <!-- Row 6: Feedback Text Area -->
+            <!-- Row 5: Feedback Text Area -->
             <div class="form-row">
                 <div class="input-group" style="flex: 1;">
                     <label for="sugg">Suggestions / Feedback :</label>
@@ -124,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- Row 7: File Upload -->
+            <!-- Row 6: File Upload -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="upload">Upload related photos/documents (max 10):</label>
