@@ -14,6 +14,17 @@
     </div>
 
     <div class="form-container">
+        <!-- MOVED: Guidelines Icon at Form Beginning -->
+        <div class="form-header">
+            <div class="guidelines-section">
+                <button type="button" class="guidelines-btn" onclick="showFormHelp()" title="Click for form guidelines and help">
+                    <span class="guidelines-icon">ℹ️</span>
+                    <span class="guidelines-text">Form Guidelines & Help</span>
+                </button>
+                <p class="guidelines-subtitle">Click above for submission guidelines, file requirements, and troubleshooting tips</p>
+            </div>
+        </div>
+
         <form id="feedbackForm" method="POST" enctype="multipart/form-data">
             <div class="form-row">
                 <div class="input-group">
@@ -41,8 +52,8 @@
                 <div class="input-group">
                     <label for="branch">Branch *</label>
                     <select id="branch" name="branch" required>
-                        <option value="" color="grey">--Select ZSB branch--</option>
-                          <option value="Rajya Sainik Board">Rajya Sainik Board</option>
+                        <option value="">--Select ZSB branch--</option>
+                        <option value="Rajya Sainik Board">Rajya Sainik Board</option>
                           <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhu )</option>
                           <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
                           <option value="ZSB Dakshin Dinajpur">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
@@ -57,7 +68,7 @@
                           <option value="ZSB Nadia">ZSB Nadia ( Nadia )</option>
                           <option value="ZSB North 24 Parganas">ZSB North 24 Parganas ( North 24 Parganas )</option>
                           <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
-                     </select>
+                    </select>
                 </div>
                 <div class="input-group">
                     <label for="id">ZSB ID Card No.(if any):</label>
@@ -82,16 +93,24 @@
 
             <div id="file-preview"></div>
 
-            <button type="submit" id="submitBtn">SUBMIT</button>
+            <!-- Terms Acceptance Checkbox -->
+            <div class="terms-container">
+                <label class="terms-label">
+                    <input type="checkbox" id="termsCheckbox" name="termsAcceptance" required>
+                    <span class="checkmark"></span>
+                    I agree to submit my personal information entered above and adhere to the 
+                    <a href="terms.html" target="_blank" class="terms-link">terms and conditions</a>.
+                </label>
+            </div>
+
+            <button type="submit" id="submitBtn" class="disabled">SUBMIT</button>
         </form>
     </div>
 
-    <!-- Custom Modal Popup -->
+    <!-- SIMPLIFIED Modal Popup (No guidelines icon in header) -->
     <div id="customModal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
-                <!-- FIXED: Single clickable information icon (removed duplicate) -->
-                <span class="modal-icon clickable-icon" onclick="showFormHelp()" title="Click for form help and guidelines">ℹ️</span>
                 <h3 class="modal-title">Notification</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
