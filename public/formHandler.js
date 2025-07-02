@@ -1,7 +1,7 @@
 // Prevent multiple submissions
 let isSubmitting = false;
 let selectedFiles = [];
-let currentCompressFileIndex = -1; // Track which file is being compressed
+let currentCompressFileIndex = -1;
 
 // Enhanced file size display function
 function formatFileSize(bytes) {
@@ -17,6 +17,12 @@ function formatFileSize(bytes) {
     } else {
         return (bytes / (k * k * k)).toFixed(2) + ' GB';
     }
+}
+
+// Check if file is a full-display image
+function isFullDisplayImage(file) {
+    const imageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    return imageTypes.includes(file.type.toLowerCase());
 }
 
 // Simplified consent validation
@@ -83,7 +89,6 @@ function showModal(message, type = 'info', title = 'Notification') {
     titleElement.textContent = title;
     messageElement.innerHTML = message;
     
-    // Simple OK button only for regular notifications
     footerElement.innerHTML = '<button class="modal-btn-primary" onclick="closeModal()">OK</button>';
     
     modal.classList.add('active');
@@ -98,16 +103,14 @@ function closeModal() {
     modal.classList.remove('active');
     document.body.style.overflow = 'auto';
     
-    // Reset compression tracking
     currentCompressFileIndex = -1;
 }
 
-// NEW: Show compression confirmation dialog
+// Show compression confirmation dialog
 function showCompressionConfirmation(fileIndex) {
     const file = selectedFiles[fileIndex];
     if (!file) return;
     
-    // Store the file index for later use
     currentCompressFileIndex = fileIndex;
     
     const modal = document.getElementById('customModal');
@@ -116,7 +119,6 @@ function showCompressionConfirmation(fileIndex) {
     const messageElement = document.getElementById('modalMessage');
     const footerElement = modal.querySelector('.modal-footer');
     
-    // Set confirmation styling
     container.classList.remove('success', 'error', 'warning', 'info');
     container.classList.add('confirm');
     
@@ -133,7 +135,6 @@ function showCompressionConfirmation(fileIndex) {
         </div>
     `;
     
-    // Custom footer with Yes/No options
     footerElement.innerHTML = `
         <button class="modal-btn-secondary" onclick="closeModal()">No, close this message</button>
         <button class="modal-btn-primary" onclick="proceedWithCompression()">Yes, I want to compress</button>
@@ -146,7 +147,7 @@ function showCompressionConfirmation(fileIndex) {
     modalBody.scrollTop = 0;
 }
 
-// NEW: Proceed with compression after confirmation
+// Proceed with compression after confirmation
 function proceedWithCompression() {
     if (currentCompressFileIndex === -1) {
         closeModal();
@@ -163,23 +164,19 @@ function proceedWithCompression() {
     
     console.log('Proceeding with compression for:', file.name);
     
-    // Check if it's an image for client-side compression
     if (file.type.startsWith('image/')) {
         compressImageClientSide(file, currentCompressFileIndex);
     } else {
-        // Redirect to external compression service
         showCompressionServiceModal([file], currentCompressFileIndex);
     }
 }
 
-// UPDATED: Compress file function with confirmation
+// Compress file function with confirmation
 function compressFile(fileIndex) {
     const file = selectedFiles[fileIndex];
     if (!file) return;
     
     console.log('Compress button clicked for:', file.name);
-    
-    // Show confirmation dialog instead of immediate compression
     showCompressionConfirmation(fileIndex);
 }
 
@@ -191,7 +188,6 @@ async function compressImageClientSide(imageFile, fileIndex) {
         const compressedFile = await compressImageUsingCanvas(imageFile);
         
         if (compressedFile.size <= 10 * 1024 * 1024) {
-            // Replace the original file with compressed version
             selectedFiles[fileIndex] = compressedFile;
             
             updateFileInput();
@@ -269,7 +265,7 @@ function compressImageUsingCanvas(file) {
     });
 }
 
-// Show compression service selection for non-images
+// Show compression service selection with RECOMMENDED mark for iLovePDF
 function showCompressionServiceModal(files, fileIndex) {
     const file = files[0];
     const serviceOptions = `
@@ -282,9 +278,10 @@ function showCompressionServiceModal(files, fileIndex) {
                         <span>Free • No Registration • Multiple Formats</span>
                     </div>
                 </button>
-                <button class="service-btn" onclick="redirectToILovePDF()">
+                <button class="service-btn recommended" onclick="redirectToILovePDF()">
                     <div class="service-info">
                         <strong>iLovePDF</strong>
+                        <span class="recommended-badge">Recommended</span>
                         <span>Free • PDF Specialist • High Quality</span>
                     </div>
                 </button>
@@ -362,10 +359,11 @@ function showFormHelp() {
         <div class="help-content">
             <h4>📋 Form Submission Guidelines</h4>
             <ul style="text-align: left; margin: 15px 0;">
-                <li><strong>Required Fields:</strong> Rank, Full Name, Phone (10 digits), and Branch are mandatory</li>
+                <li><strong>Required Fields:</strong> Rank, ESM Name, Relationship, Full Name, Phone (10 digits), and Branch are mandatory</li>
                 <li><strong>File Upload:</strong> Maximum 10 files, each under 10MB</li>
                 <li><strong>Supported Formats:</strong> Images (JPG, PNG), Documents (PDF, DOC, DOCX)</li>
                 <li><strong>Phone Number:</strong> Must be a valid 10-digit Indian mobile number</li>
+                <li><strong>Relationship:</strong> Select one option - Self, Widow, or Dependent</li>
             </ul>
             
             <h4>📁 Data Protection</h4>
@@ -380,8 +378,8 @@ function showFormHelp() {
             <ul style="text-align: left; margin: 15px 0;">
                 <li><strong>Oversized Files:</strong> Red warning appears above files exceeding 10MB</li>
                 <li><strong>Compress Button:</strong> Click to get compression options with confirmation</li>
-                <li><strong>Confirmation Dialog:</strong> Choose to compress or cancel the action</li>
-                <li><strong>Automatic Replacement:</strong> Compressed files automatically replace originals</li>
+                <li><strong>Image Preview:</strong> PNG, JPG, JPEG files show full image in thumbnail</li>
+                <li><strong>Recommended Service:</strong> iLovePDF is recommended for PDF compression</li>
             </ul>
             
             <h4>📞 Support</h4>
@@ -499,7 +497,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
             fileBox.appendChild(removeBtn);
 
-            if (file.type.startsWith("image/")) {
+            // ENHANCED: Full image display for PNG, JPG, JPEG
+            if (isFullDisplayImage(file)) {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.className = "file-thumb full-image";
+                img.onload = () => URL.revokeObjectURL(img.src);
+                fileBox.appendChild(img);
+            } else if (file.type.startsWith("image/")) {
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(file);
                 img.className = "file-thumb";
@@ -522,7 +527,7 @@ document.addEventListener("DOMContentLoaded", function() {
             sizeBadge.textContent = formatFileSize(file.size);
             fileBox.appendChild(sizeBadge);
 
-            // Add compress button for oversized files (with confirmation)
+            // Add compress button for oversized files
             if (isOversized) {
                 const compressBtn = document.createElement("button");
                 compressBtn.className = "compress-btn";
@@ -663,3 +668,4 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
