@@ -1,19 +1,24 @@
+// ============================
+// 📄 formHandler.js (Frontend)
+// ============================
 document.addEventListener("DOMContentLoaded", () => {
   let selectedFiles = [];
 
   const uploadInput = document.getElementById("upload");
   const previewContainer = document.getElementById("file-preview");
   const form = document.getElementById("feedbackForm");
+  const submitBtn = form.querySelector("button[type='submit']");
+  const loader = document.getElementById("loader");
+  const timeoutMsg = document.getElementById("timeout-msg");
 
   uploadInput.addEventListener("change", function () {
     const newFiles = Array.from(uploadInput.files);
 
-    // Avoid duplicates by file.name
     const existingNames = selectedFiles.map(file => file.name);
     const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
 
-    selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // Limit to 10 files
-    uploadInput.value = ""; // Clear native file input (doesn't clear selectedFiles)
+    selectedFiles = [...selectedFiles, ...uniqueFiles].slice(0, 10); // Limit to 10
+    uploadInput.value = "";
     renderPreviews();
   });
 
@@ -64,21 +69,27 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // Disable submit button
-    const submitBtn = form.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Submitting...";
+    // File size check
+    const totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+    if (totalSize > 25 * 1024 * 1024) {
+      alert("Total file size exceeds 25 MB. Please remove some files.");
+      return;
+    }
+
+    if (selectedFiles.some(f => f.size > 10 * 1024 * 1024)) {
+      alert("A file exceeds 10 MB limit.");
+      return;
+    }
 
     const formData = new FormData(form);
-
-    // ✅ Send visible branch name, not just option value
-    const branchSelect = form.branch;
-    const branchLabel = branchSelect.options[branchSelect.selectedIndex].text;
-    formData.set("branch", branchLabel);
-
     selectedFiles.forEach(file => {
-      formData.append("upload", file); // 'upload' must match the name used by multer in backend
+      formData.append("upload", file);
     });
+
+    // Show loader, disable form
+    loader.style.display = "block";
+    timeoutMsg.style.display = "block";
+    submitBtn.disabled = true;
 
     try {
       const res = await fetch("https://wb-sainik-board-feedback-form.onrender.com/submit", {
@@ -100,9 +111,9 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Submission failed:", err);
       alert("Form submission failed");
     } finally {
-      // Re-enable submit button
+      loader.style.display = "none";
+      timeoutMsg.style.display = "none";
       submitBtn.disabled = false;
-      submitBtn.innerText = "Submit";
     }
   });
 });
