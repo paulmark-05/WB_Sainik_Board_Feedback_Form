@@ -2,6 +2,7 @@
 let isSubmitting = false;
 let selectedFiles = [];
 let currentCompressFileIndex = -1;
+let currentCompressedFile = null; // Moved to global scope
 
 // Enhanced file size display function
 function formatFileSize(bytes) {
@@ -136,8 +137,11 @@ function closeModal() {
     modal.classList.remove('active');
     document.body.style.overflow = 'auto';
     
-    currentCompressFileIndex = -1;
-    window.currentCompressedFile = null;
+    // Don't reset these until we're sure we're done
+    if (!modal.classList.contains('compress') && !modal.classList.contains('success')) {
+        currentCompressFileIndex = -1;
+        currentCompressedFile = null;
+    }
 }
 
 // Enhanced compression confirmation dialog
@@ -216,7 +220,7 @@ function getFileTypeInfo(file) {
     }
 }
 
-// ENHANCED: Start compression process with guaranteed size reduction
+// Start compression process with guaranteed size reduction
 async function startCompression() {
     if (currentCompressFileIndex === -1) {
         closeModal();
@@ -245,6 +249,9 @@ async function startCompression() {
         } else {
             compressedFile = await compressGenericFileUntilUnderLimit(file, targetSize);
         }
+        
+        // Store the compressed file globally
+        currentCompressedFile = compressedFile;
         
         // Complete progress bar
         const progressFill = document.querySelector('.progress-fill');
@@ -339,7 +346,7 @@ function updateProgressStep(stepIndex) {
     });
 }
 
-// Show compression results with options
+// FIXED: Show compression results with proper button event handlers
 function showCompressionResults(originalFile, compressedFile) {
     const modal = document.getElementById('customModal');
     const container = modal.querySelector('.modal-container');
@@ -387,13 +394,33 @@ function showCompressionResults(originalFile, compressedFile) {
         </div>
     `;
     
+    // FIXED: Properly set up buttons with event listeners instead of inline onclick
     footerElement.innerHTML = `
-        <button class="modal-btn-danger" onclick="removeOversizedFile()">Remove Original File</button>
-        <button class="modal-btn-primary" onclick="replaceWithCompressed()">Replace with Compressed File</button>
+        <button class="modal-btn-danger" id="removeBtn">Remove Original File</button>
+        <button class="modal-btn-primary" id="replaceBtn">Replace with Compressed File</button>
     `;
     
-    // Store compressed file for later use
-    window.currentCompressedFile = compressedFile;
+    // FIXED: Add event listeners after buttons are in DOM
+    setTimeout(() => {
+        const removeBtn = document.getElementById('removeBtn');
+        const replaceBtn = document.getElementById('replaceBtn');
+        
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRemoveOriginalFile();
+            });
+        }
+        
+        if (replaceBtn) {
+            replaceBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleReplaceWithCompressed();
+            });
+        }
+    }, 100);
 }
 
 // Show compression error
@@ -431,70 +458,121 @@ function showCompressionError(file, errorMessage) {
     
     footerElement.innerHTML = `
         <button class="modal-btn-secondary" onclick="closeModal()">Keep Original</button>
-        <button class="modal-btn-danger" onclick="removeOversizedFile()">Remove File</button>
+        <button class="modal-btn-danger" onclick="handleRemoveOriginalFile()">Remove File</button>
     `;
 }
 
-// ENHANCED: Replace original file with compressed version
-function replaceWithCompressed() {
-    if (currentCompressFileIndex !== -1 && window.currentCompressedFile) {
-        // Replace the file in the array
-        selectedFiles[currentCompressFileIndex] = window.currentCompressedFile;
-        
-        // Update the file input
-        updateFileInput();
-        
-        // Re-render the previews
-        renderPreviews();
-        
-        // Show success message
-        showModal(
-            'File has been successfully replaced with the compressed version that is under 10MB!',
-            'success',
-            'File Replaced'
-        );
-        
-        // Clean up
-        window.currentCompressedFile = null;
-        currentCompressFileIndex = -1;
+// FIXED: Proper function to replace original file with compressed version
+function handleReplaceWithCompressed() {
+    console.log('Replace button clicked', {
+        currentCompressFileIndex,
+        currentCompressedFile,
+        selectedFilesLength: selectedFiles.length
+    });
+    
+    if (currentCompressFileIndex !== -1 && currentCompressedFile && selectedFiles[currentCompressFileIndex]) {
+        try {
+            // Replace the file in the array
+            selectedFiles[currentCompressFileIndex] = currentCompressedFile;
+            
+            // Update the file input
+            updateFileInput();
+            
+            // Re-render the previews
+            renderPreviews();
+            
+            // Close the current modal
+            closeModal();
+            
+            // Show success message
+            showModal(
+                'File has been successfully replaced with the compressed version that is under 10MB!',
+                'success',
+                'File Replaced'
+            );
+            
+            // Clean up
+            currentCompressedFile = null;
+            currentCompressFileIndex = -1;
+            
+        } catch (error) {
+            console.error('Error replacing file:', error);
+            showModal(
+                'Error replacing file. Please try again.',
+                'error',
+                'Error'
+            );
+        }
     } else {
-        closeModal();
+        console.error('Cannot replace file - missing data:', {
+            currentCompressFileIndex,
+            currentCompressedFile,
+            selectedFile: selectedFiles[currentCompressFileIndex]
+        });
+        showModal(
+            'Error: Cannot replace file. Please try compressing again.',
+            'error',
+            'Error'
+        );
     }
 }
 
-// ENHANCED: Properly remove oversized file from selection and uploads
-function removeOversizedFile() {
-    if (currentCompressFileIndex !== -1) {
-        const fileName = selectedFiles[currentCompressFileIndex].name;
-        
-        // Remove the file from the selectedFiles array
-        selectedFiles.splice(currentCompressFileIndex, 1);
-        
-        // Update the file input to reflect the removal
-        updateFileInput();
-        
-        // Re-render the file previews
-        renderPreviews();
-        
-        // Update the file count display
-        updateFileCount();
-        
-        // Show confirmation message
-        showModal(
-            `File "${fileName}" has been completely removed from your upload selection.`,
-            'info',
-            'File Removed'
-        );
-        
-        // Clean up
-        window.currentCompressedFile = null;
-        currentCompressFileIndex = -1;
+// FIXED: Proper function to remove oversized file from selection
+function handleRemoveOriginalFile() {
+    console.log('Remove button clicked', {
+        currentCompressFileIndex,
+        selectedFilesLength: selectedFiles.length
+    });
+    
+    if (currentCompressFileIndex !== -1 && selectedFiles[currentCompressFileIndex]) {
+        try {
+            const fileName = selectedFiles[currentCompressFileIndex].name;
+            
+            // Remove the file from the selectedFiles array
+            selectedFiles.splice(currentCompressFileIndex, 1);
+            
+            // Update the file input to reflect the removal
+            updateFileInput();
+            
+            // Re-render the file previews
+            renderPreviews();
+            
+            // Close the current modal
+            closeModal();
+            
+            // Show confirmation message
+            showModal(
+                `File "${fileName}" has been completely removed from your upload selection.`,
+                'info',
+                'File Removed'
+            );
+            
+            // Clean up
+            currentCompressedFile = null;
+            currentCompressFileIndex = -1;
+            
+        } catch (error) {
+            console.error('Error removing file:', error);
+            showModal(
+                'Error removing file. Please try again.',
+                'error',
+                'Error'
+            );
+        }
     } else {
-        closeModal();
+        console.error('Cannot remove file - invalid index:', {
+            currentCompressFileIndex,
+            selectedFilesLength: selectedFiles.length
+        });
+        showModal(
+            'Error: Cannot remove file. Please try again.',
+            'error',
+            'Error'
+        );
     }
 }
 
-// ENHANCED: Aggressive image compression until under size limit
+// FIXED: Aggressive image compression until under size limit
 async function compressImageUntilUnderLimit(imageFile, targetSize) {
     return new Promise((resolve, reject) => {
         const canvas = document.createElement('canvas');
@@ -574,7 +652,7 @@ function attemptImageCompression(img, canvas, ctx, originalFile, quality, maxSiz
     });
 }
 
-// ENHANCED: PDF compression with maximum ZIP compression
+// PDF compression with maximum ZIP compression
 async function compressPDFUntilUnderLimit(pdfFile, targetSize) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip library not loaded. PDF compression unavailable.');
@@ -583,23 +661,13 @@ async function compressPDFUntilUnderLimit(pdfFile, targetSize) {
     const zip = new JSZip();
     zip.file(pdfFile.name, pdfFile);
     
-    // Try maximum compression first
-    let compressedBlob = await zip.generateAsync({
+    const compressedBlob = await zip.generateAsync({
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
             level: 9 // Maximum compression
         }
     });
-    
-    // If still too large, try alternative compression
-    if (compressedBlob.size > targetSize) {
-        // Try with different compression algorithm
-        compressedBlob = await zip.generateAsync({
-            type: 'blob',
-            compression: 'STORE' // No compression, just ZIP container
-        });
-    }
     
     const compressedName = pdfFile.name.replace(/\.pdf$/i, '-compressed.pdf');
     return new File([compressedBlob], compressedName, {
@@ -608,7 +676,7 @@ async function compressPDFUntilUnderLimit(pdfFile, targetSize) {
     });
 }
 
-// ENHANCED: Document compression with maximum ZIP compression
+// Document compression with maximum ZIP compression
 async function compressDocumentUntilUnderLimit(docFile, targetSize) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip library not loaded. Document compression unavailable.');
@@ -635,7 +703,7 @@ async function compressDocumentUntilUnderLimit(docFile, targetSize) {
     });
 }
 
-// ENHANCED: Generic file compression with maximum ZIP compression
+// Generic file compression with maximum ZIP compression
 async function compressGenericFileUntilUnderLimit(file, targetSize) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip library not loaded. File compression unavailable.');
@@ -671,9 +739,11 @@ function compressFile(fileIndex) {
     showCompressionConfirmation(fileIndex);
 }
 
-// ENHANCED: Update file input to properly reflect selectedFiles array
+// Update file input to properly reflect selectedFiles array
 function updateFileInput() {
     const uploadInput = document.getElementById('upload');
+    
+    if (!uploadInput) return;
     
     if (selectedFiles.length === 0) {
         uploadInput.value = '';
@@ -883,7 +953,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateFileCount();
     }
 
-    // ENHANCED: Update file count function
+    // Update file count function
     function updateFileCount() {
         const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024).length;
         const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024).length;
