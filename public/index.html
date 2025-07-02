@@ -41,23 +41,23 @@
                 <div class="input-group">
                     <label for="branch">Branch *</label>
                     <select id="branch" name="branch" required>
-                        <option value="">--Select ZSB branch--</option>
-                        <option value="Rajya Sainik Board">Rajya Sainik Board</option>
-                        <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhum )</option>
-                        <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
-                        <option value="ZSB Dakshin Dinajpur">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
-                        <option value="ZSB Darjeeling ">ZSB Darjeeling ( Darjeeling )</option>
-                        <option value="ZSB Howrah">ZSB Howrah ( Howrah & Hooghly )</option>
-                        <option value="ZSB Jalpaiguri">ZSB Jalpaiguri ( Jalpaiguri )</option>
-                        <option value="ZSB Kalimpong">ZSB Kalimpong ( Kalimpong )</option>
-                        <option value="ZSB Kolkata">ZSB Kolkata ( Kolkata )</option>
-                        <option value="ZSB Malda">ZSB Malda ( Malda )</option>
-                        <option value="ZSB Midnapore">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
-                        <option value="ZSB Murshidabad">ZSB Murshidabad ( Murshidabad )</option>
-                        <option value="ZSB Nadia">ZSB Nadia ( Nadia )</option>
-                        <option value="ZSB North 24 Parganas">ZSB North 24 Parganas ( North 24 Parganas )</option>
-                        <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
-                    </select>
+                        <option value="" color="grey">--Select ZSB branch--</option>
+                          <option value="Rajya Sainik Board">Rajya Sainik Board</option>
+                          <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhu )</option>
+                          <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
+                          <option value="ZSB Dakshin Dinajpur">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
+                          <option value="ZSB Darjeeling">ZSB Darjeeling ( Darjeeling )</option>
+                          <option value="ZSB Howrah">ZSB Howrah ( Howrah & Hooghly )</option>
+                          <option value="ZSB Jalpaiguri">ZSB Jalpaiguri ( Jalpaiguri )</option>
+                          <option value="ZSB Kalimpong">ZSB Kalimpong ( Kalimpong )</option>
+                          <option value="ZSB Kolkata">ZSB Kolkata ( Kolkata )</option>
+                          <option value="ZSB Malda">ZSB Malda ( Malda )</option>
+                          <option value="ZSB Midnapore">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
+                          <option value="ZSB Murshidabad ">ZSB Murshidabad ( Murshidabad )</option>
+                          <option value="ZSB Nadia">ZSB Nadia ( Nadia )</option>
+                          <option value="ZSB North 24 Parganas">ZSB North 24 Parganas ( North 24 Parganas )</option>
+                          <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
+                     </select>
                 </div>
                 <div class="input-group">
                     <label for="id">ZSB ID Card No.(if any):</label>
@@ -83,8 +83,24 @@
             <div id="file-preview"></div>
 
             <button type="submit" id="submitBtn">SUBMIT</button>
-            
         </form>
+    </div>
+
+    <!-- Custom Modal Popup -->
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span class="modal-icon">ℹ️</span>
+                <h3 class="modal-title">Notification</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Your message will appear here</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn-primary" onclick="closeModal()">OK</button>
+            </div>
+        </div>
     </div>
 
     <script src="formHandler.js"></script>
