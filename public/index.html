@@ -1,45 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>WB Sainik Board • Feedback / Grievances</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>West Bengal Sainik Board - Feedback/Grievances Form</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header class="header">
-    <h1 class="title">Feedback / Grievances Form</h1>
-  </header>
-  <main class="form-container">
-    <section class="form-header">
-      <button type="button" class="guidelines-btn" onclick="showFormHelp()">ℹ️ Help</button>
-      <p class="guidelines-subtitle">Quick form rules and file requirements</p>
-    </section>
-    <form id="feedbackForm" enctype="multipart/form-data">
-      <!-- Rows omitted for brevity; same as previous full bundle -->
-      <!-- Relationship, Name, Rank, Branch, Phone, Email, ID, Feedback, File upload, Consent, Submit -->
-    </form>
-  </main>
-
-  <div id="customModal" class="modal-overlay">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title">Notification</h3>
-        <button class="modal-close" onclick="closeModal()">&times;</button>
-      </div>
-      <div class="modal-body"><div id="modalMessage"></div></div>
-      <div class="modal-footer"></div>
+    <div class="header">
+        <img src="logo.jpg" alt="West Bengal Sainik Board Logo" class="logo">
+        <h1 class="title">Feedback / Grievances Form</h1>
     </div>
-  </div>
 
-  <!-- Submitting Overlay -->
-  <div id="submittingOverlay" class="overlay hidden">
-    <div class="overlay-content">
-      <div id="overlaySpinner" class="spinner"></div>
-      <div id="overlayMessage" class="overlay-message">Submitting…</div>
+    <div class="form-container">
+        <div class="form-header">
+            <div class="guidelines-section">
+                <button type="button" class="guidelines-btn" onclick="showFormHelp()">
+                    <span class="guidelines-icon">ℹ️</span>
+                    <span class="guidelines-text">Form Guidelines & Help</span>
+                </button>
+                <p class="guidelines-subtitle">Click above for submission guidelines, file requirements, and troubleshooting tips</p>
+            </div>
+        </div>
+
+        <form id="feedbackForm" enctype="multipart/form-data" method="post" action="/submit">
+            <!-- Main Information Row -->
+            <div class="form-row main-info-row">
+                <!-- Stacked Rank and ESM Name -->
+                <div class="input-group stacked-fields">                        
+                    <div class="field-container">
+                        <label for="rank">Rank *</label>
+                        <input type="text" id="rank" name="rank" placeholder="Enter Rank" required>
+                    </div>
+                    <div class="field-container">
+                        <label for="esmName">ESM Name *</label>
+                        <input type="text" id="esmName" name="name" placeholder="Enter full name" required>
+                    </div>
+                </div>
+
+                <!-- Relationship Column -->
+                <div id="relationshipSection" class="input-group relationship-column-simple">
+                    <label id="relationshipLabel" class="relationship-label">Relationship *</label>
+                    <div class="checkbox-group-simple">
+                        <label class="checkbox-label-simple">
+                            <input type="radio" name="relationship" value="Self">
+                            <span class="radio-checkmark-simple"></span>
+                            <span class="checkbox-text-simple">Self</span>
+                        </label>
+                        <label class="checkbox-label-simple">
+                            <input type="radio" name="relationship" value="Widow">
+                            <span class="radio-checkmark-simple"></span>
+                            <span class="checkbox-text-simple">Widow</span>
+                        </label>
+                        <label class="checkbox-label-simple">
+                            <input type="radio" name="relationship" value="Dependent">
+                            <span class="radio-checkmark-simple"></span>
+                            <span class="checkbox-text-simple">Dependent</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Row -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="phone">Phone No. *</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter 10-digit mobile number" required>
+                    <span id="phone-error" class="error-message" style="display: none;"></span>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter Email-id">
+                </div>
+            </div>
+
+            <!-- Branch and ID Row -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="branch">Branch *</label>
+                    <select id="branch" name="branch" required>
+                        <option value="">--Select ZSB branch--</option>
+                        <option value="Rajya Sainik Board">Rajya Sainik Board</option>
+                        <option value="ZSB Burdwan">ZSB Burdwan ( Purba Bardhaman, Paschim Bardhaman & Birbhum )</option>
+                        <option value="ZSB Coochbehar">ZSB Coochbehar ( Coochbehar & Alipurduar )</option>
+                        <option value="ZSB Dakshin Dinajpur">ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )</option>
+                        <option value="ZSB Darjeeling">ZSB Darjeeling ( Darjeeling )</option>
+                        <option value="ZSB Howrah">ZSB Howrah ( Howrah & Hooghly )</option>
+                        <option value="ZSB Jalpaiguri">ZSB Jalpaiguri ( Jalpaiguri )</option>
+                        <option value="ZSB Kalimpong">ZSB Kalimpong ( Kalimpong )</option>
+                        <option value="ZSB Kolkata">ZSB Kolkata ( Kolkata )</option>
+                        <option value="ZSB Malda">ZSB Malda ( Malda )</option>
+                        <option value="ZSB Midnapore">ZSB Midnapore ( Medinipur (E & W), Purulia, Jhargram, Bankura )</option>
+                        <option value="ZSB Murshidabad">ZSB Murshidabad ( Murshidabad )</option>
+                        <option value="ZSB Nadia">ZSB Nadia ( Nadia )</option>
+                        <option value="ZSB North 24 Parganas">ZSB North 24 Parganas ( North 24 Parganas )</option>
+                        <option value="ZSB South 24 Parganas">ZSB South 24 Parganas ( South 24 Parganas )</option>
+                     </select>
+                </div>
+                <div class="input-group">
+                    <label for="zsbId">ZSB ID Card No.(if any):</label>
+                    <input type="text" id="zsbId" name="id" placeholder="Enter ZSB ID Card Number">
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="suggestions">Suggestions / Feedback :</label>
+                    <textarea id="suggestions" name="sugg" placeholder="Please provide your feedback, suggestions, or grievances here..." rows="6"></textarea>
+                </div>
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="upload">Upload related photos/documents (max 10):</label>
+                    <input type="file" id="upload" name="upload" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                    <div id="file-preview"></div>
+                    <div id="upload-count">No files selected</div>
+                </div>
+            </div>
+
+            <!-- Consent Checkbox -->
+            <div class="consent-container">
+                <label class="consent-label">
+                    <input type="checkbox" id="consentCheckbox" required>
+                    <span class="checkmark"></span>
+                    I agree to submit my personal information entered above.
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submitBtn" class="disabled" disabled>SUBMIT</button>
+        </form>
     </div>
-  </div>
 
-  <script src="formHandler.js"></script>
+    <!-- Modal -->
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Notification</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalMessage">Your message will appear here</div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn-primary" onclick="closeModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full‐screen submitting overlay -->
+<div id="submittingOverlay" class="overlay hidden">
+  <div class="overlay-content">
+    <div id="overlaySpinner" class="spinner"></div>
+    <div id="overlayMessage" class="overlay-message">Submitting…</div>
+  </div>
+</div>
+
+
+    <script src="formHandler.js"></script>
 </body>
 </html>
