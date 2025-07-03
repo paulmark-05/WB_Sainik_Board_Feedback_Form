@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,120 +6,78 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>WB Sainik Board • Feedback / Grievances</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <header class="header">
-    <img src="logo.png" alt="WB Sainik Board Logo" class="logo" />
     <h1 class="title">Feedback / Grievances Form</h1>
   </header>
-
   <main class="form-container">
     <section class="form-header">
-      <button type="button" class="guidelines-btn" onclick="showFormHelp()">
-        ℹ️ Form Guidelines & Help
-      </button>
-      <p class="guidelines-subtitle">Click above for quick rules and file requirements</p>
+      <button type="button" class="guidelines-btn" onclick="showFormHelp()">ℹ️ Help</button>
     </section>
-
-    <form id="feedbackForm" enctype="multipart/form-data" method="post" action="/submit">
+    <form id="feedbackForm" enctype="multipart/form-data">
       <div class="form-row main-info-row">
         <div class="input-group">
           <label for="esmName">ESM Name *</label>
-          <input type="text" id="esmName" name="name" placeholder="Enter full name" required />
+          <input type="text" id="esmName" name="name" required />
         </div>
-        <div id="relationshipSection" class="input-group relationship-column-simple">
-          <label id="relationshipLabel" class="relationship-label">Relationship *</label>
-          <div class="checkbox-group-simple">
-            <label class="checkbox-label-simple">
-              <input type="radio" name="relationship" value="Self" />
-              <span class="radio-checkmark-simple"></span>
-              <span class="checkbox-text-simple">Self</span>
-            </label>
-            <label class="checkbox-label-simple">
-              <input type="radio" name="relationship" value="Widow" />
-              <span class="radio-checkmark-simple"></span>
-              <span class="checkbox-text-simple">Widow</span>
-            </label>
-            <label class="checkbox-label-simple">
-              <input type="radio" name="relationship" value="Dependent" />
-              <span class="radio-checkmark-simple"></span>
-              <span class="checkbox-text-simple">Dependent</span>
-            </label>
-          </div>
+        <div id="relationshipSection" class="input-group">
+          <label id="relationshipLabel">Relationship *</label>
+          <label><input type="radio" name="relationship" value="Self" /> Self</label>
+          <label><input type="radio" name="relationship" value="Widow" /> Widow</label>
+          <label><input type="radio" name="relationship" value="Dependent" /> Dependent</label>
         </div>
       </div>
-
       <div class="form-row">
         <div class="input-group">
           <label for="rank">Rank *</label>
-          <input type="text" id="rank" name="rank" placeholder="Enter rank" required />
+          <input type="text" id="rank" name="rank" required />
         </div>
         <div class="input-group">
           <label for="branch">Branch *</label>
           <select id="branch" name="branch" required>
             <option value="">Select Branch</option>
-            <option value="ZSB Howrah ( Howrah & Hooghly )">ZSB Howrah (Howrah & Hooghly)</option>
-            <option value="ZSB Kolkata ( Kolkata )">ZSB Kolkata (Kolkata)</option>
-            <option value="ZSB Burdwan ( Purba & Paschim Bardhaman )">ZSB Burdwan (Purba & Paschim Bardhaman)</option>
-            <option value="ZSB Darjeeling ( Darjeeling )">ZSB Darjeeling (Darjeeling)</option>
-            <option value="ZSB Malda ( Malda )">ZSB Malda (Malda)</option>
-            <option value="ZSB Murshidabad ( Murshidabad )">ZSB Murshidabad (Murshidabad)</option>
-            <option value="ZSB Nadia ( Nadia )">ZSB Nadia (Nadia)</option>
-            <option value="ZSB 24 Parganas ( North/South )">ZSB 24 Parganas (North/South)</option>
-            <option value="ZSB Midnapore ( Medinipur E & W )">ZSB Midnapore (Medinipur E & W)</option>
-            <option value="ZSB Coochbehar ( Coochbehar & Alipurduar )">ZSB Coochbehar (Coochbehar & Alipurduar)</option>
-            <option value="ZSB Jalpaiguri ( Jalpaiguri )">ZSB Jalpaiguri (Jalpaiguri)</option>
-            <option value="ZSB Kalimpong ( Kalimpong )">ZSB Kalimpong (Kalimpong)</option>
-            <option value="ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )">ZSB Dakshin Dinajpur (Uttar & Dakshin Dinajpur)</option>
+            <option>ZSB Howrah</option>
+            <option>ZSB Kolkata</option>
+            <!-- etc -->
           </select>
         </div>
       </div>
-
       <div class="form-row">
         <div class="input-group">
-          <label for="phone">Phone No. *</label>
-          <input type="tel" id="phone" name="phone" placeholder="10-digit mobile no." required />
+          <label for="phone">Phone *</label>
+          <input type="tel" id="phone" name="phone" required />
           <span id="phone-error" class="error-message"></span>
         </div>
         <div class="input-group">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" />
+          <input type="email" id="email" name="email" />
         </div>
       </div>
-
       <div class="form-row">
         <div class="input-group">
-          <label for="zsbId">ZSB ID Card No. (optional)</label>
+          <label for="zsbId">ZSB ID (optional)</label>
           <input type="text" id="zsbId" name="id" />
         </div>
         <div class="input-group">
-          <label for="suggestions">Suggestions / Feedback</label>
-          <textarea id="suggestions" name="sugg" rows="5" placeholder="Your feedback…"></textarea>
+          <label for="suggestions">Feedback</label>
+          <textarea id="suggestions" name="sugg"></textarea>
         </div>
       </div>
-
       <div class="form-row">
         <div class="input-group">
-          <label for="upload">Upload documents (max 10)</label>
-          <input type="file" id="upload" name="upload" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
+          <label for="upload">Upload docs (max 10)</label>
+          <input type="file" id="upload" name="upload" multiple />
           <div id="file-preview"></div>
           <div id="upload-count">No files selected</div>
         </div>
       </div>
-
       <div class="consent-container">
-        <label class="consent-label">
-          <input type="checkbox" id="consentCheckbox" />
-          <span class="checkmark"></span>
-          I agree to submit my details.
-        </label>
+        <label><input type="checkbox" id="consentCheckbox" /> I agree</label>
       </div>
-
-      <button id="submitBtn" type="submit" class="disabled" disabled>SUBMIT</button>
+      <button id="submitBtn" type="submit" disabled>SUBMIT</button>
     </form>
   </main>
-
   <div id="customModal" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
@@ -129,7 +88,6 @@
       <div class="modal-footer"></div>
     </div>
   </div>
-
   <script src="formHandler.js"></script>
 </body>
 </html>
