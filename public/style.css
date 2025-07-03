@@ -530,13 +530,9 @@ button[type="submit"].disabled::after {
 .file-name {
   margin-top: 4px;
   font-size: 12px;
-  line-height: 1.2;
-  max-height: 2.4em;              /* 1.2em × 2 lines = 2.4em */
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;          /* limit to 2 lines */
-  -webkit-box-orient: vertical;
-  text-overflow: ellipsis;
+  white-space: nowrap;        /* prevent wrapping */
+  overflow: hidden;           /* hide overflow */
+  text-overflow: ellipsis;    /* show “...” */
 }
 
 
