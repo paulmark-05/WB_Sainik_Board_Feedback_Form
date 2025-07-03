@@ -144,3 +144,8 @@ button[type="submit"]:not(:disabled):hover { background:#0056b3; }
   25%{transform:translateX(-5px)}
   75%{transform:translateX(5px)}
 }
+
+/* style.css (include previous CSS plus) */
+.relationship-label.required-error{color:#e53935!important;animation:shake .5s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
