@@ -215,27 +215,44 @@ function showCompressionConfirmation(fileIndex) {
     modalBody.scrollTop = 0;
 }
 
-// Show compression service selection
-function showCompressionServices() {
-    showModal(`
-        <div style="padding:10px 0 0 0;">
-            <div style="font-weight:600;font-size:15px;margin-bottom:8px;">Choose a compression service</div>
-            <div style="margin-bottom:16px;">
-                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank')">iLovePDF (PDFs, <span style='color:green;font-size:12px;'>Recommended</span>)</button><br>
-                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://compressjpeg.com/','_blank')">CompressJPEG (Images)</button><br>
-                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://smallpdf.com/compress-pdf','_blank')">SmallPDF (PDFs/Docs)</button>
-            </div>
-            <div style="color:#555;font-size:14px;">
-                After compressing, download the file and upload the new version here.
-            </div>
+// Replace your existing showCompressionServiceModal with this:
+
+function showCompressionServiceModal(fileIndex) {
+  const file = selectedFiles[fileIndex];
+  if (!file) return;
+
+  showModal(`
+    <div class="compression-modal white-bg">
+      <h4 class="compression-title">File Compression Services</h4>
+      <p class="compression-subtitle">Choose a free compression service for: <strong>${file.name}</strong></p>
+      <div class="service-cards">
+        <div class="service-card">
+          <button onclick="window.open('https://www.youcompress.com/','_blank')">YouCompress</button>
+          <p>Free • No Registration • Multiple Formats</p>
         </div>
-    `, 'info', 'Online Compression');
-    
-    setTimeout(() => {
-        const footer = document.querySelector('.modal-footer');
-        footer.innerHTML = `<button class="modal-btn-secondary" onclick="closeModal()">Close</button>`;
-    }, 10);
+        <div class="service-card recommended">
+          <button onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank')">iLovePDF</button>
+          <p>Free • PDF Specialist • High Quality</p>
+        </div>
+        <div class="service-card">
+          <button onclick="window.open('https://smallpdf.com/compress-pdf','_blank')">SmallPDF</button>
+          <p>Free • Easy to Use • Quick Processing</p>
+        </div>
+      </div>
+      <p class="compression-instructions">
+        💡 After compressing, download and re-upload the new file here.
+      </p>
+    </div>
+  `, 'info', '');
+  
+  // replace footer buttons
+  setTimeout(() => {
+    document.querySelector('.modal-footer').innerHTML = `
+      <button class="modal-btn-secondary" onclick="closeModal()">Close</button>
+    `;
+  }, 10);
 }
+
 
 // Update file input to match selectedFiles array
 function updateFileInput() {
