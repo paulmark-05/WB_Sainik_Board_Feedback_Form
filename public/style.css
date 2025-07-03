@@ -895,3 +895,61 @@ html {
   font-size: 13px;
   color: #444;
 }
+
+/* Full‐screen overlay */
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+/* Hidden by default */
+.hidden {
+  display: none;
+}
+
+.overlay-content {
+  text-align: center;
+  color: white;
+}
+
+/* Spinner */
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Submitting text */
+.overlay-message {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Success state */
+.overlay.success {
+  background: rgba(0, 128, 0, 0.8);
+}
+
+.overlay.success .spinner {
+  display: none;
+}
+
+.overlay.success .overlay-message {
+  color: white;
+  font-size: 22px;
+}
+
