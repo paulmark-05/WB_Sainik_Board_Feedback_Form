@@ -3,6 +3,7 @@ let isSubmitting = false;
 let selectedFiles = [];
 let currentCompressFileIndex = -1;
 
+
 // Enhanced file size display function
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 KB';
@@ -174,6 +175,7 @@ function closeModal() {
     currentCompressFileIndex = -1;
 }
 
+
 // Show compression confirmation dialog
 function showCompressionConfirmation(fileIndex) {
     const file = selectedFiles[fileIndex];
@@ -205,8 +207,9 @@ function showCompressionConfirmation(fileIndex) {
     
     footerElement.innerHTML = `
         <button class="modal-btn-secondary" onclick="closeModal()">No, close this message</button>
-        <button class="modal-btn-primary" onclick="showCompressionServices()">Yes, I want to compress</button>
-    `;
+<button class="modal-btn-primary" onclick="proceedToCompression()">Yes, I want to compress</button>
+    
+`;
     
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -215,27 +218,50 @@ function showCompressionConfirmation(fileIndex) {
     modalBody.scrollTop = 0;
 }
 
-// Show compression service selection
-function showCompressionServices() {
-    showModal(`
-        <div style="padding:10px 0 0 0;">
-            <div style="font-weight:600;font-size:15px;margin-bottom:8px;">Choose a compression service</div>
-            <div style="margin-bottom:16px;">
-                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank')">iLovePDF (PDFs, <span style='color:green;font-size:12px;'>Recommended</span>)</button><br>
-                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://compressjpeg.com/','_blank')">CompressJPEG (Images)</button><br>
-                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://smallpdf.com/compress-pdf','_blank')">SmallPDF (PDFs/Docs)</button>
-            </div>
-            <div style="color:#555;font-size:14px;">
-                After compressing, download the file and upload the new version here.
-            </div>
-        </div>
-    `, 'info', 'Online Compression');
+
+// White-background compression services dialog
+function proceedToCompression() {
     
-    setTimeout(() => {
-        const footer = document.querySelector('.modal-footer');
-        footer.innerHTML = `<button class="modal-btn-secondary" onclick="closeModal()">Close</button>`;
-    }, 10);
+    const file = selectedFiles[currentCompressFileIndex];
+    if (!file) return;
+
+    showModal(
+        `<div class="compression-modal white-bg">
+            <h4 class="compression-title">File Compression Services</h4>
+            <p class="compression-subtitle">
+                Compress <strong>${file.name}</strong> using one of these free online tools:
+            </p>
+            <div class="service-cards">
+                <div class="service-card">
+                    <button onclick="window.open('https://www.youcompress.com/','_blank')">
+                        YouCompress
+                    </button>
+                    <p>No registration • Multiple formats</p>
+                </div>
+                <div class="service-card recommended">
+                    <button onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank')">
+                        iLovePDF <span class="recommended-text">(Recommended)</span>
+                    </button>
+                    <p>PDF specialist • High quality</p>
+                </div>
+                <div class="service-card">
+                    <button onclick="window.open('https://smallpdf.com/compress-pdf','_blank')">
+                        SmallPDF
+                    </button>
+                    <p>Easy • Quick processing</p>
+                </div>
+            </div>
+            <p class="compression-instructions">
+                💡 After compressing, download the new file and re-upload it here to replace the original.
+            </p>
+        </div>`,
+        'info',
+        '',
+        `<button class="modal-btn-secondary" onclick="closeModal()">Close</button>`
+    );
 }
+ window.proceedToCompression = proceedToCompression;
+
 
 // Update file input to match selectedFiles array
 function updateFileInput() {
