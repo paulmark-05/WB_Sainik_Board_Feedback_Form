@@ -1,5 +1,3 @@
-// server.js
-import { format } from 'date-fns';
 
 require('dotenv').config();
 const express    = require('express');
@@ -91,18 +89,23 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     return res.status(429).json({ success: false, error: 'Please wait 30 seconds before re-submitting' });
   }
   try {
+    const { format } = require('date-fns');
+    // …
     const br = branchClean(d.branch);
     const bf = await ensureFolder(process.env.DRIVE_FOLDER_ID, br);
     const pf = await ensureFolder(bf, clean(`${d.rank}-${d.name}`));
+    
+    // date-fns timestamp instead of manual replace/split
     const ts = format(new Date(), 'yyyy-MM-dd_HH-mm-ss');
     const tf = await ensureFolder(pf, ts);
-
+    
     for (const f of files) {
       const meta = { name: f.originalname, parents: [tf] };
       const media = { mimeType: f.mimetype, body: fs.createReadStream(f.path) };
       await drive.files.create({ resource: meta, media, fields: 'webViewLink' });
       fs.unlinkSync(f.path);
     }
+
 
     const row = [
       new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
