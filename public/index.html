@@ -1,154 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>WB Sainik Board – Feedback / Grievances Form</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WB Sainik Board • Feedback / Grievances</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <!-- ── Top banner ────────────────────────────────────────────── -->
   <header class="header">
-    <img src="logo.png" alt="WB Sainik Board" class="logo">
+    <img src="logo.png" alt="WB Sainik Board Logo" class="logo" />
     <h1 class="title">Feedback / Grievances Form</h1>
   </header>
 
-  <!-- ── Main form container ───────────────────────────────────── -->
   <main class="form-container">
-    <!-- Help / guidelines button -->
     <section class="form-header">
       <button type="button" class="guidelines-btn" onclick="showFormHelp()">
         ℹ️ Form Guidelines & Help
       </button>
-      <p class="guidelines-subtitle">
-        Click the button above for quick rules, file requirements and tips
-      </p>
+      <p class="guidelines-subtitle">Click above for quick rules and file requirements</p>
     </section>
 
     <form id="feedbackForm" enctype="multipart/form-data" method="post" action="/submit">
-      <!-- ── Row 1 : Name - Relationship ───────────────────────── -->
       <div class="form-row main-info-row">
         <div class="input-group">
           <label for="esmName">ESM Name *</label>
-          <input id="esmName" name="name" placeholder="Enter full name" required>
+          <input type="text" id="esmName" name="name" placeholder="Enter full name" required />
         </div>
-
         <div id="relationshipSection" class="input-group relationship-column-simple">
           <label id="relationshipLabel" class="relationship-label">Relationship *</label>
           <div class="checkbox-group-simple">
             <label class="checkbox-label-simple">
-              <input type="radio" name="relationship" value="Self">
-              <span class="radio-checkmark-simple"></span> Self
+              <input type="radio" name="relationship" value="Self" />
+              <span class="radio-checkmark-simple"></span>
+              <span class="checkbox-text-simple">Self</span>
             </label>
             <label class="checkbox-label-simple">
-              <input type="radio" name="relationship" value="Widow">
-              <span class="radio-checkmark-simple"></span> Widow
+              <input type="radio" name="relationship" value="Widow" />
+              <span class="radio-checkmark-simple"></span>
+              <span class="checkbox-text-simple">Widow</span>
             </label>
             <label class="checkbox-label-simple">
-              <input type="radio" name="relationship" value="Dependent">
-              <span class="radio-checkmark-simple"></span> Dependent
+              <input type="radio" name="relationship" value="Dependent" />
+              <span class="radio-checkmark-simple"></span>
+              <span class="checkbox-text-simple">Dependent</span>
             </label>
           </div>
         </div>
       </div>
 
-      <!-- ── Row 2 : Rank - Branch ─────────────────────────────── -->
       <div class="form-row">
         <div class="input-group">
           <label for="rank">Rank *</label>
-          <input id="rank" name="rank" placeholder="Enter rank" required>
+          <input type="text" id="rank" name="rank" placeholder="Enter rank" required />
         </div>
-
         <div class="input-group">
           <label for="branch">Branch *</label>
           <select id="branch" name="branch" required>
-            <option value="">Select branch</option>
-            <!-- WEST BENGAL BRANCH OPTIONS -->
-            <option value="ZSB Howrah ( Howrah & Hooghly )">
-              ZSB Howrah ( Howrah & Hooghly )
-            </option>
-            <option value="ZSB Kolkata ( Kolkata )">
-              ZSB Kolkata ( Kolkata )
-            </option>
-            <option value="ZSB Burdwan ( Purba & Paschim Bardhaman )">
-              ZSB Burdwan ( Purba & Paschim Bardhaman )
-            </option>
-            <option value="ZSB Darjeeling ( Darjeeling )">
-              ZSB Darjeeling ( Darjeeling )
-            </option>
-            <option value="ZSB Midnapore ( Medinipur E & W, Jhargram, Bankura )">
-              ZSB Midnapore ( Medinipur E & W, Jhargram, Bankura )
-            </option>
-            <option value="ZSB North 24 Parganas ( North 24 Parganas )">
-              ZSB North 24 Parganas ( North 24 Parganas )
-            </option>
-            <option value="ZSB South 24 Parganas ( South 24 Parganas )">
-              ZSB South 24 Parganas ( South 24 Parganas )
-            </option>
-            <option value="ZSB Nadia ( Nadia )">
-              ZSB Nadia ( Nadia )
-            </option>
-            <option value="ZSB Murshidabad ( Murshidabad )">
-              ZSB Murshidabad ( Murshidabad )
-            </option>
-            <!-- add / edit options as needed -->
+            <option value="">Select Branch</option>
+            <option value="ZSB Howrah ( Howrah & Hooghly )">ZSB Howrah (Howrah & Hooghly)</option>
+            <option value="ZSB Kolkata ( Kolkata )">ZSB Kolkata (Kolkata)</option>
+            <option value="ZSB Burdwan ( Purba & Paschim Bardhaman )">ZSB Burdwan (Purba & Paschim Bardhaman)</option>
+            <option value="ZSB Darjeeling ( Darjeeling )">ZSB Darjeeling (Darjeeling)</option>
+            <option value="ZSB Malda ( Malda )">ZSB Malda (Malda)</option>
+            <option value="ZSB Murshidabad ( Murshidabad )">ZSB Murshidabad (Murshidabad)</option>
+            <option value="ZSB Nadia ( Nadia )">ZSB Nadia (Nadia)</option>
+            <option value="ZSB 24 Parganas ( North/South )">ZSB 24 Parganas (North/South)</option>
+            <option value="ZSB Midnapore ( Medinipur E & W )">ZSB Midnapore (Medinipur E & W)</option>
+            <option value="ZSB Coochbehar ( Coochbehar & Alipurduar )">ZSB Coochbehar (Coochbehar & Alipurduar)</option>
+            <option value="ZSB Jalpaiguri ( Jalpaiguri )">ZSB Jalpaiguri (Jalpaiguri)</option>
+            <option value="ZSB Kalimpong ( Kalimpong )">ZSB Kalimpong (Kalimpong)</option>
+            <option value="ZSB Dakshin Dinajpur ( Uttar & Dakshin Dinajpur )">ZSB Dakshin Dinajpur (Uttar & Dakshin Dinajpur)</option>
           </select>
         </div>
       </div>
 
-      <!-- ── Row 3 : Phone - Email ─────────────────────────────── -->
       <div class="form-row">
         <div class="input-group">
           <label for="phone">Phone No. *</label>
-          <input id="phone" name="phone" placeholder="10-digit mobile no." required>
-          <span id="phone-error" class="error-message" style="display:none"></span>
+          <input type="tel" id="phone" name="phone" placeholder="10-digit mobile no." required />
+          <span id="phone-error" class="error-message"></span>
         </div>
         <div class="input-group">
-          <label for="email">Email (optional)</label>
-          <input id="email" name="email" type="email" placeholder="you@example.com">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" />
         </div>
       </div>
 
-      <!-- ── Row 4 : ID - Feedback ─────────────────────────────── -->
       <div class="form-row">
         <div class="input-group">
           <label for="zsbId">ZSB ID Card No. (optional)</label>
-          <input id="zsbId" name="id">
+          <input type="text" id="zsbId" name="id" />
         </div>
         <div class="input-group">
-          <label for="suggestions">Feedback / Suggestions</label>
-          <textarea id="suggestions" name="sugg" rows="5"
-            placeholder="Write your grievance / suggestion here…"></textarea>
+          <label for="suggestions">Suggestions / Feedback</label>
+          <textarea id="suggestions" name="sugg" rows="5" placeholder="Your feedback…"></textarea>
         </div>
       </div>
 
-      <!-- ── Row 5 : File upload ──────────────────────────────── -->
       <div class="form-row">
         <div class="input-group">
-          <label for="upload">Upload documents (max 10, ≤10 MB each)</label>
-          <input id="upload" name="upload" type="file" multiple
-                 accept=".png,.jpg,.jpeg,.pdf,.doc,.docx">
+          <label for="upload">Upload documents (max 10)</label>
+          <input type="file" id="upload" name="upload" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
           <div id="file-preview"></div>
           <div id="upload-count">No files selected</div>
         </div>
       </div>
 
-      <!-- ── Consent ──────────────────────────────────────────── -->
       <div class="consent-container">
         <label class="consent-label">
-          <input type="checkbox" id="consentCheckbox">
+          <input type="checkbox" id="consentCheckbox" />
           <span class="checkmark"></span>
           I agree to submit my details.
         </label>
       </div>
 
-      <!-- ── Submit ───────────────────────────────────────────── -->
       <button id="submitBtn" type="submit" class="disabled" disabled>SUBMIT</button>
     </form>
   </main>
 
-  <!-- ── Generic modal template (messages, confirm, etc.) ────── -->
   <div id="customModal" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
