@@ -1,163 +1,569 @@
+// Prevent multiple submissions
+let isSubmitting = false;
 let selectedFiles = [];
-let confirmPending = false;
+let currentCompressFileIndex = -1;
 
-// Helpers
-const qs = s => document.querySelector(s);
-const qsa = s => document.querySelectorAll(s);
-const fmt = b => {
-  const k = 1024;
-  if (b < k) return b + ' bytes';
-  if (b < k*k) return (b/k).toFixed(2) + ' KB';
-  if (b < k*k*k) return (b/(k*k)).toFixed(2) + ' MB';
-  return (b/(k*k*k)).toFixed(2) + ' GB';
-};
-
-// Modal
-function showModal(html, type='info', title='Notification', footerHTML='<button class="modal-btn-primary" onclick="closeModal()">OK</button>') {
-  const m = qs('#customModal');
-  m.classList.add('active');
-  qs('.modal-container').className = 'modal-container ' + type;
-  qs('.modal-title').textContent = title;
-  qs('#modalMessage').innerHTML = html;
-  qs('.modal-footer').innerHTML = footerHTML;
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  qs('#customModal').classList.remove('active');
-  document.body.style.overflow = 'auto';
-  confirmPending = false;
-}
-
-// Validate relationship
-function checkRelationship() {
-  const chosen = [...qsa('input[name="relationship"]')].some(r => r.checked);
-  const label = qs('#relationshipLabel');
-  if (chosen) {
-    label.classList.remove('required-error');
-    return true;
-  }
-  label.classList.add('required-error');
-  qs('#relationshipSection').scrollIntoView({ behavior:'smooth', block:'center' });
-  return false;
-}
-
-// Phone validation
-function validPhone(p) { return /^[6-9]\d{9}$/.test(p.replace(/\D/g,'')); }
-
-// Preview
-function updateInput() {
-  const dt = new DataTransfer();
-  selectedFiles.forEach(f => dt.items.add(f));
-  qs('#upload').files = dt.files;
-}
-function preview() {
-  const box = qs('#file-preview'); box.innerHTML = '';
-  const over = selectedFiles.filter(f => f.size > 10*1024*1024).length;
-  if (over) box.innerHTML = `<div class="oversized-warning"><span class="warning-icon">⚠️</span><span class="warning-text">${over} file(s) >10MB - click to manage.</span></div>`;
-  selectedFiles.forEach((f,i) => {
-    const d = document.createElement('div');
-    d.className = 'file-box' + (f.size>10*1024*1024?' file-oversized':'');
-    const x = document.createElement('span');
-    x.className = 'remove-btn'; x.textContent = '×';
-    x.onclick = e => { e.stopPropagation(); selectedFiles.splice(i,1); updateInput(); preview(); };
-    d.appendChild(x);
-    if (f.type.startsWith('image/')) {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(f); img.className = 'file-thumb';
-      img.onload = ()=>URL.revokeObjectURL(img.src);
-      d.appendChild(img);
+// Enhanced file size display function
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 KB';
+    
+    const k = 1024;
+    if (bytes < k) {
+        return bytes + ' bytes';
+    } else if (bytes < k * k) {
+        return (bytes / k).toFixed(2) + ' KB';
+    } else if (bytes < k * k * k) {
+        return (bytes / (k * k)).toFixed(2) + ' MB';
     } else {
-      const ic = document.createElement('div'); ic.className='file-icon';
-      ic.textContent = f.name.split('.').pop().toUpperCase();
-      d.appendChild(ic);
+        return (bytes / (k * k * k)).toFixed(2) + ' GB';
     }
-    const sb = document.createElement('div');
-    sb.className = 'file-size-badge'+(f.size>10*1024*1024?' oversized':'');
-    sb.textContent = fmt(f.size);
-    d.appendChild(sb);
-    if (f.size>10*1024*1024) d.onclick=()=>manageOversize(i);
-    box.appendChild(d);
-  });
-  updateInput();
-  const valid = selectedFiles.filter(f=>f.size<=10*1024*1024).length;
-  qs('#upload-count').textContent = selectedFiles.length
-    ? `${valid} ready${over?`, ${over} need compression`:''}`
-    : 'No files selected';
 }
 
-// Oversize handling
-function manageOversize(i) {
-  const f = selectedFiles[i];
-  showModal(
-    `<p><strong>${f.name}</strong><br>Size: ${fmt(f.size)} (limit 10MB)</p><p>Remove or compress?</p>`,
-    'warning','Oversized File',
-    `<button class="modal-btn-secondary" onclick="closeModal()">Cancel</button>
-     <button class="modal-btn-primary" onclick="openCompression()">Compress</button>`
-  );
-}
-function openCompression(){
-  showModal(
-    `<p>Select a free compression service; then re-upload.</p>
-     <button class="modal-btn-primary" onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank')">iLovePDF</button>
-     <button class="modal-btn-primary" onclick="window.open('https://compressjpeg.com/','_blank')">CompressJPEG</button>
-     <button class="modal-btn-primary" onclick="window.open('https://smallpdf.com/compress-pdf','_blank')">SmallPDF</button>`,
-    'info','Online Compression',
-    `<button class="modal-btn-secondary" onclick="closeModal()">Close</button>`
-  );
+// Check if file is a full-display image
+function isFullDisplayImage(file) {
+    const imageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    return imageTypes.includes(file.type.toLowerCase());
 }
 
-// Help
-function showFormHelp(){
-  showModal(
-    `<ul style="text-align:left">
-       <li>Name, Relationship, Rank, Phone & Branch are required.</li>
-       <li>Up to 10 files, each ≤10MB.</li>
-       <li>Remove: ×. Oversized: click to compress.</li>
-     </ul>`,
-    'info','Help'
-  );
+// Setup relationship toggle functionality
+function setupRelationshipToggle() {
+    const relationshipRadios = document.querySelectorAll('input[name="relationship"]');
+    
+    relationshipRadios.forEach(radio => {
+        let isSelected = false;
+        
+        radio.addEventListener('click', function() {
+            if (isSelected && this.checked) {
+                // Deselect if already selected
+                this.checked = false;
+                isSelected = false;
+            } else {
+                // Clear all others and select this one
+                relationshipRadios.forEach(r => {
+                    r.parentElement.isSelected = false;
+                });
+                this.checked = true;
+                isSelected = true;
+            }
+            
+            // Remove error styling when a selection is made
+            const label = document.getElementById('relationshipLabel');
+            if (label) {
+                label.classList.remove('required-error');
+            }
+        });
+        
+        // Track selection state
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                relationshipRadios.forEach(r => {
+                    if (r !== this) {
+                        r.parentElement.isSelected = false;
+                    }
+                });
+                isSelected = true;
+                
+                // Remove error styling when a selection is made
+                const label = document.getElementById('relationshipLabel');
+                if (label) {
+                    label.classList.remove('required-error');
+                }
+            }
+        });
+    });
 }
 
-// Init
-document.addEventListener('DOMContentLoaded',()=>{
-  const inp=qs('#upload'), form=qs('#feedbackForm'),
-        sb=qs('#submitBtn'), c=qs('#consentCheckbox');
+// Validate relationship selection
+function validateRelationshipField() {
+    const radios = document.getElementsByName('relationship');
+    const label = document.getElementById('relationshipLabel');
+    const section = document.getElementById('relationshipSection');
+    
+    for (const radio of radios) {
+        if (radio.checked) {
+            label.classList.remove('required-error');
+            return true;
+        }
+    }
+    
+    // No relationship selected - show error
+    label.classList.add('required-error');
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    return false;
+}
 
-  c.onchange = ()=>{ sb.disabled=!c.checked; sb.classList.toggle('disabled',!c.checked) };
-  qs('#phone').oninput = e=>{ const pe=qs('#phone-error'); if(!e.target.value) return pe.style.display='none';
-    pe.textContent = validPhone(e.target.value)?'':'Invalid number'; pe.style.display = pe.textContent?'block':'none';
-  };
-  inp.onchange = e=>{
-    const nf=[...e.target.files].filter(f=>!selectedFiles.find(x=>x.name===f.name));
-    if(selectedFiles.length+nf.length>10){ nf.splice(10-selectedFiles.length); showModal('Max 10 files; extras ignored.','warning','Limit') }
-    selectedFiles=[...selectedFiles,...nf]; e.target.value=''; preview();
-  };
+// Simplified consent validation
+function validateConsent() {
+    const consentCheckbox = document.getElementById('consentCheckbox');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (consentCheckbox && consentCheckbox.checked) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('disabled');
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('disabled');
+    }
+}
 
-  form.onsubmit = e=>{
-    e.preventDefault();
-    if(!checkRelationship()){ showModal('Please select Relationship.','error','Required'); return; }
-    if(!validPhone(qs('#phone').value)){ showModal('Enter a valid phone.','error','Phone'); return; }
-    if(selectedFiles.some(f=>f.size>10*1024*1024)){ showModal('Compress files >10MB first.','error','Oversized'); return; }
-    showModal(
-      'If all information is correct and not violating norms, click Confirm.',
-      'confirm','Confirm Submission',
-      `<button class="modal-btn-secondary" onclick="closeModal()">Cancel</button>
-       <button class="modal-btn-primary" onclick="submitForm()">Confirm</button>`
-    );
-  };
-  preview();
+// Phone number validation
+function validatePhoneNumber(phone) {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(cleanPhone);
+}
+
+// Real-time phone validation
+function setupPhoneValidation() {
+    const phoneInput = document.getElementById('phone');
+    const phoneError = document.getElementById('phone-error');
+    
+    if (!phoneInput) return;
+    
+    phoneInput.addEventListener('input', function() {
+        const phone = this.value.trim();
+        
+        if (phone === '') {
+            phoneError.textContent = '';
+            phoneError.style.display = 'none';
+            return;
+        }
+        
+        if (!validatePhoneNumber(phone)) {
+            phoneError.textContent = 'Please enter a valid 10-digit mobile number';
+            phoneError.style.display = 'block';
+        } else {
+            phoneError.textContent = '';
+            phoneError.style.display = 'none';
+        }
+    });
+}
+
+// Custom Modal Functions
+function showModal(message, type = 'info', title = 'Notification') {
+    const modal = document.getElementById('customModal');
+    const container = modal.querySelector('.modal-container');
+    const titleElement = modal.querySelector('.modal-title');
+    const messageElement = document.getElementById('modalMessage');
+    const footerElement = modal.querySelector('.modal-footer');
+    
+    container.classList.remove('success', 'error', 'warning', 'info', 'confirm');
+    
+    if (type) {
+        container.classList.add(type);
+    }
+    
+    titleElement.textContent = title;
+    messageElement.innerHTML = message;
+    
+    footerElement.innerHTML = '<button class="modal-btn-primary" onclick="closeModal()">OK</button>';
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    const modalBody = modal.querySelector('.modal-body');
+    modalBody.scrollTop = 0;
+}
+
+function closeModal() {
+    const modal = document.getElementById('customModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    
+    currentCompressFileIndex = -1;
+}
+
+// Show compression confirmation dialog
+function showCompressionConfirmation(fileIndex) {
+    const file = selectedFiles[fileIndex];
+    if (!file) return;
+    
+    currentCompressFileIndex = fileIndex;
+    
+    const modal = document.getElementById('customModal');
+    const container = modal.querySelector('.modal-container');
+    const titleElement = modal.querySelector('.modal-title');
+    const messageElement = document.getElementById('modalMessage');
+    const footerElement = modal.querySelector('.modal-footer');
+    
+    container.classList.remove('success', 'error', 'warning', 'info');
+    container.classList.add('confirm');
+    
+    titleElement.textContent = 'Compress File Confirmation';
+    
+    messageElement.innerHTML = `
+        <div class="confirmation-content">
+            <div class="file-info">
+                <p><strong>File:</strong> ${file.name}</p>
+                <p><strong>Current Size:</strong> ${formatFileSize(file.size)}</p>
+                <p><strong>Size Limit:</strong> 10 MB</p>
+            </div>
+            <p class="confirmation-question">What would you like to do with this oversized file?</p>
+        </div>
+    `;
+    
+    footerElement.innerHTML = `
+        <button class="modal-btn-secondary" onclick="closeModal()">No, close this message</button>
+        <button class="modal-btn-primary" onclick="showCompressionServices()">Yes, I want to compress</button>
+    `;
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    const modalBody = modal.querySelector('.modal-body');
+    modalBody.scrollTop = 0;
+}
+
+// Show compression service selection
+function showCompressionServices() {
+    showModal(`
+        <div style="padding:10px 0 0 0;">
+            <div style="font-weight:600;font-size:15px;margin-bottom:8px;">Choose a compression service</div>
+            <div style="margin-bottom:16px;">
+                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://www.ilovepdf.com/compress_pdf','_blank')">iLovePDF (PDFs, <span style='color:green;font-size:12px;'>Recommended</span>)</button><br>
+                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://compressjpeg.com/','_blank')">CompressJPEG (Images)</button><br>
+                <button class="modal-btn-primary" style="margin:3px 0;" onclick="window.open('https://smallpdf.com/compress-pdf','_blank')">SmallPDF (PDFs/Docs)</button>
+            </div>
+            <div style="color:#555;font-size:14px;">
+                After compressing, download the file and upload the new version here.
+            </div>
+        </div>
+    `, 'info', 'Online Compression');
+    
+    setTimeout(() => {
+        const footer = document.querySelector('.modal-footer');
+        footer.innerHTML = `<button class="modal-btn-secondary" onclick="closeModal()">Close</button>`;
+    }, 10);
+}
+
+// Update file input to match selectedFiles array
+function updateFileInput() {
+    const uploadInput = document.getElementById('upload');
+    
+    if (selectedFiles.length === 0) {
+        uploadInput.value = '';
+    } else {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        uploadInput.files = dt.files;
+    }
+}
+
+// Form Help Guidelines
+function showFormHelp() {
+    const helpContent = `
+        <div class="help-content">
+            <h4>📋 Form Guidelines</h4>
+            <ul style="text-align:left;margin:15px 0;">
+                <li><strong>Required:</strong> Rank, ESM Name, Relationship, Phone, Branch</li>
+                <li><strong>Files:</strong> ≤ 10 files, each ≤ 10 MB</li>
+                <li><strong>Formats:</strong> JPG / PNG images, PDF & DOC/DOCX docs</li>
+                <li><strong>Phone:</strong> Valid 10-digit Indian mobile number</li>
+            </ul>
+
+            <h4>🔧 File Management</h4>
+            <ul style="text-align:left;margin:15px 0;">
+                <li>Click the <b>×</b> to remove a file</li>
+                <li>Files over 10 MB show an orange border</li>
+                <li>Click an oversized file → <strong>Compress</strong> or <strong>Remove</strong></li>
+            </ul>
+
+            <h4>📞 Need Help?</h4>
+            <p style="text-align:left;margin:10px 0;">
+                Contact your local ZSB branch office.
+            </p>
+        </div>
+    `;
+    
+    showModal(helpContent, 'info', 'Form Help');
+}
+
+// Close modal when clicking overlay
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'customModal') {
+        closeModal();
+    }
 });
 
-function submitForm(){
-  closeModal();
-  const form = qs('#feedbackForm'), sb=qs('#submitBtn');
-  sb.disabled=true; sb.textContent='Submitting…';
-  const fd=new FormData(form); selectedFiles.forEach(f=>fd.append('upload',f));
-  fetch('/submit',{method:'POST',body:fd})
-    .then(r=>r.json()).then(j=>{
-      if(j.success) showModal('Form submitted successfully.','success','Done'), form.reset(),selectedFiles=[],preview();
-      else throw new Error(j.error||'Error');
-    })
-    .catch(e=>showModal('Submission failed: '+e.message,'error','Error'))
-    .finally(()=>{sb.disabled=false; sb.textContent='SUBMIT';});
-}
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// Main initialization
+document.addEventListener("DOMContentLoaded", function() {
+    const uploadInput = document.getElementById("upload");
+    const previewContainer = document.getElementById("file-preview");
+    const form = document.getElementById("feedbackForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const consentCheckbox = document.getElementById("consentCheckbox");
+
+    // Initialize submit button as disabled
+    submitBtn.disabled = true;
+    submitBtn.classList.add('disabled');
+
+    // Setup phone validation
+    setupPhoneValidation();
+
+    // Setup relationship toggle functionality
+    setupRelationshipToggle();
+
+    // Consent checkbox validation
+    if (consentCheckbox) {
+        consentCheckbox.addEventListener('change', validateConsent);
+    }
+
+    // File upload handling
+    uploadInput.addEventListener("change", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const newFiles = Array.from(this.files);
+        const existingNames = selectedFiles.map(file => file.name);
+        const uniqueFiles = newFiles.filter(file => !existingNames.includes(file.name));
+        
+        // Check file limits
+        if (selectedFiles.length + uniqueFiles.length > 10) {
+            const allowedCount = 10 - selectedFiles.length;
+            showModal(
+                `Maximum 10 files allowed. Only the first ${allowedCount} files will be added.`,
+                'warning',
+                'File Limit Reached'
+            );
+            uniqueFiles.splice(allowedCount);
+        }
+        
+        // Add ALL files (including oversized ones)
+        selectedFiles = [...selectedFiles, ...uniqueFiles];
+        
+        this.value = "";
+        renderPreviews();
+    });
+
+    function renderPreviews() {
+        previewContainer.innerHTML = "";
+        
+        // Check if there are any oversized files
+        const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024);
+        
+        // Show warning if there are oversized files
+        if (oversizedFiles.length > 0) {
+            const warningDiv = document.createElement("div");
+            warningDiv.className = "oversized-warning";
+            warningDiv.innerHTML = `
+                <div class="warning-content">
+                    <span class="warning-icon">⚠️</span>
+                    <span class="warning-text">
+                        ${oversizedFiles.length} file(s) exceed the 10MB limit. 
+                        Click on oversized files to compress them.
+                    </span>
+                </div>
+            `;
+            previewContainer.appendChild(warningDiv);
+        }
+        
+        selectedFiles.forEach((file, index) => {
+            const fileBox = document.createElement("div");
+            fileBox.className = "file-box";
+            
+            const isOversized = file.size > 10 * 1024 * 1024;
+            if (isOversized) {
+                fileBox.classList.add('file-oversized');
+            }
+
+            const removeBtn = document.createElement("span");
+            removeBtn.innerHTML = "×";
+            removeBtn.className = "remove-btn";
+            removeBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                selectedFiles.splice(index, 1);
+                updateFileInput();
+                renderPreviews();
+                updateFileCount();
+            };
+
+            fileBox.appendChild(removeBtn);
+
+            // Enhanced: Full image display for PNG, JPG, JPEG
+            if (isFullDisplayImage(file)) {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.className = "file-thumb full-image";
+                img.onload = () => URL.revokeObjectURL(img.src);
+                fileBox.appendChild(img);
+            } else if (file.type.startsWith("image/")) {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.className = "file-thumb";
+                img.onload = () => URL.revokeObjectURL(img.src);
+                fileBox.appendChild(img);
+            } else {
+                const icon = document.createElement("div");
+                icon.className = "file-icon";
+                icon.textContent = file.name.split(".").pop().toUpperCase();
+                fileBox.appendChild(icon);
+
+                const fileName = document.createElement("div");
+                fileName.className = "file-name";
+                fileName.textContent = file.name;
+                fileBox.appendChild(fileName);
+            }
+            
+            const sizeBadge = document.createElement("div");
+            sizeBadge.className = isOversized ? "file-size-badge oversized" : "file-size-badge";
+            sizeBadge.textContent = formatFileSize(file.size);
+            fileBox.appendChild(sizeBadge);
+
+            // Make oversized files clickable
+            if (isOversized) {
+                fileBox.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showCompressionConfirmation(index);
+                };
+            }
+
+            previewContainer.appendChild(fileBox);
+        });
+
+        updateFileCount();
+    }
+
+    function updateFileCount() {
+        const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024).length;
+        const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024).length;
+        
+        let countText = "";
+        if (validFiles > 0 && oversizedFiles > 0) {
+            countText = `${validFiles} valid file(s), ${oversizedFiles} oversized file(s)`;
+        } else if (validFiles > 0) {
+            countText = `${validFiles} file(s) selected`;
+        } else if (oversizedFiles > 0) {
+            countText = `${oversizedFiles} oversized file(s) - click to compress`;
+        } else {
+            countText = "No files selected";
+        }
+        
+        document.getElementById("upload-count").textContent = countText;
+    }
+
+    // Form submission with validation
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isSubmitting) {
+            return;
+        }
+
+        // VALIDATE RELATIONSHIP FIRST
+        if (!validateRelationshipField()) {
+            showModal(
+                'Please select your relationship before submitting the form.',
+                'error',
+                'Relationship Required'
+            );
+            return;
+        }
+
+        // Check consent
+        if (!consentCheckbox || !consentCheckbox.checked) {
+            showModal(
+                'You must agree to submit your personal information before submitting the form.',
+                'error',
+                'Consent Required'
+            );
+            return;
+        }
+
+        // Validate phone number
+        const phoneInput = document.getElementById('phone');
+        if (!validatePhoneNumber(phoneInput.value)) {
+            showModal(
+                'Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).',
+                'error',
+                'Invalid Phone Number'
+            );
+            phoneInput.focus();
+            return;
+        }
+
+        // Check for oversized files before submission
+        const oversizedFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024);
+        if (oversizedFiles.length > 0) {
+            showModal(
+                `Cannot submit form with oversized files. Please compress the following files first:<br><br>${oversizedFiles.map(f => `<strong>${f.name}</strong> (${formatFileSize(f.size)})`).join('<br>')}`,
+                'error',
+                'Oversized Files Detected'
+            );
+            return;
+        }
+
+        const validFiles = selectedFiles.filter(f => f.size <= 10 * 1024 * 1024);
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        try {
+            const formData = new FormData();
+            
+            const formFields = new FormData(form);
+            for (let [key, value] of formFields.entries()) {
+                if (key !== 'upload') {
+                    formData.append(key, value);
+                }
+            }
+            
+            validFiles.forEach(file => {
+                formData.append("upload", file);
+            });
+
+            const response = await fetch("/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success || result.message) {
+                showModal(
+                    `Your feedback has been successfully submitted!<br><br><strong>ESM Name:</strong> ${form.esmName.value}<br><strong>Branch:</strong> ${form.branch.value}<br><br>Thank you for your valuable feedback.`,
+                    'success',
+                    'Form Submitted Successfully'
+                );
+                
+                setTimeout(() => {
+                    form.reset();
+                    selectedFiles = [];
+                    renderPreviews();
+                    validateConsent();
+                }, 2000);
+            } else {
+                throw new Error(result.error || "Failed to submit form");
+            }
+
+        } catch (error) {
+            console.error("Submission error:", error);
+            showModal(
+                `Form submission failed: <strong>${error.message}</strong><br><br>Please check your internet connection and try again. If the problem persists, contact technical support.`,
+                'error',
+                'Submission Failed'
+            );
+        } finally {
+            isSubmitting = false;
+            validateConsent();
+            if (!submitBtn.disabled) {
+                submitBtn.textContent = "SUBMIT";
+            }
+        }
+    });
+});
