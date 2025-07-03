@@ -4,6 +4,7 @@ const cors = require('cors');
 const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -84,6 +85,40 @@ const isRecentSubmission = (key) => {
     return false;
 };
 
+// Helper function to clean folder names and extract branch name
+function cleanFolderName(name) {
+    return name.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function extractBranchName(branchFullName) {
+    // Extract branch name without the district names in parentheses
+    const branchName = branchFullName.split('(')[0].trim();
+    return cleanFolderName(branchName);
+}
+
+// Helper functions for Google Drive folder management
+async function ensureFolder(parentId, folderName) {
+    const search = await drive.files.list({
+        q: `'${parentId}' in parents and name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        fields: 'files(id, name)'
+    });
+
+    if (search.data.files.length > 0) {
+        return search.data.files[0].id;
+    }
+
+    const folder = await drive.files.create({
+        resource: {
+            name: folderName,
+            mimeType: 'application/vnd.google-apps.folder',
+            parents: [parentId]
+        },
+        fields: 'id'
+    });
+
+    return folder.data.id;
+}
+
 // Enhanced form submission endpoint
 app.post('/submit', upload.array('upload', 10), async (req, res) => {
     console.log('📝 Form submission received');
@@ -115,22 +150,37 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
 
         console.log(`✅ Processing submission for: ${data.name}`);
 
-        // Process Google Drive upload (if available)
+        // Process Google Drive upload with hierarchical folder structure
         let uploadedFileLinks = [];
-        let userFolderId = null;
+        let timestampFolderId = null;
         if (drive && sheets) {
             try {
-                const branchName = cleanFolderName(data.branch || "Uncategorized");
-                const subFolderName = cleanFolderName(`${data.rank} - ${data.name}`);
+                // Create folder hierarchy: Branch -> Rank-Name -> Timestamp
+                const branchName = extractBranchName(data.branch);
+                const personFolderName = cleanFolderName(`${data.rank}-${data.name}`);
+                
+                // Create timestamp folder name (YYYY-MM-DD_HH-MM-SS)
+                const now = new Date();
+                const timestamp = now.toISOString()
+                    .replace(/T/, '_')
+                    .replace(/:/g, '-')
+                    .split('.')[0];
 
-                const parentFolderId = await ensureFolder(process.env.DRIVE_FOLDER_ID, branchName);
-                userFolderId = await ensureFolder(parentFolderId, subFolderName);
+                // Ensure branch folder exists
+                const branchFolderId = await ensureFolder(process.env.DRIVE_FOLDER_ID, branchName);
+                
+                // Ensure person folder exists within branch
+                const personFolderId = await ensureFolder(branchFolderId, personFolderName);
+                
+                // Create timestamp folder within person folder
+                timestampFolderId = await ensureFolder(personFolderId, timestamp);
 
+                // Upload files to timestamp folder
                 for (const file of files) {
                     try {
                         const fileMeta = {
                             name: file.originalname,
-                            parents: [userFolderId]
+                            parents: [timestampFolderId]
                         };
 
                         const media = {
@@ -151,7 +201,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
                     }
                 }
 
-                // Update Google Sheet - NEW COLUMN ORDER WITH RELATIONSHIP
+                // Update Google Sheet with timestamp folder link
                 const sheetValues = [
                     new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }), // A - Timestamp
                     data.rank,           // B - Rank
@@ -163,7 +213,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
                     data.branch,         // H - Branch
                     data.id || '',       // I - ID
                     data.sugg || '',     // J - Feedback
-                    uploadedFileLinks.join(', ') // K - Drive links
+                    timestampFolderId ? `https://drive.google.com/drive/folders/${timestampFolderId}` : '' // K - Drive folder link
                 ];
 
                 await sheets.spreadsheets.values.append({
@@ -173,7 +223,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
                     requestBody: { values: [sheetValues] }
                 });
 
-                console.log('📊 Google Sheet updated');
+                console.log('📊 Google Sheet updated with timestamp folder link');
             } catch (googleError) {
                 console.error('❌ Google services error:', googleError.message);
             }
@@ -181,7 +231,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
 
         // Send email notification
         try {
-            await sendEmailNotification(data, uploadedFileLinks, userFolderId);
+            await sendEmailNotification(data, uploadedFileLinks, timestampFolderId);
             console.log('📧 Email notification sent');
         } catch (emailError) {
             console.error('❌ Email notification failed:', emailError.message);
@@ -218,8 +268,8 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     }
 });
 
-// Email notification function with RELATIONSHIP included
-async function sendEmailNotification(data, uploadedFileLinks, userFolderId) {
+// Email notification function with RELATIONSHIP and view-only links
+async function sendEmailNotification(data, uploadedFileLinks, timestampFolderId) {
     console.log('📧 Starting email notification process...');
     
     // Check environment variables
@@ -231,16 +281,13 @@ async function sendEmailNotification(data, uploadedFileLinks, userFolderId) {
     }
     
     console.log(`Email from: ${process.env.NOTIFY_EMAIL}`);
-    console.log(`App password configured: ${process.env.APP_PASSWORD ? 'Yes' : 'No'}`);
 
     const transporter = nodemailer.createTransporter({
         service: 'gmail',
         auth: {
             user: process.env.NOTIFY_EMAIL,
             pass: process.env.APP_PASSWORD
-        },
-        debug: true,
-        logger: true
+        }
     });
 
     // Test connection first
@@ -253,35 +300,101 @@ async function sendEmailNotification(data, uploadedFileLinks, userFolderId) {
         throw new Error(`Email configuration error: ${verifyError.message}`);
     }
 
-    // Generate Google Drive folder link
-    const driveFolderLink = userFolderId ? 
-        `https://drive.google.com/drive/folders/${userFolderId}` : 
-        'Not available';
-    
-    // Generate Google Sheet link
+    // Generate view-only links
     const googleSheetLink = process.env.SHEET_ID ? 
         `https://docs.google.com/spreadsheets/d/${process.env.SHEET_ID}/edit` : 
         'Not available';
+    
+    const driveFolderLink = timestampFolderId ? 
+        `https://drive.google.com/drive/folders/${timestampFolderId}` : 
+        'Not available';
 
-    // Email subject with relationship
-    const emailSubject = `New Feedback/Grievance Submission: ${data.rank}-${data.name}(${data.branch})`;
+    // Email subject
+    const emailSubject = `New Feedback/Grievance Submission: ${data.rank}-${data.name} (${data.branch})`;
 
     const mailOptions = {
         from: `"WB Sainik Board" <${process.env.NOTIFY_EMAIL}>`,
         to: process.env.NOTIFY_EMAIL,
         subject: emailSubject,
         html: `
-        <table border="1" cellpadding="6" style="border-collapse:collapse;font-family:Arial;font-size:14px">
-            <tr><td><b>Name</b></td><td>${data.name}</td></tr>
-            <tr><td><b>Rank</b></td><td>${data.rank}</td></tr>
-            <tr><td><b>Relationship</b></td><td>${data.relationship}</td></tr>
-            <tr><td><b>Branch</b></td><td>${data.branch}</td></tr>
-            <tr><td><b>Phone</b></td><td>${data.phone}</td></tr>
-            <tr><td><b>Email</b></td><td>${data.email || '—'}</td></tr>
-            <tr><td><b>ID Card</b></td><td>${data.id || '—'}</td></tr>
-            <tr><td><b>Feedback</b></td><td>${data.sugg || '—'}</td></tr>
-        </table><br>
-        <p><a href="${googleSheetLink}">Google Sheet</a> | <a href="${driveFolderLink}">Drive folder</a></p>
+        <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; border: 1px solid #ddd;">
+            <!-- Header -->
+            <div style="background: linear-gradient(to right, #e03c3c, #303030ac, #27aad6); padding: 20px; text-align: center; color: white;">
+                <h2 style="margin: 0; font-size: 24px;">West Bengal Sainik Board</h2>
+                <p style="margin: 5px 0 0 0; font-size: 16px;">New Feedback/Grievance Submission</p>
+            </div>
+            
+            <!-- Submission Details -->
+            <div style="padding: 20px;">
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; width: 30%;">Name:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Rank:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.rank}</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Relationship:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.relationship}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Branch:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.branch}</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Phone:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.phone}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Email:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.email || 'Not provided'}</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">ID Card:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.id || 'Not provided'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; vertical-align: top;">Feedback:</td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6;">${data.sugg || 'No feedback provided'}</td>
+                    </tr>
+                </table>
+                
+                <!-- Quick Access Links Section -->
+                <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #ffc107;">
+                    <h3 style="color: #856404; margin: 0 0 15px 0;">🔗 Quick Access Links (View Only)</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <h4 style="color: #495057; margin: 0 0 8px 0; font-size: 16px;">📊 Google Sheet (All Submissions)</h4>
+                            <a href="${googleSheetLink}" target="_blank" 
+                               style="display: inline-block; background: #28a745; color: white; padding: 10px 15px; 
+                                      text-decoration: none; border-radius: 5px; font-weight: bold;">
+                                View Spreadsheet
+                            </a>
+                        </div>
+                        <div style="flex: 1; min-width: 250px;">
+                            <h4 style="color: #495057; margin: 0 0 8px 0; font-size: 16px;">📁 Google Drive Folder (This Submission)</h4>
+                            <a href="${driveFolderLink}" target="_blank" 
+                               style="display: inline-block; background: #007bff; color: white; padding: 10px 15px; 
+                                      text-decoration: none; border-radius: 5px; font-weight: bold;">
+                                View Files
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #f8f9fa; padding: 20px; border-top: 1px solid #dee2e6; text-align: center;">
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">
+                    <strong>Submitted:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                </p>
+                <p style="margin: 8px 0 0 0; color: #6c757d; font-size: 12px;">
+                    This is an automated notification from the WB Sainik Board Feedback System.
+                </p>
+            </div>
+        </div>
         `
     };
 
@@ -294,33 +407,6 @@ async function sendEmailNotification(data, uploadedFileLinks, userFolderId) {
         console.error('❌ Email sending failed:', sendError);
         throw new Error(`Failed to send email: ${sendError.message}`);
     }
-}
-
-// Helper functions
-async function ensureFolder(parentId, folderName) {
-    const search = await drive.files.list({
-        q: `'${parentId}' in parents and name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-        fields: 'files(id, name)'
-    });
-
-    if (search.data.files.length > 0) {
-        return search.data.files[0].id;
-    }
-
-    const folder = await drive.files.create({
-        resource: {
-            name: folderName,
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [parentId]
-        },
-        fields: 'id'
-    });
-
-    return folder.data.id;
-}
-
-function cleanFolderName(name) {
-    return name.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim();
 }
 
 // Health check endpoint
