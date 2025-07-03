@@ -110,7 +110,8 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     const br = branchClean(data.branch);
     const bf = await ensureFolder(process.env.DRIVE_FOLDER_ID, br);
     const pf = await ensureFolder(bf, clean(`${data.rank}-${data.name}`));
-    const ts = format(new Date(), 'yyyy-MM-dd_HH-mm-ss');
+   const ts = format(new Date(), 'yyyy-MM-dd_HH:mm:ss');
+    console.log(ts);
     const tf = await ensureFolder(pf, ts);
 
     // Upload files
