@@ -829,3 +829,69 @@ html {
         font-size: 14px;
     }
 }
+
+/* White-background compression modal */
+.compression-modal.white-bg {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.compression-modal.white-bg .compression-title {
+  margin-top: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.compression-modal.white-bg .compression-subtitle {
+  margin: 8px 0 16px;
+  color: #555;
+  font-size: 14px;
+}
+
+.compression-modal.white-bg .service-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.compression-modal.white-bg .service-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  background: #f9f9f9;
+}
+
+.compression-modal.white-bg .service-card.recommended {
+  border-color: #28a745;
+  background: #f0f9f4;
+}
+
+.compression-modal.white-bg .service-card button {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.compression-modal.white-bg .service-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.compression-modal.white-bg .recommended-text {
+  font-size: 12px;
+  color: #28a745;
+  margin-left: 4px;
+}
+
+.compression-modal.white-bg .compression-instructions {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #444;
+}
