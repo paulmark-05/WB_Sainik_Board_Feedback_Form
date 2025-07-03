@@ -110,12 +110,11 @@ function openCompression(){
 function showFormHelp(){
   showModal(
     `<ul style="text-align:left">
-       <li>ESM Name, Relationship, Rank, Phone & Branch are required.</li>
-       <li>Up to 10 files, each ≤ 10 MB.</li>
-       <li>Remove file: click ×. Oversized: click to compress.</li>
-       <li>Check consent box to enable SUBMIT.</li>
+       <li>Name, Relationship, Rank, Phone & Branch are required.</li>
+       <li>Up to 10 files, each ≤10MB.</li>
+       <li>Remove: ×. Oversized: click to compress.</li>
      </ul>`,
-    'info','Form Help'
+    'info','Help'
   );
 }
 
