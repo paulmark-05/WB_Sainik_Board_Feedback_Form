@@ -1,7 +1,7 @@
 {
   "name": "wb-sainik-board-feedback",
   "version": "1.0.0",
-  "description": "WB Sainik Board Feedback/Grievance Backend",
+  "description": "WB Sainik Board Feedback/Grievance System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
