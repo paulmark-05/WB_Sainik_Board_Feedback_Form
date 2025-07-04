@@ -120,7 +120,7 @@ function setupPhoneValidation() {
     const phoneInput = document.getElementById('phone');
     const phoneError = document.getElementById('phone-error');
     
-    if (!phoneInput) return;
+    if (!phoneInput)return;
     
     phoneInput.addEventListener('input', function() {
         const phone = this.value.trim();
@@ -139,6 +139,43 @@ function setupPhoneValidation() {
             phoneError.style.display = 'none';
         }
     });
+
+
+// ✅ EMAIL VALIDATION BELOW
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        let emailError = document.getElementById('email-error');
+
+        // If the error span doesn't already exist, create it
+        if (!emailError) {
+            emailError = document.createElement('span');
+            emailError.id = 'email-error';
+            emailError.className = 'error-message';
+            emailError.style.display = 'none';
+            emailError.style.color = 'red';
+            emailInput.parentNode.appendChild(emailError);
+        }
+
+        emailInput.addEventListener('input', function () {
+            const email = this.value.trim();
+
+            if (email === '') {
+                emailError.textContent = '';
+                emailError.style.display = 'none';
+                return;
+            }
+
+            const emailRegex = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
+
+            if (!emailRegex.test(email)) {
+                emailError.textContent = 'Please enter a valid email (e.g. example@domain.com)';
+                emailError.style.display = 'block';
+            } else {
+                emailError.textContent = '';
+                emailError.style.display = 'none';
+            }
+        });
+    }
 }
 
 // Custom Modal Functions
@@ -483,9 +520,10 @@ document.addEventListener("DOMContentLoaded", function() {
         e.stopPropagation();
         
 
-        if (isSubmitting) return;
-        isSubmitting = true;
-        document.getElementById("formSpinner").style.display = "flex";
+        if (isSubmitting) {
+          
+            return;
+        }
 
         // VALIDATE RELATIONSHIP FIRST
         if (!validateRelationshipField()) {
@@ -562,11 +600,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const result = await response.json();
 
             if (result.success || result.message) {
-              document.getElementById("formSpinner").style.display = "none";
-                    isSubmitting = false;
-                    showModal("Form submitted successfully (placeholder).", 'success', 'Submitted');
-
-                    submitBtn.disabled = false;
                 showModal(
                     `Your feedback has been successfully submitted!<br><br><strong>ESM Name:</strong> ${form.esmName.value}<br><strong>Branch:</strong> ${form.branch.value}<br><br>Thank you for your valuable feedback.`,
                     'success',
@@ -578,7 +611,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     selectedFiles = [];
                     renderPreviews();
                     validateConsent();
-                  }, 2000);
+                }, 2000);
             } else {
                 throw new Error(result.error || "Failed to submit form");
             }
@@ -598,7 +631,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
-
 
 
 
