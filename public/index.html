@@ -23,8 +23,9 @@
                 <p class="guidelines-subtitle">Click above for submission guidelines, file requirements, and troubleshooting tips</p>
             </div>
         </div>
+        
 
-        <form id="feedbackForm" enctype="multipart/form-data" method="post" action="/submit">
+        <form id="feedbackForm" enctype="multipart/form-data" method="post" action="/submit" >
             <!-- Main Information Row -->
             <div class="form-row main-info-row">
                 <!-- Stacked Rank and ESM Name -->
@@ -152,12 +153,9 @@
         </div>
     </div>
 
-    <!-- Full‐screen submitting overlay -->
-<div id="submittingOverlay" class="overlay hidden">
-  <div class="overlay-content">
-    <div id="overlaySpinner" class="spinner"></div>
-    <div id="overlayMessage" class="overlay-message">Submitting…</div>
-  </div>
+    <div id="formSpinner" class="spinner-overlay" style="display: none;">
+  <div class="spinner"></div>
+  <p class="spinner-text">Submitting, please wait...</p>
 </div>
 
 
