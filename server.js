@@ -23,10 +23,6 @@ const upload = multer({
 let drive, sheets;
 
 (async () => {
-  if (!process.env.GOOGLE_CREDENTIALS_JSON) {
-    console.warn('⚠️ GOOGLE_CREDENTIALS_JSON missing.');
-    return;
-  }
   const auth = new google.auth.GoogleAuth({
     credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON),
     scopes: [
@@ -37,7 +33,7 @@ let drive, sheets;
   const client = await auth.getClient();
   drive = google.drive({ version: 'v3', auth: client });
   sheets = google.sheets({ version: 'v4', auth: client });
-  console.log('✅ Google Drive & Sheets initialized');
+  console.log('✅ Google APIs ready');
 })();
 
 const recent = new Map();
@@ -69,16 +65,16 @@ async function ensureFolder(parentId, name) {
 }
 
 async function sendMail(data, sheetURL, driveURL, originURL) {
-  if (!process.env.NOTIFY_EMAIL || !process.env.APP_PASSWORD) {
-    throw new Error('Email credentials missing.');
-  }
-
   const transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: process.env.NOTIFY_EMAIL, pass: process.env.APP_PASSWORD }
+    auth: {
+      user: process.env.NOTIFY_EMAIL,
+      pass: process.env.APP_PASSWORD
+    }
   });
 
   await transporter.verify();
+
   const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
   const logoURL = `${originURL}/logo.jpg`;
 
@@ -106,7 +102,7 @@ async function sendMail(data, sheetURL, driveURL, originURL) {
   const htmlForUser = `
     <div style="font-family:Arial,sans-serif;font-size:15px;background:#f7f9fc;padding:20px;border-radius:10px;border:1px solid #ddd;max-width:600px;margin:auto">
       <div style="text-align:center;margin-bottom:20px">
-        <img src="${logoURL}" alt="WB Sainik Board" height="60" style="margin:auto">
+        <img src="${logoURL}" alt="WB Sainik Board" height="80" style="margin:auto">
       </div>
       <h2 style="color:rgb(48,48,172);text-align:center">✅ Submission Successful</h2>
       <p>Dear <strong>${data.name}</strong>,</p>
@@ -195,10 +191,10 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     const origin = `${req.protocol}://${req.get('host')}`;
     await sendMail(data, sheetURL, driveFolderLink !== '-' ? driveFolderLink : null, origin);
 
-    return res.json({ success: true, message: 'Form submitted successfully' });
+    res.json({ success: true, message: 'Form submitted successfully' });
   } catch (err) {
     console.error('❌ Submission Error:', err);
-    return res.status(500).json({ success: false, error: 'Server error' });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 });
 
