@@ -10,7 +10,7 @@
 <body>
     <div class="header">
         <img src="logo.jpg" alt="West Bengal Sainik Board Logo" class="logo">
-        <h1 class="title">Feedback / Grievances Form</h1>
+        <h1 class="title">Feedback / Siggestion / Grievance Form</h1>
     </div>
 
     <div class="form-container">
@@ -35,7 +35,7 @@
                         <input type="text" id="rank" name="rank" placeholder="Enter Rank" required>
                     </div>
                     <div class="field-container">
-                        <label for="esmName">ESM Name *</label>
+                        <label for="esmName">Serving / ESM Name *</label>
                         <input type="text" id="esmName" name="name" placeholder="Enter full name" required>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
             <!-- Branch and ID Row -->
             <div class="form-row">
                 <div class="input-group">
-                    <label for="branch">Branch *</label>
+                    <label for="branch">Parent ZSB Branch (RSB for Serving)*</label>
                     <select id="branch" name="branch" required>
                         <option value="">--Select ZSB branch--</option>
                         <option value="Rajya Sainik Board">Rajya Sainik Board</option>
@@ -100,7 +100,7 @@
                      </select>
                 </div>
                 <div class="input-group">
-                    <label for="zsbId">ZSB ID Card No.(if any):</label>
+                    <label for="zsbId">ZSB ID Card No.(for ESM):</label>
                     <input type="text" id="zsbId" name="id" placeholder="Enter ZSB ID Card Number">
                 </div>
             </div>
@@ -108,7 +108,7 @@
             <!-- Feedback Section -->
             <div class="form-row">
                 <div class="input-group">
-                    <label for="suggestions">Suggestions / Feedback :</label>
+                    <label for="suggestions">Feedback / Suggestion / Grievance :</label>
                     <textarea id="suggestions" name="sugg" placeholder="Please provide your feedback, suggestions, or grievances here..." rows="6"></textarea>
                 </div>
             </div>
@@ -128,7 +128,7 @@
                 <label class="consent-label">
                     <input type="checkbox" id="consentCheckbox" required>
                     <span class="checkmark"></span>
-                    I agree to submit my personal information entered above.
+                    I agree to submit my personal information as per IT policy (personal data will be used within the Sainik Board)
                 </label>
             </div>
 
