@@ -319,13 +319,13 @@ function showFormHelp() {
         <div class="help-content">
             <h4>📋 Form Guidelines</h4>
             <ul style="text-align:left;margin:15px 0;">
-                <li><strong>Required:</strong> Rank, ESM Name, Relationship, Phone, Branch</li>
+                <li><strong>Required:</strong> Rank, ESM Name, Relationship, Phone, Parent ZSB Branch</li>
                 <li><strong>Files:</strong> ≤ 10 files, each ≤ 10 MB</li>
                 <li><strong>Formats:</strong> JPG / PNG images, PDF & DOC/DOCX docs</li>
                 <li><strong>Phone:</strong> Valid 10-digit Indian mobile number</li>
             </ul>
 
-            <h4>🔧 File Management</h4>
+            <h4>🔧 File Management (for attachments) </h4>
             <ul style="text-align:left;margin:15px 0;">
                 <li>Click the <b>×</b> to remove a file</li>
                 <li>Files over 10 MB show an orange border</li>
@@ -334,7 +334,7 @@ function showFormHelp() {
 
             <h4>📞 Need Help?</h4>
             <p style="text-align:left;margin:10px 0;">
-                Contact your local ZSB branch office.
+                Contact your Parent ZSB branch office.
             </p>
         </div>
     `;
