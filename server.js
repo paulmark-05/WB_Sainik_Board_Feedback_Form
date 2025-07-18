@@ -71,19 +71,19 @@ function generateEmailTemplate(data, forUser = false) {
       <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
         
         <!-- Header with Logo -->
-        <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(to bottom, rgb(224, 60, 60), rgb(48, 48, 172), rgb(39, 170, 214)); padding: 20px; text-align: center;">
           <img src="${logoURL}" alt="WB Sainik Board Logo" style="max-height: 120px; margin-bottom: 10px;">
           <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: bold;">West Bengal Sainik Board</h1>
        ${forUser ? `
           <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">Thank you for your submission. Your information has been noted for suitable action. 
 </p>
           `:`
-          <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">New Submission Received</p>`}
+          <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">New Submission Received</p> `}
         </div>
 
         <!-- Main Content -->
-        <div style="padding: 30px;">
-            <h2 style="color: #007bff; margin: 0 0 10px 0; font-size: 18px;">Submission Details</h2>
+        <div style="padding: 15px;">
+            <h2 style="color:rgb(48, 48, 172); margin: 0 0 10px 0; font-size: 18px;">Submission Details</h2>
           </div>
 
           <!-- Details Table -->
@@ -133,11 +133,10 @@ function generateEmailTemplate(data, forUser = false) {
 
         <!-- Footer -->
         ${forUser ? `
-        <div style="background-color: #343a40; color: #ffffff; padding: 20px; text-align: center;">
-          <p style="margin: 0 0 10px 0; font-size: 14px;">This is an automated notification from WB Sainik Board.</p>
+        <div style="background-color:rgb(48, 48, 172); color: #ffffff; padding: 20px; text-align: center;">
+          <p style="margin: 0 0 10px 0; font-size: 14px;">This is an automated notification from West Bengal Sainik Board.</p>
           <p style="margin: 0 0 10px 0; font-size: 12px; color: #adb5bd;">
-             Please do not reply. For further support please contact your ZSB branch.
-            <a href="mailto:support@wbsainikboard.gov.in" style="color: #17a2b8;">support@wbsainikboard.gov.in</a>
+             Do not reply to this mail. For further support please contact your ZSB branch.
           </p>
           <hr style="border: none; border-top: 1px solid #495057; margin: 15px 0;">
           <p style="margin: 0; font-size: 12px; color: #6c757d;">
