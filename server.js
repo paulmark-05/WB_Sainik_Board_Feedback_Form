@@ -133,7 +133,7 @@ function generateEmailTemplate(data, forUser = false) {
 
         <!-- Footer -->
         ${forUser ? `
-        <div style="background-color:rgb(48, 48, 172); color: #ffffff; padding: 20px; text-align: center;">
+        <div style="background-color:rgb(54, 60, 66); color: #ffffff; padding: 20px; text-align: center;">
           <p style="margin: 0 0 10px 0; font-size: 14px;">This is an automated notification from West Bengal Sainik Board.</p>
           <p style="margin: 0 0 10px 0; font-size: 12px; color: #adb5bd;">
              Do not reply to this mail. For further support please contact your ZSB branch.
