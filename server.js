@@ -58,6 +58,7 @@ function getBranchKey(branchValue) {
 // Enhanced email template with logo and professional styling
 function generateEmailTemplate(data, forUser = false) {
   const logoURL = 'https://feedback-form-b24b.onrender.com/logo.jpg' // Update with actual logo URL
+  const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   
   return `
     <!DOCTYPE html>
@@ -68,12 +69,13 @@ function generateEmailTemplate(data, forUser = false) {
       <title>WB Sainik Board - New Feedback Submission</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+      <!-- ID: ${uniqueId} -->
       <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
         
         <!-- Header with Logo -->
         <div style="background: linear-gradient(to bottom, rgb(224, 60, 60), rgb(48, 48, 172), rgb(39, 170, 214)); padding: 20px; text-align: center;">
-          <img src="${logoURL}" alt="WB Sainik Board Logo" style="max-height: 120px; margin-bottom: 10px;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: bold;">West Bengal Sainik Board</h1>
+          <img src="${logoURL}" alt="WB Sainik Board Logo" style="max-height: 100px; margin-bottom: 10px;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 19px; font-weight: bold;">West Bengal Sainik Board</h1>
        ${forUser ? `
           <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">Thank you for your submission. Your information has been noted for suitable action. 
 </p>
@@ -82,8 +84,8 @@ function generateEmailTemplate(data, forUser = false) {
         </div>
 
         <!-- Main Content -->
-        <div style="padding: 15px;">
-            <h2 style="color:rgb(48, 48, 172); margin: 0 0 10px 0; font-size: 18px;">Submission Details</h2>
+        <div style="padding: 8px; text-align: center;">
+            <h2 style="color:rgb(48, 48, 172); margin: 0 0 8px 0; font-size: 14px;">Submission Details</h2>
           </div>
 
           <!-- Details Table -->
@@ -117,7 +119,7 @@ function generateEmailTemplate(data, forUser = false) {
               <td style="padding: 12px; border-bottom: 1px solid #dee2e6; color: #212529;">${data.id || '-'}</td>
             </tr>
             <tr>
-              <td style="padding: 12px; font-weight: bold; color: #495057; background-color: #f8f9fa; vertical-align: top;">Feedback / Suggestion / Grievance </td>
+              <td style="padding: 12px; font-weight: bold; color: #495057; background-color: #f8f9fa; vertical-align: top;">Feedback / Grievance </td>
               <td style="padding: 12px; color: #212529;">${data.sugg || '-'}</td>
             </tr>
           </table>
@@ -138,8 +140,8 @@ function generateEmailTemplate(data, forUser = false) {
           <p style="margin: 0 0 10px 0; font-size: 12px; color: #adb5bd;">
              Do not reply to this mail. For further support please contact your ZSB branch.
           </p>
-          <hr style="border: none; border-top: 1px solid #495057; margin: 15px 0;">
-          <p style="margin: 0; font-size: 12px; color: #6c757d;">
+          <hr style="border: none; border-top: 1px solid #495057; margin: 10px 0;">
+          <p style="margin: 0; font-size: 10px; color: #6c757d;">
             Government of West Bengal | Serving Our Veterans and Families with Pride
           </p>
         </div>
@@ -149,6 +151,7 @@ function generateEmailTemplate(data, forUser = false) {
     </html>
   `
 }
+
 
 // Enhanced email function with branch-specific routing and attachments
 async function sendMail(data, files = []) {
