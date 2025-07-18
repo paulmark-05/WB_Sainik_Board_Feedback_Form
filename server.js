@@ -141,7 +141,7 @@ function generateEmailTemplate(data, forUser = false) {
              Do not reply to this mail. For further support please contact your ZSB branch.
           </p>
           <hr style="border: none; border-top: 1px solid #495057; margin: 10px 0;">
-          <p style="margin: 0; font-size: 10px; color: #6c757d;">
+          <p style="margin: 0; font-size: 12px; color: #6c757d;">
             Government of West Bengal | Serving Our Veterans and Families with Pride
           </p>
         </div>
