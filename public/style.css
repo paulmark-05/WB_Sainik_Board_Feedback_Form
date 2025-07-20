@@ -113,7 +113,7 @@ form .form-row {
 }
 
 .input-group {
-    flex: 1;
+    flex: 1 1 250px;
     display: flex;
     flex-direction: column;
     min-width: 250px;
@@ -125,7 +125,7 @@ form .form-row {
     flex-direction: column;
     gap: 15px;
     justify-content: space-between;
-    flex: 1.2;
+    flex: 1.2 1 250px;
     min-height: 140px;
 }
 
@@ -138,6 +138,7 @@ form .form-row {
     font-weight: 600;
     margin-bottom: 5px;
     color: #333;
+    word-break: break-word;
 }
 
 .field-container input {
@@ -902,6 +903,151 @@ html {
   font-size: 13px;
   color: #444;
 }
+
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .form-container {
+        width: 95%;
+        padding: 20px;
+        margin: 20px auto;
+    }
+
+    .input-group {
+        min-width: 100%;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-row.main-info-row {
+        min-height: auto;
+    }
+
+    .input-group.stacked-fields {
+        margin-bottom: 15px;
+        flex: 1;
+        min-height: auto;
+    }
+
+    .input-group.relationship-column-simple {
+        max-width: none;
+        min-width: 100%;
+        margin-top: 15px;
+    }
+
+    .checkbox-group-simple {
+        flex-direction: row;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        height: auto;
+    }
+
+    .checkbox-label-simple {
+        flex: 1;
+        min-width: 80px;
+        justify-content: center;
+        text-align: center;
+        padding: 10px 5px;
+    }
+
+    .file-box {
+        width: 120px;
+    }
+
+    .file-thumb.full-image {
+        height: 90px;
+    }
+
+    .file-name {
+        font-size: 10px;
+        max-height: 2.2em;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .logo {
+        width: 150px;
+    }
+
+    .guidelines-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}  
+
+@media (max-width: 767px){
+  /* container padding a little tighter on small phones */
+  .form-container{
+    width: 95%;
+    padding: 18px;
+    margin: 18px auto;
+  }
+
+  /* every row now stacks vertically by default */
+  .form-row{
+    flex-direction: column;
+    gap: 18px;
+  }
+
+/* each input group uses full width */
+  .input-group,
+  .input-group.relationship-column-simple{
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  /* make long labels wrap nicely and never overflow */
+  .field-container label{
+    font-size: 14px;
+    line-height: 1.3;
+  }
+     /* radio / checkbox row becomes multi-line flex */
+  .checkbox-group-simple{
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    height: auto;
+    justify-content: space-between;
+  }
+
+  .checkbox-label-simple{
+    flex: 1 1 45%;          /* two items per row */
+    min-width: 140px;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 8px 4px;
+  }
+     /* file boxes shrink a bit */
+  .file-box{ width: 110px; }
+  .file-thumb.full-image{ height: 80px; }
+
+  /* header sizes */
+  .title{ font-size: 20px; }
+  .logo{  width: 140px; }
+
+  /* button & guideline tweaks */
+  .guidelines-btn{
+    padding: 10px 18px;
+    font-size: 13px;
+    gap: 8px;
+  }
+}
+
+
+@media (max-width:480px){
+  /* slightly smaller padding again */
+  .form-container{ padding: 15px; }
+
+  /* insure dropdown arrows stay visible */
+  select{ background-position: right 10px center; }
+}
+
+
 #submittingOverlay {
   position: fixed;
   top: 0;
@@ -926,20 +1072,82 @@ html {
   color: #333;
 }
 
-#submittingOverlay .loader {
-  border: 4px solid #ccc;
+#submittingOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 9999;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.5);
+}
+
+#submittingOverlay.active {
+  display: flex;
+}
+
+.overlay-content {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.3);
+  padding: 30px 40px;
+  text-align: center;
+  color: #333;
+  min-width: 220px;
+}
+
+.loader {
+  border: 4px solid #d3d3d3;
   border-top: 4px solid rgb(48, 48, 172);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 40px; height: 40px;
+  margin: 0 auto 18px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 15px;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
+/* Mobile overlay optimization */
+@media (max-width: 600px) {
+  .overlay-content { padding: 24px 10px; min-width: 130px; }
+  .loader { width: 32px; height: 32px; }
+}
 
+/* 1. Always use border-box everywhere */
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+/* 2. Make sure field containers and direct field elements don't overflow */
+.input-group,
+input, select, textarea {
+  max-width: 100%;
+  box-sizing: border-box !important;
+}
+
+/* 3. The select and input fields will now shrink to fit their parents, even for long options */
+.form-row .input-group {
+  min-width: 0; /* allow shrinking below 250px if needed */
+}
+
+/* 4. Optional: For even tighter fit on tiny screens */
+@media (max-width: 480px) {
+  .form-container {
+    padding: 8px 2vw;
+  }
+  .input-group {
+    min-width: 0;
+    max-width: 100%;
+  }
+  input, select, textarea {
+    font-size: 16px;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+}
