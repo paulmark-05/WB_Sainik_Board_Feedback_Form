@@ -21,23 +21,22 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024, files: 10 }
 })
 
-// ZSB Branch email mapping - Update these with actual branch emails
 const BRANCH_EMAILS = {
-  'Rajya Sainik Board': 'paulamit001@gmail.com',
-  'ZSB Burdwan': 'nayanipaul001@gmail.com',
-  'ZSB Coochbehar': 'nayanipaul.24@gmail.com',
-  'ZSB Dakshin Dinajpur': 'nayanipaul001@gmail.com',
-  'ZSB Darjeeling': 'nayanipaul.24@gmail.com',
-  'ZSB Howrah': 'nayanipaul001@gmail.com',
-  'ZSB Jalpaiguri': 'nayanipaul.24@gmail.com',
-  'ZSB Kalimpong': 'nayanipaul001@gmail.com',
-  'ZSB Kolkata': 'nayanipaul.24@gmail.com',
-  'ZSB Malda': 'nayanipaul001@gmail.com',
-  'ZSB Midnapore': 'nayanipaul.24@gmail.com',
-  'ZSB Murshidabad': 'nayanipaul001@gmail.com',
-  'ZSB Nadia': 'nayanipaul.24@gmail.com',
-  'ZSB North 24 Parganas': 'nayanipaul001@gmail.com',
-  'ZSB South 24 Parganas': 'nayanipaul.24@gmail.com'
+  'Rajya Sainik Board': 'rsb-wb@gov.in',
+  'ZSB Burdwan': 'secy.zsb-burdwan@bangla.gov.in',
+  'ZSB Coochbehar': 'secyzsb-wb.cbr@coochbehar.gov.in',
+  'ZSB Dakshin Dinajpur': 'secy.zsbdd-wb@gov.in',
+  'ZSB Darjeeling': 'zsbd-wb@gov.in',
+  'ZSB Howrah': 'secy.zsb-howrah@bangla.gov.in',
+  'ZSB Jalpaiguri': 'zsb-jalpaiguri@bangla.gov.in',
+  'ZSB Kalimpong': 'zsb-kpg@bangla.gov.in',
+  'ZSB Kolkata': 'zsb-kolkata@bangla.gov.in',
+  'ZSB Malda': 'secy.zsb-malda@bangla.gov.in',
+  'ZSB Midnapore': 'secy.zsb-midnapore@bangla.gov.in',
+  'ZSB Murshidabad': 'zsb-murshidabad@bangla.gov.in',
+  'ZSB Nadia': 'zsb-nadiawb@bangla.gov.in',
+  'ZSB North 24 Parganas': 'zsb-barasat@nic.in',
+  'ZSB South 24 Parganas': 'secy.zsb-wb.s24pgs@nic.in'
 }
 
 // Prevent rapid re-submission
