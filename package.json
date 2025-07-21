@@ -3,17 +3,24 @@
   "version": "1.0.0",
   "description": "WB Sainik Board Feedback/Grievance System",
   "main": "server.js",
-  "license": "MIT",
+  "license" : "MIT",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.2.1",
     "googleapis": "^128.0.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
     "multer": "^2.0.0",
-    "nodemailer": "^6.9.4"
+    "nodemailer": "^6.9.4",
+    "nodemon": "^3.1.10",
+    "xss-filters": "^1.2.7"
   }
 }
