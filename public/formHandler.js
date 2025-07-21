@@ -601,7 +601,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             if (result.success || result.message) {
                 showModal(
-                    `Your feedback has been successfully submitted!<br><br><strong>ESM Name:</strong> ${form.esmName.value}<br><strong>Branch:</strong> ${form.branch.value}<br><br>Thank you for your valuable feedback.`,
+                    `Your feedback has been successfully submitted!<br><br><strong>Name:</strong> ${form.esmName.value}<br><strong>Branch:</strong> ${form.branch.value}<br><br>Thank you for your valuable feedback.`,
                     'success',
                     'Form Submitted Successfully'
                 );
