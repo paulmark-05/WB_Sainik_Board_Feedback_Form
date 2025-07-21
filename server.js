@@ -23,21 +23,21 @@ const upload = multer({
 
 // ZSB Branch email mapping - Update these with actual branch emails
 const BRANCH_EMAILS = {
-  'Rajya Sainik Board': 'rsb-wb@gov.in',
-  'ZSB Burdwan': 'secy.zsb-burdwan@bangla.gov.in',
-  'ZSB Coochbehar': 'secyzsb-wb.cbr@coochbehar.gov.in',
-  'ZSB Dakshin Dinajpur': 'secy.zsbdd-wb@nic.in',
-  'ZSB Darjeeling': 'zsbd-wb@gov.in',
-  'ZSB Howrah': 'secy.zsb-howrah@bangla.gov.in',
-  'ZSB Jalpaiguri': 'zsb-jalpaiguri@bangla.gov.in',
-  'ZSB Kalimpong': 'zsb-kpg@bangla.gov.in',
-  'ZSB Kolkata': 'zsb-kolkata@bangla.gov.in',
-  'ZSB Malda': 'secy.zsb-malda@bangla.gov.in',
-  'ZSB Midnapore': 'secy.zsb-midnapore@bangla.gov.in',
-  'ZSB Murshidabad': 'zsb-murshidabad@bangla.gov.in',
-  'ZSB Nadia': 'zsb-nadiawb@bangla.gov.in',
-  'ZSB North 24 Parganas': 'zsb-barasat@nic.in',
-  'ZSB South 24 Parganas': 'secy.zsb-wb.s24pgs@nic.in'
+  'Rajya Sainik Board': 'paulamit001@gmail.com',
+  'ZSB Burdwan': 'nayanipaul001@gmail.com',
+  'ZSB Coochbehar': 'nayanipaul.24@gmail.com',
+  'ZSB Dakshin Dinajpur': 'nayanipaul001@gmail.com',
+  'ZSB Darjeeling': 'nayanipaul.24@gmail.com',
+  'ZSB Howrah': 'nayanipaul001@gmail.com',
+  'ZSB Jalpaiguri': 'nayanipaul.24@gmail.com',
+  'ZSB Kalimpong': 'nayanipaul001@gmail.com',
+  'ZSB Kolkata': 'nayanipaul.24@gmail.com',
+  'ZSB Malda': 'nayanipaul001@gmail.com',
+  'ZSB Midnapore': 'nayanipaul.24@gmail.com',
+  'ZSB Murshidabad': 'nayanipaul001@gmail.com',
+  'ZSB Nadia': 'nayanipaul.24@gmail.com',
+  'ZSB North 24 Parganas': 'nayanipaul001@gmail.com',
+  'ZSB South 24 Parganas': 'nayanipaul.24@gmail.com'
 }
 
 // Prevent rapid re-submission
@@ -141,9 +141,9 @@ function generateEmailTemplate(data, forUser = false) {
              Do not reply to this mail. For further support please contact your ZSB branch.
           </p>
           <hr style="border: none; border-top: 1px solid #495057; margin: 10px 0;">
-          <p style="margin: 0; font-size: 12px; color: #6c757d;"><b>
+          <p style="margin: 0; font-size: 12px; color: #6c757d;">
             Government of West Bengal | Serving Our Veterans and Families with Pride
-          </b></p>
+          </p>
         </div>
          `: ``}
       </div>
