@@ -139,7 +139,7 @@ function generateEmailTemplate(data, forUser = false) {
 }
 
 // Gmail OAuth2 nodemailer transporter setup
-const { google } = require('googleapis');
+
 const OAuth2 = google.auth.OAuth2;
 
 const oAuth2Client = new OAuth2(
