@@ -3,8 +3,10 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const fs = require('fs');
+
+const { google } = require('googleapis');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -144,8 +146,6 @@ function generateEmailTemplate(data, forUser = false) {
 }
 
 
-const { google } = require('googleapis');
-const nodemailer = require('nodemailer');
 
 const oAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
