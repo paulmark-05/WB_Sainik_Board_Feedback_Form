@@ -143,19 +143,32 @@ function generateEmailTemplate(data, forUser = false) {
 `;
 }
 
-// Send email with nodemailer
-async function sendMail(data, files = []) {
-  if (!process.env.NOTIFY_EMAIL || !process.env.APP_PASSWORD) {
-    throw new Error('Email environment variables NOTIFY_EMAIL or APP_PASSWORD not set');
-  }
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail', // replace if you use OAuth2 or gov SMTP
+const { google } = require('googleapis');
+const nodemailer = require('nodemailer');
+
+const oAuth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  'https://developers.google.com/oauthplayground' // Your redirect_uri
+);
+
+oAuth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
+
+async function createTransporter() {
+  const { token } = await oAuth2Client.getAccessToken();
+  return nodemailer.createTransport({
+    service: 'gmail',
     auth: {
+      type: 'OAuth2',
       user: process.env.NOTIFY_EMAIL,
-      pass: process.env.APP_PASSWORD,
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+      accessToken: token
     }
   });
+}
 
   await transporter.verify();
 
