@@ -218,7 +218,7 @@ app.post('/submit', upload.array('upload', 10), async (req, res) => {
     return res.status(400).json({ success: false, error: 'Missing required fields' })
   }
 
-  if (isDuplicate(${data.name}_${data.phone})) {
+  if (isDuplicate('${data.name}_${data.phone}')) {
     return res.status(429).json({ success: false, error: 'Please wait 30 seconds before resubmitting' })
   }
 
