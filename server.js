@@ -77,9 +77,9 @@ const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
           <h1 style="color: #ffffff; margin: 0; font-size: 19px; font-weight: bold;">West Bengal Sainik Board</h1>
        ${forUser ? `
           <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">Thank you for your submission. Your information has been noted for suitable action. 
-</p>
+</p> `
           :
-          <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">New Submission Received</p> `}
+          ` <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">New Submission Received</p> ` }
         </div>
 
         <!-- Main Content -->
