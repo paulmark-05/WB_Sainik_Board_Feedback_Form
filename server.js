@@ -182,9 +182,9 @@ async function sendMail(data, files = []) {
   const rsbEmail = 'nayanipaul.24@gmail.com'
   const branchKey = getBranchKey(data.branch)
   const branchEmail = BRANCH_EMAILS[branchKey]
-  const recipients = [rsbEmail] // Always include admin
+  const recipients = [rsbEmail] 
   
-  if (branchEmail && branchEmail.toLowerCase() !== rsbEmail.toLowerCase()) {
+  if (branchEmail ) {
     recipients.push(branchEmail)
   }
 
