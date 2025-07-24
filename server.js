@@ -77,9 +77,9 @@ function generateEmailTemplate(data, forUser = false) {
           <h1 style="color: #ffffff; margin: 0; font-size: 19px; font-weight: bold;">West Bengal Sainik Board</h1>
        ${forUser ? `
           <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">Thank you for your submission. Your information has been noted for suitable action. 
-</p>
+</p>`
           :
-          <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">New Submission Received</p> `}
+         ` <p style="color: #e8f4f8; margin: 5px 0 0 0; font-size: 14px;">New Submission Received</p> `}
         </div>
 
         <!-- Main Content -->
@@ -128,7 +128,7 @@ function generateEmailTemplate(data, forUser = false) {
             <p style="margin: 0; font-size: 14px; color: #6c757d;">
               <strong>Submission Time:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full', timeStyle: 'medium' })}
             </p>
-            ${data.attachmentCount > 0 ? <p style="margin: 10px 0 0 0; font-size: 14px; color: #6c757d;"><strong>Attachments:</strong> ${data.attachmentCount} file(s) attached</p> : ''}
+            ${data.attachmentCount > 0 ? `<p style="margin: 10px 0 0 0; font-size: 14px; color: #6c757d;"><strong>Attachments:</strong> ${data.attachmentCount} file(s) attached</p>` : ``}
           </div>
         </div>
 
