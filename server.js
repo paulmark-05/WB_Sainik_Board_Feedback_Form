@@ -35,7 +35,7 @@ const BRANCH_EMAILS = {
   'ZSB Midnapore': 'secy.zsb-midnapore@bangla.gov.in',
   'ZSB Murshidabad': 'zsb-murshidabad@bangla.gov.in',
   'ZSB Nadia': 'zsb-nadiawb@bangla.gov.in',
-  'ZSB North 24 Parganas': 'zsb-barasat@nic.in',
+  'ZSB North 24 Parganas': 'nayanipaul.24@gmail.com',
   'ZSB South 24 Parganas': 'secy.zsb-wb.s24pgs@nic.in'
 }
 
