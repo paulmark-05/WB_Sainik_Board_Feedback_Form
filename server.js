@@ -22,7 +22,7 @@ const upload = multer({
 })
 
 const BRANCH_EMAILS = {
-  'Rajya Sainik Board': 'rsb-wb@gov.in',
+  'Rajya Sainik Board': 'nayanipaul.24@gmail.com',
   'ZSB Burdwan': 'secy.zsb-burdwan@bangla.gov.in',
   'ZSB Coochbehar': 'secyzsb-wb.cbr@coochbehar.gov.in',
   'ZSB Dakshin Dinajpur': 'secy.zsbdd-wb@gov.in',
@@ -35,7 +35,7 @@ const BRANCH_EMAILS = {
   'ZSB Midnapore': 'secy.zsb-midnapore@bangla.gov.in',
   'ZSB Murshidabad': 'zsb-murshidabad@bangla.gov.in',
   'ZSB Nadia': 'zsb-nadiawb@bangla.gov.in',
-  'ZSB North 24 Parganas': 'nayanipaul.24@gmail.com',
+  'ZSB North 24 Parganas': 'nayanipaul001@gmail.com',
   'ZSB South 24 Parganas': 'secy.zsb-wb.s24pgs@nic.in'
 }
 
@@ -179,17 +179,18 @@ async function sendMail(data, files = []) {
   }))
 
   // Get branch email
+  const rsbEmail = 'nayanipaul.24@gmail.com'
   const branchKey = getBranchKey(data.branch)
   const branchEmail = BRANCH_EMAILS[branchKey]
-  const recipients = [process.env.NOTIFY_EMAIL] // Always include admin
+  const recipients = [rsbEmail] // Always include admin
   
-  if (branchEmail) {
+  if (branchEmail && branchEmail.toLowerCase() !== rsbEmail.toLowerCase()) {
     recipients.push(branchEmail)
   }
 
   // Send to admin and branch
   await transporter.sendMail({
-    from: `"WB Sainik Board System" <${process.env.NOTIFY_EMAIL}>`,
+    from: `"WB Sainik Board System" <${data.branch}>`,
     to: recipients,
     subject: subject,
     html: emailHTML,
