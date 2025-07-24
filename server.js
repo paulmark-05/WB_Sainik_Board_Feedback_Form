@@ -128,7 +128,7 @@ const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
             <p style="margin: 0; font-size: 14px; color: #6c757d;">
               <strong>Submission Time:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full', timeStyle: 'medium' })}
             </p>
-            ${data.attachmentCount > 0 ? <p style="margin: 10px 0 0 0; font-size: 14px; color: #6c757d;"><strong>Attachments:</strong> ${data.attachmentCount} file(s) attached</p> : ''}
+            ${data.attachmentCount > 0 ? ` <p style="margin: 10px 0 0 0; font-size: 14px; color: #6c757d;"> <strong>Attachments:</strong> ${data.attachmentCount} file(s) attached</p>` : ``}
           </div>
         </div>
 
