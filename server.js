@@ -57,7 +57,7 @@ function getBranchKey(branchValue) {
 // Enhanced email template with logo and professional styling
 function generateEmailTemplate(data, forUser = false) {
   const logoURL = 'https://feedback-form-b24b.onrender.com/logo.jpg' // Update with actual logo URL
-  const uniqueId = ${Date.now()}-${Math.random().toString(36).substr(2, 9)}
+const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   
   return `
     <!DOCTYPE html>
