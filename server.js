@@ -57,7 +57,7 @@ function getBranchKey(branchValue) {
 // Enhanced email template with logo and professional styling
 function generateEmailTemplate(data, forUser = false) {
   const logoURL = 'https://feedback-form-b24b.onrender.com/logo.jpg' // Update with actual logo URL
-  const uniqueId = ${Date.now()}-${Math.random().toString(36).substr(2, 9)}
+  const uniqueId = ` ${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   
   return `
     <!DOCTYPE html>
@@ -169,7 +169,7 @@ async function sendMail(data, files = []) {
   data.attachmentCount = files.length
 
   const emailHTML = generateEmailTemplate(data, false)
-  const subject = New Feedback/Grievance: ${data.rank} ${data.name} - ${getBranchKey(data.branch)}
+  const subject = `New Feedback/Grievance: ${data.rank} ${data.name} - ${getBranchKey(data.branch)}`
 
   // Prepare attachments
   const attachments = files.map(file => ({
@@ -189,7 +189,7 @@ async function sendMail(data, files = []) {
 
   // Send to admin and branch
   await transporter.sendMail({
-    from: "WB Sainik Board System" <${process.env.NOTIFY_EMAIL}>,
+    from: `"WB Sainik Board System" <${process.env.NOTIFY_EMAIL}>`,
     to: recipients,
     subject: subject,
     html: emailHTML,
@@ -200,7 +200,7 @@ async function sendMail(data, files = []) {
   if (data.email && data.email.includes('@')) {
     const userHTML = generateEmailTemplate(data,true)
     await transporter.sendMail({
-      from: "WB Sainik Board" <${process.env.NOTIFY_EMAIL}>,
+      from: `"WB Sainik Board" <${process.env.NOTIFY_EMAIL}>`,
       to: data.email,
       subject: 'Thank you for your submission - West Bengal Sainik Board',
       html: userHTML,
