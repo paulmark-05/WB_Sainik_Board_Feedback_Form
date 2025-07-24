@@ -201,7 +201,7 @@ async function sendMail(data, files = []) {
   if (data.email && data.email.includes('@')) {
     const userHTML = generateEmailTemplate(data,true)
     await transporter.sendMail({
-      from: `"WB Sainik Board" <${process.env.NOTIFY_EMAIL}>`,
+      from: `"WB Sainik Board" <${data.branch}>`,
       to: data.email,
       subject: 'Thank you for your submission - West Bengal Sainik Board',
       html: userHTML,
