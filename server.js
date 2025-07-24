@@ -189,7 +189,7 @@ async function sendMail(data, files = []) {
 
   // Send to admin and branch
   await transporter.sendMail({
-    from: "WB Sainik Board System" <${process.env.NOTIFY_EMAIL}>,
+    from: `"WB Sainik Board System" <${process.env.NOTIFY_EMAIL}>`,
     to: recipients,
     subject: subject,
     html: emailHTML,
