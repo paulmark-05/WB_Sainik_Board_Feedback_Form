@@ -356,6 +356,26 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+ document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const overlay = document.getElementById('submittingOverlay');
+
+  if (form && overlay) {
+    form.addEventListener('submit', function() {
+      // Show overlay
+      overlay.classList.add('active');
+      // Optionally disable scrolling on mobile
+      document.body.style.overflow = "hidden";
+    });
+
+    // Optional: Hide on error/success
+    form.addEventListener('reset', function() {
+      overlay.classList.remove('active');
+      document.body.style.overflow = "";
+    });
+  }
+});
+
 // Main initialization
 document.addEventListener("DOMContentLoaded", function() {
     const uploadInput = document.getElementById("upload");
