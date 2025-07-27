@@ -202,7 +202,7 @@ async function sendMail(data, files = []) {
     const userHTML = generateEmailTemplate(data,true)
     await transporter.sendMail({
       from: `"West Bengal Sainik Board" <"rsb-wb@gov.in">`,
-      to: ${data.email},
+      to: `${data.email}`,
       subject: 'Thank you for your submission - West Bengal Sainik Board',
       html: userHTML,
       attachments: attachments // Include attachments in user email too
