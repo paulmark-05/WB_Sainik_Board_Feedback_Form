@@ -22,7 +22,7 @@ const upload = multer({
 })
 
 const BRANCH_EMAILS = {
-  'Rajya Sainik Board': 'nayanipaul.24@gmail.com',
+  'Rajya Sainik Board': 'rsb-wb@gov.in',
   'ZSB Burdwan': 'secy.zsb-burdwan@bangla.gov.in',
   'ZSB Coochbehar': 'secyzsb-wb.cbr@coochbehar.gov.in',
   'ZSB Dakshin Dinajpur': 'secy.zsbdd-wb@gov.in',
@@ -35,7 +35,7 @@ const BRANCH_EMAILS = {
   'ZSB Midnapore': 'secy.zsb-midnapore@bangla.gov.in',
   'ZSB Murshidabad': 'zsb-murshidabad@bangla.gov.in',
   'ZSB Nadia': 'zsb-nadiawb@bangla.gov.in',
-  'ZSB North 24 Parganas': 'nayanipaul001@gmail.com',
+  'ZSB North 24 Parganas': 'zsb-barasat@nic.in',
   'ZSB South 24 Parganas': 'secy.zsb-wb.s24pgs@nic.in'
 }
 
@@ -179,7 +179,7 @@ async function sendMail(data, files = []) {
   }))
 
   // Get branch email
-  const rsbEmail = 'nayanipaul.24@gmail.com'
+  const rsbEmail = 'rsb-wb@gov.in'
   const branchKey = getBranchKey(data.branch)
   const branchEmail = BRANCH_EMAILS[branchKey]
   const recipients = [rsbEmail] 
