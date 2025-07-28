@@ -190,7 +190,7 @@ async function sendMail(data, files = []) {
 
   // Send to admin and branch
   await transporter.sendMail({
-    from: `"West Bengal Sainik Board" <"rsb-wb@gov.in">`,
+    from: `"West Bengal Sainik Board" <rsb-wb@gov.in>`,
     to: recipients,
     subject: subject,
     html: emailHTML,
@@ -201,7 +201,7 @@ async function sendMail(data, files = []) {
   if (data.email && data.email.includes('@')) {
     const userHTML = generateEmailTemplate(data,true)
     await transporter.sendMail({
-      from: `"West Bengal Sainik Board" <"rsb-wb@gov.in">`,
+      from: `"West Bengal Sainik Board" <rsb-wb@gov.in>`,
       to: `${data.email}`,
       subject: 'Thank you for your submission - West Bengal Sainik Board',
       html: userHTML,
