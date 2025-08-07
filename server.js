@@ -98,6 +98,10 @@ function generateEmailTemplate(data, forUser = false) {
               <td style="padding: 12px; border-bottom: 1px solid #dee2e6; color: #212529;">${data.name}</td>
             </tr>
             <tr>
+              <td style="padding: 12px; border-bottom: 1px solid #dee2e6; font-weight: bold; color: #495057; background-color: #f8f9fa;">Serving / ESM Name</td>
+              <td style="padding: 12px; border-bottom: 1px solid #dee2e6; color: #212529;">${data.servicenum}</td>
+            </tr>
+            <tr>
               <td style="padding: 12px; border-bottom: 1px solid #dee2e6; font-weight: bold; color: #495057; background-color: #f8f9fa;">Relationship</td>
               <td style="padding: 12px; border-bottom: 1px solid #dee2e6; color: #212529;">${data.relationship}</td>
             </tr>
