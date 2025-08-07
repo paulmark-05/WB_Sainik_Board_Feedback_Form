@@ -655,7 +655,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     // List the selectors for all required fields (update if your IDs differ)
-const requiredSelectors = ['#rank', '#esmName', '#phone', '#branch'];
+const requiredSelectors = ['#rank', '#esmName','#servicenum','#suggestion', '#phone', '#branch'];
 
 function highlightMissing() {
   let missing = false;
